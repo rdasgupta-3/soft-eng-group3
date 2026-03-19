@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Choose Your Model</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; background-color: #f4f4f9; padding-top: 50px; }
+        .player-container { display: flex; justify-content: center; gap: 30px; margin-top: 40px; }
+        .player-card { 
+            width: 200px; 
+            height: 250px; 
+            background: white; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, border 0.2s;
+            border: 2px solid transparent;
+        }
+        /* Hover indicator */
+        .player-card:hover { 
+            transform: translateY(-10px); 
+            box-shadow: 0 10px 15px rgba(0,0,0,0.2); 
+            border: 2px solid #007bff; 
+        }
+        .player-image { width: 100px; height: 100px; background-color: #ddd; border-radius: 50%; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+    <h2>Choose Your Player</h2>
+    
+    <div class="player-container">
+        <div class="player-card" onclick="selectPlayer('Model A')">
+            <div class="player-image"></div>
+            <h3>Player 1</h3>
+        </div>
+        <div class="player-card" onclick="selectPlayer('Model B')">
+            <div class="player-image"></div>
+            <h3>Player 2</h3>
+        </div>
+        <div class="player-card" onclick="selectPlayer('Model C')">
+            <div class="player-image"></div>
+            <h3>Player 3</h3>
+        </div>
+    </div>
+
+<script>
+    function selectPlayer(playerName) {
+        // You can store the selection in localStorage if needed for the chat page later
+        localStorage.setItem('selectedPlayer', playerName);
+        window.location.href = 'chat.html';
+    }
+</script>
+
+</body>
+</html>

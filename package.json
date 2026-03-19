@@ -1,0 +1,17 @@
+{
+  "name": "iteration1_swe",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@cucumber/cucumber": "^12.7.0",
+    "puppeteer": "^24.40.0"
+  }
+}
