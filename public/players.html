@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Persona - LLM Project</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Select Your Persona</h1>
+    
+    <div class="player-grid">
+        <div class="player-card frame-sweetheart" onclick="location.href='/chat?persona=sweetheart'">
+            <img src="images/image_4.png" alt="Miss Sweetheart">
+            <div class="player-name">Miss Sweetheart</div>
+        </div>
+
+        <div class="player-card frame-professional" onclick="location.href='/chat?persona=professional'">
+            <img src="images/image_6.png" alt="Mr. Professional">
+            <div class="player-name">MR. PROFESSIONAL</div>
+        </div>
+
+        <div class="player-card frame-silly" onclick="location.href='/chat?persona=silly'">
+            <img src="images/image_5.png" alt="Lord Silly The Ninth">
+            <div class="player-name">Lord Silly The Ninth</div>
+        </div>
+    </div>
+
+    <script>
+        // Note: I added basic URL parameters (e.g., ?persona=silly) 
+        // to the 'onclick' events. This is a foundational step 
+        // for "Database design" (Image 2), as it tells the chat page
+        // which system prompt to load.
+    </script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+/* --- Keep existing base styles --- */
+body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background: #f0f2f5; margin: 0; padding: 20px;}
+h1 { margin-bottom: 30px; color: #333; }
+
+/* --- Updated Player Grid Styles --- */
+.player-grid { 
+    display: flex; 
+    gap: 30px; 
+    justify-content: center;
+    flex-wrap: wrap; /* Good for responsiveness */
+}
+
+/* Base style for all player cards */
+.player-card { 
+    width: 250px; /* Adjusted for better visibility */
+    cursor: pointer;
+    background: white;
+    border-radius: 8px; /* Slight rounded corners, like the image plaques */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    overflow: hidden; /* Keeps the image inside the border */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+}
+
+/* The standard 'hover indicator' requirement */
+.player-card:hover { 
+    transform: translateY(-10px) scale(1.03); 
+    box-shadow: 0 12px 20px rgba(0,0,0,0.2);
+}
+
+/* The actual image inside the card */
+.player-card img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* The name tag below the image */
+.player-name {
+    padding: 10px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    background: #f8f9fa; /* Default nameplate background */
+}
+
+/* --- Specific 'Frame' Styles (Mapping to your images) --- */
+
+/* 1. Miss Sweetheart (image_4.png) - Floral/Pink Frame */
+.frame-sweetheart {
+    border: 5px solid #f8bbd0; /* Soft pink border */
+}
+.frame-sweetheart .player-name {
+    color: #c2185b; /* Deep pink text */
+    background: #fce4ec; /* Very light pink nameplate */
+    font-family: 'Georgia', serif; /* A softer, classic font */
+}
+/* Specific hover highlight color for Sweetheart */
+.frame-sweetheart:hover {
+    border-color: #f48fb1;
+    box-shadow: 0 0 15px rgba(244, 143, 177, 0.6);
+}
+
+/* 2. Mr. Professional (image_6.png) - Corporate Blue Frame */
+.frame-professional {
+    border: 5px solid #1565c0; /* Strong professional blue */
+}
+.frame-professional .player-name {
+    color: white; /* White text on blue */
+    background: #0d47a1; /* Dark blue nameplate */
+    text-transform: uppercase; /* To match the metallic plaque */
+    letter-spacing: 1px;
+}
+/* Specific hover highlight color for Professional */
+.frame-professional:hover {
+    border-color: #1e88e5;
+    box-shadow: 0 0 15px rgba(30, 136, 229, 0.6);
+}
+
+/* 3. Lord Silly The Ninth (image_5.png) - Royal Purple Frame */
+.frame-silly {
+    border: 5px solid #6a1b9a; /* Royal purple border */
+}
+.frame-silly .player-name {
+    color: #fbc02d; /* Royal gold/yellow text */
+    background: #4a148c; /* Very dark purple nameplate */
+    font-family: 'Cursive', 'Georgia', serif; /* Playful font */
+}
+/* Specific hover highlight color for Silly */
+.frame-silly:hover {
+    border-color: #8e24aa;
+    box-shadow: 0 0 15px rgba(142, 36, 170, 0.6);
+}
+
+
+/* --- Keep existing chat styles below this --- */
+/* ... (chat-window, bubble, etc.) ... */
