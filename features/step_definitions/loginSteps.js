@@ -14,7 +14,7 @@ Given('I am on the login page', async function () {
   page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 800 });
 
-  await page.goto(`file://${process.cwd()}/login.html`);
+  await page.goto(`file://${process.cwd()}/public/login.html`);
   await page.waitForTimeout(1200); 
 });
 

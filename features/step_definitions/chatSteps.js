@@ -25,7 +25,7 @@ Given('I am logged in as {string} with password {string}', async function (email
   page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 800 });
 
-  await page.goto(`file://${process.cwd()}/login.html`);
+  await page.goto(`file://${process.cwd()}/public/login.html`);
   await page.waitForTimeout(1000);
   await page.type('#email', email, { delay: 100 });
   await page.type('#password', password, { delay: 100 });
@@ -35,7 +35,7 @@ Given('I am logged in as {string} with password {string}', async function (email
 });
 
 Given('I am on the AI chat page', async function () {
-  await page.goto(`file://${process.cwd()}/chat.html`, { waitUntil: 'domcontentloaded' });
+  await page.goto(`file://${process.cwd()}/public/chat.html`, { waitUntil: 'domcontentloaded' });
   await page.waitForTimeout(1200);
 });
 
