@@ -41,7 +41,7 @@ Then('I should go to the select page', async function () {
 
   const url = page.url();
 
-  if (!url.includes('select.html')) {
+  if (!url.includes('players.html')) {
     throw new Error('Did not navigate to select page');
   }
 
