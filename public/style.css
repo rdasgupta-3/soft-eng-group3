@@ -91,6 +91,26 @@ h1 { margin-bottom: 30px; color: #333; }
     box-shadow: 0 0 15px rgba(142, 36, 170, 0.6);
 }
 
+/* --- Persona Descriptions --- */
+.player-description {
+    font-size: 0.85rem;
+    padding: 0 10px 15px 10px;
+    margin: 0;
+    line-height: 1.4;
+}
 
-/* --- Keep existing chat styles below this --- */
-/* ... (chat-window, bubble, etc.) ... */
+/* Match the description background to the nameplate background */
+.frame-sweetheart .player-description {
+    background: #fce4ec;
+    color: #880e4f; /* Darker pink for readability */
+}
+
+.frame-professional .player-description {
+    background: #0d47a1;
+    color: #bbdefb; /* Light blue text for readability */
+}
+
+.frame-silly .player-description {
+    background: #4a148c;
+    color: #e1bee7; /* Light purple text for readability */
+}
