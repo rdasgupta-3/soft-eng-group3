@@ -8,9 +8,14 @@
 <body>
     <div class="container">
         <h1>Welcome</h1>
-        <input type="email" placeholder="Email">
-        <input type="password" placeholder="Password">
-        <button onclick="location.href='/choose-player'">Login / Sign Up</button>
+        
+        <div id="error-message" style="color: #d32f2f; font-size: 0.9em; margin-bottom: 10px; display: none; background: #ffebee; padding: 8px; border-radius: 4px;"></div>
+
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Password">
+        
+        <button onclick="attemptLogin()">Login / Sign Up</button>
+        
         <hr>
         <div id="g_id_onload" data-client_id="YOUR_GOOGLE_CLIENT_ID" data-callback="handleCredentialResponse"></div>
         <div class="g_id_signin" data-type="standard"></div>
@@ -20,9 +25,40 @@
             <a href="#">Forgot Email?</a>
         </div>
     </div>
+
     <script>
+        // Google Auth
         function handleCredentialResponse(response) {
             console.log("Encoded JWT ID token: " + response.credential);
+            window.location.href = "/choose-player";
+        }
+
+        // Standard Email/Password Validation
+        function attemptLogin() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const errorDiv = document.getElementById('error-message');
+
+            // Reset error message on every click
+            errorDiv.style.display = 'none';
+            errorDiv.innerText = '';
+
+            // Scenario 1: Empty Login
+            if (email === "" || password === "") {
+                errorDiv.innerText = "Error: Email and password fields cannot be empty.";
+                errorDiv.style.display = 'block';
+                return; // Stops the function from redirecting
+            }
+
+            // Scenario 2: Invalid Login 
+            // (Mocking a database check for the development tests)
+            if (email !== "test@example.com" || password !== "password123") {
+                errorDiv.innerText = "Error: Invalid credentials. Please try again.";
+                errorDiv.style.display = 'block';
+                return; // Stops the function from redirecting
+            }
+
+            // Scenario 3: Valid Login
             window.location.href = "/choose-player";
         }
     </script>
