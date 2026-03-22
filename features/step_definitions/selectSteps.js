@@ -45,7 +45,7 @@ Then('each model option should have a name and avatar', async function () {
       return !(hasName && hasAvatar);
     }).length;
   });
-  assert.strictEqual(invalidCount, 0, `${invalidCount} model option(s) are missing a name, avatar, or description`);
+  assert.strictEqual(invalidCount, 0, `${invalidCount} model option(s) are missing a name and avatar`);
 });
 
 When('I select the model {string}', async function (modelName) {
