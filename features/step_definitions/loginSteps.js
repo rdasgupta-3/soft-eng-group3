@@ -15,29 +15,29 @@ Given('I am on the login page', async function () {
   await page.setViewport({ width: 1280, height: 800 });
 
   await page.goto(`file://${process.cwd()}/public/login.html`);
-  await page.waitForTimeout(1200); 
+  await new Promise(resolve => setTimeout(resolve, 1200));
 });
 
 When('I enter a valid email and password', async function () {
-  await page.waitForTimeout(800);
+  await new Promise(resolve => setTimeout(resolve, 800));
   await page.type('#email', 'test@test.com', { delay: 100 });
   await page.type('#password', '123456', {delay: 100});
 });
 
 When('I enter an invalid email and password', async function () {
-  await page.waitForTimeout(800);
+  await new Promise(resolve => setTimeout(resolve, 800));
   await page.type('#email', 'wrong@test.com', { delay: 100 });
   await page.type('#password', 'wrongpassword', { delay: 100 });
 });
 
 
 When('I click the login button', async function () {
-  await page.waitForTimeout(800);
+  await new Promise(resolve => setTimeout(resolve, 800));
   await page.click('button');
 });
 
 Then('I should go to the select page', async function () {
-  await page.waitForTimeout(1500); 
+  await new Promise(resolve => setTimeout(resolve, 1500));
 
   const url = page.url();
 

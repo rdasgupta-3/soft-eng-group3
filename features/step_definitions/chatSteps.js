@@ -26,29 +26,29 @@ Given('I am logged in as {string} with password {string}', async function (email
   await page.setViewport({ width: 1280, height: 800 });
 
   await page.goto(`file://${process.cwd()}/public/login.html`);
-  await page.waitForTimeout(1000);
+  await new Promise(resolve => setTimeout(resolve, 1000));
   await page.type('#email', email, { delay: 100 });
   await page.type('#password', password, { delay: 100 });
-  await page.waitForTimeout(800);
+  await new Promise(resolve => setTimeout(resolve, 800));
   await page.click('button.primary-btn');
-  await page.waitForTimeout(1500);
+  await new Promise(resolve => setTimeout(resolve, 1500));
 });
 
 Given('I am on the AI chat page', async function () {
   await page.goto(`file://${process.cwd()}/public/chat.html`, { waitUntil: 'domcontentloaded' });
-  await page.waitForTimeout(1200);
+  await new Promise(resolve => setTimeout(resolve, 1200));
 });
 
 When('I type a message into the chat input field', async function () {
-  await page.waitForTimeout(800);
+  await new Promise(resolve => setTimeout(resolve, 800));
   await page.type('#chat-input', 'Hello from Puppeteer', { delay: 100 });
 });
 
 When('I submit the message', async function () {
   aiBubbleCountBeforeSubmit = await page.$$eval('#chat-history .ai-bubble', nodes => nodes.length);
-  await page.waitForTimeout(800); 
+  await new Promise(resolve => setTimeout(resolve, 800));
   await page.click('#send-btn');
-  await page.waitForTimeout(1500);
+  await new Promise(resolve => setTimeout(resolve, 1200));
 });
 
 Then('my message should be displayed in the chat history', async function () {
@@ -68,9 +68,9 @@ Then('an AI response should be returned in the chat', async function () {
 });
 
 When('I log out', async function () {
-  await page.waitForTimeout(800); 
+  await new Promise(resolve => setTimeout(resolve, 800)); 
   await page.click('.logout-btn');
-  await page.waitForTimeout(1500);
+  await new Promise(resolve => setTimeout(resolve, 1500));
 });
 
 Then('I should be on the landing page', async function () {
