@@ -18,9 +18,14 @@ After(async function () {
 });
 
 Given('I am on the AI model selector page as an authenticated user', async function () {
-  browser = await puppeteer.launch({ headless: false });
+  browser = await puppeteer.launch({
+  headless: false,
+  slowMo: 300 
+});
   page = await browser.newPage();
-  await page.goto(`file://${process.cwd()}/select.html`);
+  await page.setViewport({ width: 1280, height: 800 });
+  await page.goto(`file://${process.cwd()}/select.html`, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(1200);
   selectedModel = null;
 });
 
@@ -55,9 +60,11 @@ When('I select the model {string}', async function (modelName) {
     const isMatch = heading === modelName || onclickText.includes(modelName);
 
     if (isMatch) {
+      await page.waitForTimeout(800);
       const navigationDone = page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 1500 }).catch(() => null);
       await card.click();
       await navigationDone;
+      await page.waitForTimeout(1200);
       clicked = true;
       break;
     }
@@ -89,9 +96,11 @@ Then('I can continue to the AI chat page', async function () {
   if (!url.includes('chat')) {
     const button = await page.$('button#continue-btn, button.continue-btn, a.continue-btn, button[data-testid="continue"]');
     if (button) {
+      await page.waitForTimeout(800);
       const navigationDone = page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 1500 }).catch(() => null);
       await button.click();
       await navigationDone;
+      await page.waitForTimeout(1200);
       url = page.url();
     }
   }
