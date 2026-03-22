@@ -35,5 +35,15 @@
         // for "Database design" (Image 2), as it tells the chat page
         // which system prompt to load.
     </script>
+
+    <button onclick="logout()" style="position: absolute; top: 20px; right: 20px; background-color: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;">Log Out</button>
+
+<script>
+    function logout() {
+        // In the future, this will tell the backend to destroy the session cookie
+        alert("You have been logged out.");
+        window.location.href = "/";
+    }
+</script>
 </body>
 </html>

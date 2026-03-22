@@ -1,79 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
     <title>LLM Chat</title>
-    <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; padding-top: 30px; background-color: #f4f4f9; margin: 0; }
-        .chat-container { width: 600px; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: flex; flex-direction: column; height: 80vh; }
-        
-        .chat-header { padding: 15px; background: #007bff; color: white; border-top-left-radius: 8px; border-top-right-radius: 8px; display: flex; justify-content: space-between; }
-        .logout-btn { background: transparent; color: white; border: 1px solid white; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
-        
-        .chat-history { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        
-        .bubble { max-width: 70%; padding: 10px 15px; border-radius: 20px; line-height: 1.4; }
-        .user-bubble { background-color: #007bff; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-        .ai-bubble { background-color: #e9ecef; color: black; align-self: flex-start; border-bottom-left-radius: 2px; }
-        
-        .input-area { padding: 15px; border-top: 1px solid #ddd; display: flex; gap: 10px; }
-        .input-area input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 20px; outline: none; }
-        .input-area button { padding: 10px 20px; background-color: #007bff; color: white; border: none; border-radius: 20px; cursor: pointer; }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<div class="chat-container">
-    <div class="chat-header">
-        <span id="chat-title">Chatting with Player</span>
-        <button class="logout-btn" onclick="window.location.href='login.html'">Log Out</button>
+    <div id="chat-window">
+        <div id="messages"></div>
     </div>
-    
-    <div class="chat-history" id="chat-history">
-        <div class="bubble ai-bubble">Hello! How can I help you today?</div>
-    </div>
-    
     <div class="input-area">
-        <input type="text" id="chat-input" placeholder="Type your message here...">
-        <button id="send-btn">Send</button>
+        <input type="text" id="userInput" placeholder="Type your message here..." onkeypress="handleKey(event)">
+        <button onclick="sendMessage()">Send</button>
     </div>
-</div>
+
+    <script>
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const msgContainer = document.getElementById('messages');
+            if (input.value.trim() !== "") {
+                const bubble = document.createElement('div');
+                bubble.className = 'bubble user-bubble';
+                bubble.innerText = input.value;
+                msgContainer.appendChild(bubble);
+                input.value = ""; // Erase text after send
+                msgContainer.scrollTop = msgContainer.scrollHeight;
+            }
+        }
+        function handleKey(e) { if (e.key === 'Enter') sendMessage(); }
+    </script>
+
+    <button onclick="logout()" style="position: absolute; top: 20px; right: 20px; background-color: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;">Log Out</button>
 
 <script>
-    const chatHistory = document.getElementById('chat-history');
-    const chatInput = document.getElementById('chat-input');
-    const sendBtn = document.getElementById('send-btn');
-
-    // Update title based on selection
-    const player = localStorage.getItem('selectedPlayer');
-    if(player) document.getElementById('chat-title').innerText = `Chatting with ${player}`;
-
-    function sendMessage() {
-        const text = chatInput.value.trim();
-        if (text === "") return;
-
-        // Create user bubble
-        const userBubble = document.createElement('div');
-        userBubble.classList.add('bubble', 'user-bubble');
-        userBubble.innerText = text;
-        
-        // Append to history and scroll to bottom
-        chatHistory.appendChild(userBubble);
-        chatHistory.scrollTop = chatHistory.scrollHeight;
-
-        // Erase input
-        chatInput.value = "";
+    function logout() {
+        // In the future, this will tell the backend to destroy the session cookie
+        alert("You have been logged out.");
+        window.location.href = "/";
     }
-
-    // Event Listeners
-    sendBtn.addEventListener('click', sendMessage);
-    
-    chatInput.addEventListener('keypress', function (e) {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
-    });
 </script>
-
 </body>
 </html>

@@ -1,7 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Login - LLM Project</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landing Page - LLM Chat</title>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -11,25 +13,34 @@
         
         <div id="error-message" style="color: #d32f2f; font-size: 0.9em; margin-bottom: 10px; display: none; background: #ffebee; padding: 8px; border-radius: 4px;"></div>
 
-        <input type="email" id="email" placeholder="Email">
-        <input type="password" id="password" placeholder="Password">
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Password" required>
         
-        <button onclick="attemptLogin()">Login / Sign Up</button>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button onclick="attemptLogin()" style="flex: 1; background-color: #007bff; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">Log In</button>
+            <button onclick="location.href='/signup'" style="flex: 1; background-color: #28a745; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">Create Account</button>
+        </div>
         
-        <hr>
+        <hr style="margin: 20px 0;">
+
+        <button onclick="location.href='/auth/cas'" style="width: 100%; background-color: #cc0033; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; margin-bottom: 15px; font-weight: bold;">
+            Log in with Rutgers NetID (CAS)
+        </button>
+
         <div id="g_id_onload" data-client_id="YOUR_GOOGLE_CLIENT_ID" data-callback="handleCredentialResponse"></div>
         <div class="g_id_signin" data-type="standard"></div>
         
-        <div class="links">
-            <a href="#">Forgot Password?</a>
-            <a href="#">Forgot Email?</a>
+        <div class="links" style="margin-top: 20px; display: flex; justify-content: space-between; font-size: 0.9em;">
+            <a href="#" style="color: #007bff; text-decoration: none;">Forgot Password?</a>
+            <a href="#" style="color: #007bff; text-decoration: none;">Forgot Email?</a>
         </div>
     </div>
 
     <script>
-        // Google Auth
+        // Google Auth Callback
         function handleCredentialResponse(response) {
             console.log("Encoded JWT ID token: " + response.credential);
+            // Redirects to player selection upon successful Google login
             window.location.href = "/choose-player";
         }
 
@@ -50,15 +61,14 @@
                 return; // Stops the function from redirecting
             }
 
-            // Scenario 2: Invalid Login 
-            // (Mocking a database check for the development tests)
+            // Scenario 2: Invalid Login (Mocking database validation)
             if (email !== "test@example.com" || password !== "password123") {
                 errorDiv.innerText = "Error: Invalid credentials. Please try again.";
                 errorDiv.style.display = 'block';
                 return; // Stops the function from redirecting
             }
 
-            // Scenario 3: Valid Login
+            // Scenario 3: Valid Login -> Redirects to Page 3
             window.location.href = "/choose-player";
         }
     </script>

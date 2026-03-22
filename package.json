@@ -12,6 +12,7 @@
   "type": "commonjs",
   "dependencies": {
     "@cucumber/cucumber": "^12.7.0",
+    "express": "^5.2.1",
     "puppeteer": "^24.40.0"
   }
 }
