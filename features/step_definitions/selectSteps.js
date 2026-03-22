@@ -24,7 +24,9 @@ Given('I am on the AI model selector page as an authenticated user', async funct
 });
   page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 800 });
-  await page.goto(`file://${process.cwd()}/public/players.html`, { waitUntil: 'domcontentloaded' });
+  
+  // UPDATED TO LOCALHOST
+  await page.goto('http://localhost:3000/choose-player', { waitUntil: 'domcontentloaded' });
   await new Promise(resolve => setTimeout(resolve, 1200));
   selectedModel = null;
 });
@@ -37,7 +39,7 @@ Then('I should see at least 3 model options', async function () {
 Then('each model option should have a name and avatar', async function () {
   const invalidCount = await page.evaluate(() => {
     return Array.from(document.querySelectorAll('.player-card')).filter(card => {
-      const name = card.querySelector('h3');
+      const name = card.querySelector('h3, .player-name'); // Made selector more flexible
       const avatar = card.querySelector('.player-image, img');
       const description = card.querySelector('p');
       const hasName = Boolean(name && name.textContent.trim().length > 0);
@@ -54,7 +56,7 @@ When('I select the model {string}', async function (modelName) {
   let clicked = false;
 
   for (const card of cards) {
-    const heading = await card.$eval('h3', el => el.textContent.trim()).catch(() => '');
+    const heading = await card.$eval('h3, .player-name', el => el.textContent.trim()).catch(() => '');
     const onclickText = await card.evaluate(el => el.getAttribute('onclick') || '');
     const isMatch = heading === modelName || onclickText.includes(modelName);
 

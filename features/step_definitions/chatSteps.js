@@ -25,7 +25,8 @@ Given('I am logged in as {string} with password {string}', async function (email
   page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 800 });
 
-  await page.goto(`file://${process.cwd()}/public/login.html`);
+  // UPDATED TO LOCALHOST
+  await page.goto('http://localhost:3000/');
   await new Promise(resolve => setTimeout(resolve, 1000));
   await page.type('#email', email, { delay: 100 });
   await page.type('#password', password, { delay: 100 });
@@ -35,7 +36,8 @@ Given('I am logged in as {string} with password {string}', async function (email
 });
 
 Given('I am on the AI chat page', async function () {
-  await page.goto(`file://${process.cwd()}/public/chat.html`, { waitUntil: 'domcontentloaded' });
+  // UPDATED TO LOCALHOST
+  await page.goto('http://localhost:3000/chat', { waitUntil: 'domcontentloaded' });
   await new Promise(resolve => setTimeout(resolve, 1200));
 });
 
@@ -75,7 +77,7 @@ When('I log out', async function () {
 
 Then('I should be on the landing page', async function () {
   const url = page.url();
-  if (!url.includes('landing') && !url.includes('index') && !url.includes('login.html')) {
+  if (!url.includes('landing') && !url.includes('index') && !url.includes('login.html') && url !== 'http://localhost:3000/') {
     throw new Error(`Expected landing page, got ${url}`);
   }
   await browser.close();

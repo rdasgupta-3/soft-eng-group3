@@ -14,7 +14,8 @@ Given('I am on the login page', async function () {
   page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 800 });
 
-  await page.goto(`file://${process.cwd()}/public/login.html`);
+  // UPDATED TO LOCALHOST
+  await page.goto('http://localhost:3000/');
   await new Promise(resolve => setTimeout(resolve, 1200));
 });
 
@@ -30,7 +31,6 @@ When('I enter an invalid email and password', async function () {
   await page.type('#password', 'wrongpassword', { delay: 100 });
 });
 
-
 When('I click the login button', async function () {
   await new Promise(resolve => setTimeout(resolve, 800));
   await page.click('button');
@@ -41,7 +41,8 @@ Then('I should go to the select page', async function () {
 
   const url = page.url();
 
-  if (!url.includes('players.html')) {
+  // UPDATED TO MATCH EXPRESS ROUTE
+  if (!url.includes('choose-player')) {
     throw new Error('Did not navigate to select page');
   }
 
@@ -54,7 +55,8 @@ Then('I should see an error message', async function () {
   const hasError =
     content.includes('error') ||
     content.includes('invalid') ||
-    content.includes('required');
+    content.includes('required') ||
+    content.includes('Error'); // Catch our specific error text
 
   if (!hasError) {
     throw new Error('Expected an error message, but none was shown');
