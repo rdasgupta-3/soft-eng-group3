@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Landing Page - LLM Chat</title>
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -27,8 +26,9 @@
             Log in with Rutgers NetID (CAS)
         </button>
 
-        <div id="g_id_onload" data-client_id="YOUR_GOOGLE_CLIENT_ID" data-callback="handleCredentialResponse"></div>
-        <div class="g_id_signin" data-type="standard"></div>
+        <button onclick="alert('Google Sign-In is coming soon!')" style="width: 100%; background-color: #4285F4; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; margin-bottom: 15px; font-weight: bold;">
+            Sign in with Google (Coming Soon)
+        </button>
         
         <div class="links" style="margin-top: 20px; display: flex; justify-content: space-between; font-size: 0.9em;">
             <a href="#" style="color: #007bff; text-decoration: none;">Forgot Password?</a>
@@ -37,12 +37,6 @@
     </div>
 
     <script>
-        // Google Auth Callback
-        function handleCredentialResponse(response) {
-            console.log("Encoded JWT ID token: " + response.credential);
-            window.location.href = "/choose-player";
-        }
-
         // Standard Email/Password Validation via Backend API
         async function attemptLogin() {
             const email = document.getElementById('email').value.trim();
