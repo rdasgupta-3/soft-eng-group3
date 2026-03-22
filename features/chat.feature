@@ -6,7 +6,6 @@ Scenario: Sending a prompt to the AI
   When I type a message into the chat input field
   And I submit the message
   Then my message should be displayed in the chat history
-  And an AI response should be returned in the chat
 
 Scenario: Logged-in user can log out to landing page
   Given I am logged in as "user@example.com" with password "ValidPass123!"

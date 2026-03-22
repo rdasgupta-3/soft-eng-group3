@@ -27,7 +27,7 @@ When('I click the login button', async function () {
 });
 
 Then('I should go to the select page', async function () {
-  await page.waitForTimeout(1000); // give browser time to redirect
+  await page.waitForTimeout(1000); 
 
   const url = page.url();
 
