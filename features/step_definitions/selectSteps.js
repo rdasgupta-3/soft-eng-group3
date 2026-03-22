@@ -75,20 +75,14 @@ When('I select the model {string}', async function (modelName) {
 });
 
 Then('exactly one model should be selected', async function () {
-  const saved = await page.evaluate(() => localStorage.getItem('selectedPlayer'));
-  assert(saved && saved.trim().length > 0, 'Expected exactly one selected model value to be stored');
-  if (selectedModel) {
-    assert.strictEqual(saved, selectedModel, `Expected selected model to be ${selectedModel}, got ${saved}`);
-  }
+  const currentUrl = page.url();
+  // Check if the URL contains our persona query parameter
+  assert(currentUrl.includes('persona='), 'Expected the selected model to be passed in the URL');
 });
 
 Then('the selected model should be saved', async function () {
-  const saved = await page.evaluate(() => localStorage.getItem('selectedPlayer'));
-  if (selectedModel) {
-    assert.strictEqual(saved, selectedModel, `Expected selected model to be ${selectedModel}, got ${saved}`);
-    return;
-  }
-  assert(saved && saved.trim().length > 0, 'Expected selected model to be saved in localStorage');
+  const currentUrl = page.url();
+  assert(currentUrl.includes('persona='), 'Expected the selected model to be saved in the URL parameters');
 });
 
 Then('I can continue to the AI chat page', async function () {

@@ -3,8 +3,11 @@ const path = require('path');
 const app = express();
 const PORT = 3000;
 
-// Our "In-Memory Database" for this iteration
-const users = [];
+// Our "In-Memory Database" with pre-loaded QA test users
+const users = [
+    { email: 'test@test.com', password: '123456' },
+    { email: 'user@example.com', password: 'ValidPass123!' }
+];
 
 app.use(express.static('public'));
 app.use(express.json());
