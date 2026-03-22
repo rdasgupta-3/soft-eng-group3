@@ -40,36 +40,40 @@
         // Google Auth Callback
         function handleCredentialResponse(response) {
             console.log("Encoded JWT ID token: " + response.credential);
-            // Redirects to player selection upon successful Google login
             window.location.href = "/choose-player";
         }
 
-        // Standard Email/Password Validation
-        function attemptLogin() {
+        // Standard Email/Password Validation via Backend API
+        async function attemptLogin() {
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value.trim();
             const errorDiv = document.getElementById('error-message');
 
-            // Reset error message on every click
             errorDiv.style.display = 'none';
-            errorDiv.innerText = '';
 
-            // Scenario 1: Empty Login
             if (email === "" || password === "") {
                 errorDiv.innerText = "Error: Email and password fields cannot be empty.";
                 errorDiv.style.display = 'block';
-                return; // Stops the function from redirecting
+                return;
             }
 
-            // Scenario 2: Invalid Login (Mocking database validation)
-            if (email !== "test@example.com" || password !== "password123") {
-                errorDiv.innerText = "Error: Invalid credentials. Please try again.";
+            // Ask the server to verify the credentials
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                // Success! The server found the user.
+                window.location.href = "/choose-player";
+            } else {
+                // Failure! The server rejected the credentials.
+                errorDiv.innerText = result.error;
                 errorDiv.style.display = 'block';
-                return; // Stops the function from redirecting
             }
-
-            // Scenario 3: Valid Login -> Redirects to Page 3
-            window.location.href = "/choose-player";
         }
     </script>
 </body>
