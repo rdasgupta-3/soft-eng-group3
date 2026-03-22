@@ -19,11 +19,13 @@ Given('I am on the login page', async function () {
 });
 
 When('I enter a valid email and password', async function () {
+  await page.waitForTimeout(800);
   await page.type('#email', 'test@test.com', { delay: 100 });
   await page.type('#password', '123456', {delay: 100});
 });
 
 When('I enter an invalid email and password', async function () {
+  await page.waitForTimeout(800);
   await page.type('#email', 'wrong@test.com', { delay: 100 });
   await page.type('#password', 'wrongpassword', { delay: 100 });
 });
@@ -35,7 +37,7 @@ When('I click the login button', async function () {
 });
 
 Then('I should go to the select page', async function () {
-  await page.waitForTimeout(1000); 
+  await page.waitForTimeout(1500); 
 
   const url = page.url();
 
