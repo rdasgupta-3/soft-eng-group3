@@ -24,7 +24,7 @@ Given('I am on the AI model selector page as an authenticated user', async funct
 });
   page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 800 });
-  await page.goto(`file://${process.cwd()}/players.html`, { waitUntil: 'domcontentloaded' });
+  await page.goto(`file://${process.cwd()}/public/players.html`, { waitUntil: 'domcontentloaded' });
   await new Promise(resolve => setTimeout(resolve, 1200));
   selectedModel = null;
 });
