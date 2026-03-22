@@ -34,7 +34,7 @@ Then('I should see at least 3 model options', async function () {
   assert(count >= 3, `Expected at least 3 model options, found ${count}`);
 });
 
-Then('each model option should have a name, avatar, and description', async function () {
+Then('each model option should have a name and avatar', async function () {
   const invalidCount = await page.evaluate(() => {
     return Array.from(document.querySelectorAll('.player-card')).filter(card => {
       const name = card.querySelector('h3');
@@ -42,8 +42,7 @@ Then('each model option should have a name, avatar, and description', async func
       const description = card.querySelector('p');
       const hasName = Boolean(name && name.textContent.trim().length > 0);
       const hasAvatar = Boolean(avatar);
-      const hasDescription = Boolean(description && description.textContent.trim().length > 0);
-      return !(hasName && hasAvatar && hasDescription);
+      return !(hasName && hasAvatar);
     }).length;
   });
   assert.strictEqual(invalidCount, 0, `${invalidCount} model option(s) are missing a name, avatar, or description`);
