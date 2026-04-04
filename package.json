@@ -1,10 +1,13 @@
 {
   "name": "iteration1_swe",
   "version": "1.0.0",
-  "description": "",
+  "description": "Below is the current routing table for our Express.js backend, separating our frontend views from our backend data endpoints.",
   "main": "index.js",
   "scripts": {
-    "test": "cucumber-js features/**/*.feature --require features/step_definitions/**/*.js"
+    "test": "cucumber-js features/**/*.feature --require features/step_definitions/**/*.js",
+    "test:unit": "jasmine",
+    "test:all": "npm run test:unit && npm run test",
+    "start": "node server.js"
   },
   "keywords": [],
   "author": "",
@@ -14,5 +17,17 @@
     "@cucumber/cucumber": "^12.7.0",
     "express": "^5.2.1",
     "puppeteer": "^24.40.0"
-  }
+  },
+  "devDependencies": {
+    "jasmine": "^6.1.0",
+    "jsdom": "^29.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rdasgupta-3/soft-eng-group3.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rdasgupta-3/soft-eng-group3/issues"
+  },
+  "homepage": "https://github.com/rdasgupta-3/soft-eng-group3#readme"
 }
