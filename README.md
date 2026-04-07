@@ -20,7 +20,7 @@ Below is the current routing table for our Express.js backend, separating our fr
 
 
 
-For the current development iteration, we are utilizing a File-Based JSON Storage so that the user data is persistent across server restarts. This allows login, logout, and password reset to persist even if the server restarts. The files in our data folder files are loaded and saved using Node’s fs module. Conversation history is currently kept in memory for this iteration.
+For the current development iteration, we are utilizing a File-Based JSON Storage so that the user data is persistent across server restarts. This allows login, logout, password reset, and conversations to persist even if the server restarts. The files in our data folder files are loaded and saved using Node’s fs module.
 
 Located in /data/:
 | File | Purpose |
@@ -28,6 +28,7 @@ Located in /data/:
 | users.json | Stores registered users email and password |
 | sessions.json | Stores active login sesssions |
 | resetTokens.json | Stores password-reset tokens with expiration timestamps |
+| conversations.json | Stores users conversations for conversation history |
 
 
 **Entity: User**
@@ -44,8 +45,7 @@ This project can generate AI chat replies from a local Ollama instance (no API k
 2. Install a model (default used by this project):
 	- `llama3.2:latest`
 3. Pull the model
-	-`ollama pull llama3.2:latest`
-
+	- `ollama pull llama3.2:latest`
 4. Start Ollama (default local server):
 	- `ollama serve`
 
@@ -54,4 +54,4 @@ You can override the default environment variables using an .env in the project 
 - `OLLAMA_BASE_URL = http://127.0.0.1:11434`
 - `OLLAMA_MODEL = llama3.2:latest`
 
-The frontend checks `/api/ollama-status` to determine whether Ollama is running. If Ollama is offline or unavailable, the chat UI displays a warning banner and disables message input. If this error check fails, the backend falls back to a safe placeholder assistant response so chat flow still works.
+The frontend checks `/api/ollama-status` to determine whether Ollama is running. If Ollama is offline or unavailable, the chat UI displays a warning banner and disables message input. If this error check fails or, the backend falls back to a safe placeholder assistant response so chat flow still works.
