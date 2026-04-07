@@ -6,52 +6,518 @@
     <title>AI Chat - LLM</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <div class="container" style="max-width: 600px; margin: 0 auto; padding: 20px;">
-        <button class="logout-btn" onclick="location.href='/'" style="float: right; background-color: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">Log Out</button>
-        
-        <h1>AI Chat Interface</h1>
-
-        <div id="chat-history" style="height: 300px; border: 1px solid #ccc; border-radius: 4px; padding: 10px; margin-bottom: 10px; overflow-y: auto; background: #f9f9f9;">
-            <div class="ai-bubble" style="background: #e9ecef; padding: 8px; border-radius: 4px; margin-bottom: 10px; width: fit-content;">
-                Hello! I am your selected AI. How can I help you?
+<body class="chat-page">
+    <div class="chat-shell">
+        <aside class="chat-history-panel">
+            <div class="history-header">
+                <h2>Chat History</h2>
+                <button id="new-chat-btn" type="button" onclick="createNewConversation()">+ New</button>
             </div>
-        </div>
+            <div class="history-search-wrap">
+                <input type="text" id="history-search" placeholder="Search chats..." oninput="updateHistorySearch(this.value)">
+            </div>
+            <div id="conversation-list"></div>
+        </aside>
 
-        <div style="display: flex; gap: 10px;">
-            <input type="text" id="chat-input" placeholder="Type your message..." style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;" required>
-            <button id="send-btn" onclick="sendMessage()" style="background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">Send</button>
-        </div>
+        <section class="chat-main">
+            <header class="chat-header">
+                <h1>AI Chat Assistant</h1>
+                <p>Ask anything and continue the conversation naturally.</p>
+            </header>
+
+            <div id="chat-window">
+                <div id="messages"></div>
+            </div>
+
+            <div class="input-area">
+                <input type="text" id="userInput" placeholder="Type your message here..." onkeypress="handleKey(event)">
+                <button onclick="sendMessage()">Send</button>
+            </div>
+        </section>
     </div>
 
     <script>
-        // Mock Chat Logic to pass the UI tests
-        function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const history = document.getElementById('chat-history');
-            const message = input.value.trim();
+        const STORAGE_KEY = 'llmChatConversations';
+        const ACTIVE_KEY = 'llmActiveConversationId';
+        const useServerApi = (
+            typeof window.fetch === 'function' &&
+            window.location.protocol.startsWith('http') &&
+            !/jsdom/i.test(window.navigator.userAgent || '')
+        );
 
-            if (!message) return;
+        let conversations = [];
+        let activeConversationId = null;
+        let historySearchQuery = '';
 
-            // 1. Render User Message (Cucumber looks for .user-bubble)
-            history.innerHTML += `
-                <div class="user-bubble" style="background: #007bff; color: white; padding: 8px; border-radius: 4px; margin-bottom: 10px; width: fit-content; margin-left: auto;">
-                    ${message}
-                </div>`;
-            
-            // Clear the input box
+        function loadConversationsFromLocal() {
+            try {
+                const saved = localStorage.getItem(STORAGE_KEY);
+                conversations = saved ? JSON.parse(saved) : [];
+            } catch (error) {
+                conversations = [];
+            }
+
+            activeConversationId = localStorage.getItem(ACTIVE_KEY);
+
+            if (!conversations.length) {
+                const first = buildConversation();
+                conversations.push(first);
+                activeConversationId = first.id;
+                saveConversations();
+            }
+
+            if (!conversations.find(c => c.id === activeConversationId)) {
+                activeConversationId = conversations[0].id;
+            }
+        }
+
+        async function syncConversationsFromServer() {
+            const response = await fetch('/api/conversations');
+            if (response.status === 401) {
+                window.location.href = '/';
+                return;
+            }
+            if (!response.ok) {
+                throw new Error('Failed to load conversations from server.');
+            }
+
+            const payload = await response.json();
+            conversations = Array.isArray(payload.conversations) ? payload.conversations : [];
+
+            if (conversations.length && !conversations.find(c => c.id === activeConversationId)) {
+                activeConversationId = conversations[0].id;
+            }
+
+            saveConversations();
+            renderConversationList();
+            renderMessages();
+        }
+
+        function saveConversations() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations));
+            localStorage.setItem(ACTIVE_KEY, activeConversationId);
+        }
+
+        function buildConversation() {
+            const now = Date.now();
+            return {
+                id: `conv-${now}-${Math.floor(Math.random() * 10000)}`,
+                title: 'New Conversation',
+                pinned: false,
+                isDraft: false,
+                updatedAt: now,
+                messages: []
+            };
+        }
+
+        function buildDraftConversation() {
+            const draft = buildConversation();
+            draft.isDraft = true;
+            return draft;
+        }
+
+        function ensureDraftConversation() {
+            if (conversations.length) {
+                return;
+            }
+
+            const draft = buildDraftConversation();
+            conversations = [draft];
+            activeConversationId = draft.id;
+        }
+
+        function openFreshDraftSession() {
+            const draft = buildDraftConversation();
+            conversations.unshift(draft);
+            activeConversationId = draft.id;
+        }
+
+        function getActiveConversation() {
+            return conversations.find(c => c.id === activeConversationId);
+        }
+
+        function sortedConversations() {
+            return [...conversations].sort((a, b) => {
+                if (a.pinned !== b.pinned) {
+                    return a.pinned ? -1 : 1;
+                }
+                return b.updatedAt - a.updatedAt;
+            });
+        }
+
+        function updateHistorySearch(value) {
+            historySearchQuery = (value || '').trim().toLowerCase();
+            renderConversationList();
+        }
+
+        function conversationMatchesSearch(conv) {
+            if (!historySearchQuery) {
+                return true;
+            }
+
+            const titleText = (conv.title || '').toLowerCase();
+            const messageText = (conv.messages || [])
+                .map(m => (m && m.text ? m.text : ''))
+                .join(' ')
+                .toLowerCase();
+
+            return titleText.includes(historySearchQuery) || messageText.includes(historySearchQuery);
+        }
+
+        function hasUserMessages(conv) {
+            return (conv.messages || []).some(msg => msg && msg.type === 'user-bubble' && (msg.text || '').trim().length > 0);
+        }
+
+        function renderConversationList() {
+            const list = document.getElementById('conversation-list');
+            list.innerHTML = '';
+
+            const ordered = sortedConversations().filter(conversationMatchesSearch);
+            if (!ordered.length) {
+                const empty = document.createElement('div');
+                empty.className = 'history-empty-state';
+                empty.innerText = historySearchQuery ? 'No matching conversations.' : 'No conversations yet.';
+                list.appendChild(empty);
+                return;
+            }
+
+            const pinned = ordered.filter(conv => conv.pinned);
+            const unpinned = ordered.filter(conv => !conv.pinned);
+
+            function appendConversationItem(conv) {
+                const item = document.createElement('div');
+                item.className = `history-item ${conv.id === activeConversationId ? 'active' : ''}`;
+                item.onclick = () => switchConversation(conv.id);
+
+                const title = document.createElement('div');
+                title.className = 'history-title';
+                title.innerText = conv.title;
+
+                const preview = document.createElement('div');
+                preview.className = 'history-preview';
+                const last = conv.messages[conv.messages.length - 1];
+                preview.innerText = last ? last.text : 'No messages yet';
+
+                item.appendChild(title);
+                item.appendChild(preview);
+
+                if (hasUserMessages(conv)) {
+                    const pinBtn = document.createElement('button');
+                    pinBtn.type = 'button';
+                    pinBtn.className = 'history-pin-btn';
+                    pinBtn.innerText = conv.pinned ? '★' : '☆';
+                    pinBtn.title = conv.pinned ? 'Unpin conversation' : 'Pin conversation';
+                    pinBtn.setAttribute('aria-label', pinBtn.title);
+                    pinBtn.onclick = (event) => {
+                        event.stopPropagation();
+                        togglePin(conv.id);
+                    };
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.type = 'button';
+                    deleteBtn.className = 'history-delete-btn';
+                    deleteBtn.innerText = '×';
+                    deleteBtn.title = 'Delete conversation';
+                    deleteBtn.setAttribute('aria-label', deleteBtn.title);
+                    deleteBtn.onclick = (event) => {
+                        event.stopPropagation();
+                        deleteConversation(conv.id);
+                    };
+
+                    const actions = document.createElement('div');
+                    actions.className = 'history-actions';
+                    actions.appendChild(pinBtn);
+                    actions.appendChild(deleteBtn);
+                    item.appendChild(actions);
+                }
+
+                list.appendChild(item);
+            }
+
+            if (pinned.length) {
+                const pinnedLabel = document.createElement('div');
+                pinnedLabel.className = 'history-separator';
+                pinnedLabel.innerText = 'STARRED';
+                list.appendChild(pinnedLabel);
+            }
+
+            pinned.forEach(appendConversationItem);
+
+            if (pinned.length && unpinned.length) {
+                const divider = document.createElement('div');
+                divider.className = 'history-divider';
+                list.appendChild(divider);
+            }
+
+            unpinned.forEach(appendConversationItem);
+        }
+
+        function renderMessages() {
+            const msgContainer = document.getElementById('messages');
+            const current = getActiveConversation();
+            msgContainer.innerHTML = '';
+
+            if (!current) {
+                return;
+            }
+
+            current.messages.forEach(msg => {
+                const bubble = document.createElement('div');
+                bubble.className = `bubble ${msg.type}`;
+                bubble.innerText = msg.text;
+                msgContainer.appendChild(bubble);
+            });
+
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+        }
+
+        function switchConversation(conversationId) {
+            activeConversationId = conversationId;
+            saveConversations();
+            renderConversationList();
+            renderMessages();
+        }
+
+        function createNewConversation() {
+            const current = getActiveConversation();
+            const currentIsEmpty = current && Array.isArray(current.messages) && current.messages.length === 0;
+            if (currentIsEmpty) {
+                activeConversationId = current.id;
+                saveConversations();
+                renderConversationList();
+                renderMessages();
+                return;
+            }
+
+            if (useServerApi) {
+                const draft = buildDraftConversation();
+                conversations.push(draft);
+                activeConversationId = draft.id;
+                saveConversations();
+                renderConversationList();
+                renderMessages();
+                return;
+            }
+
+            const created = buildConversation();
+            conversations.push(created);
+            activeConversationId = created.id;
+            saveConversations();
+            renderConversationList();
+            renderMessages();
+        }
+
+        function togglePin(conversationId) {
+            const conv = conversations.find(c => c.id === conversationId);
+            if (!conv) {
+                return;
+            }
+
+            if (useServerApi) {
+                (async () => {
+                    try {
+                        await fetch(`/api/conversations/${conversationId}`, {
+                            method: 'PATCH',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ pinned: !conv.pinned })
+                        });
+                        await syncConversationsFromServer();
+                    } catch (error) {
+                        console.error(error);
+                    }
+                })();
+                return;
+            }
+
+            conv.pinned = !conv.pinned;
+            conv.updatedAt = Date.now();
+            saveConversations();
+            renderConversationList();
+        }
+
+        function deleteConversation(conversationId) {
+            const conv = conversations.find(c => c.id === conversationId);
+            if (!conv) {
+                return;
+            }
+
+            const shouldDelete = window.confirm(`Delete conversation "${conv.title}"?`);
+            if (!shouldDelete) {
+                return;
+            }
+
+            if (useServerApi) {
+                (async () => {
+                    try {
+                        await fetch(`/api/conversations/${conversationId}`, {
+                            method: 'DELETE'
+                        });
+                        await syncConversationsFromServer();
+                    } catch (error) {
+                        console.error(error);
+                    }
+                })();
+                return;
+            }
+
+            const wasActive = (conversationId === activeConversationId);
+            conversations = conversations.filter(c => c.id !== conversationId);
+
+            if (!conversations.length) {
+                const created = buildConversation();
+                conversations.push(created);
+                activeConversationId = created.id;
+            } else if (wasActive) {
+                activeConversationId = sortedConversations()[0].id;
+            }
+
+            saveConversations();
+            renderConversationList();
+            renderMessages();
+        }
+
+        async function addMessage(type, text) {
+            const current = getActiveConversation();
+            if (!current) {
+                return;
+            }
+
+            if (useServerApi) {
+                let targetConversationId = current.id;
+
+                if (current.isDraft && type === 'user-bubble') {
+                    const createResponse = await fetch('/api/conversations', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    if (createResponse.status === 401) {
+                        window.location.href = '/';
+                        return;
+                    }
+
+                    if (!createResponse.ok) {
+                        throw new Error('Failed to create conversation.');
+                    }
+
+                    const createPayload = await createResponse.json();
+                    if (!createPayload || !createPayload.conversation || !createPayload.conversation.id) {
+                        throw new Error('Invalid conversation response from server.');
+                    }
+
+                    targetConversationId = createPayload.conversation.id;
+                    activeConversationId = targetConversationId;
+                }
+
+                const response = await fetch(`/api/conversations/${targetConversationId}/messages`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type, text })
+                });
+
+                if (response.status === 401) {
+                    window.location.href = '/';
+                    return;
+                }
+
+                await syncConversationsFromServer();
+                return;
+            }
+
+            current.messages.push({
+                type,
+                text,
+                at: Date.now()
+            });
+
+            if (current.title === 'New Conversation' && type === 'user-bubble') {
+                current.title = text.length > 28 ? `${text.slice(0, 28)}...` : text;
+            }
+
+            current.updatedAt = Date.now();
+            saveConversations();
+            renderConversationList();
+            renderMessages();
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('userInput');
+            const text = input.value.trim();
+            if (!text) {
+                return;
+            }
+
+            await addMessage('user-bubble', text);
             input.value = '';
 
-            // 2. Simulate AI Response after 500ms (Cucumber looks for .ai-bubble)
+            if (useServerApi) {
+                const current = getActiveConversation();
+                if (!current) {
+                    return;
+                }
+
+                const response = await fetch(`/api/conversations/${current.id}/ai-reply`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.status === 401) {
+                    window.location.href = '/';
+                    return;
+                }
+
+                await syncConversationsFromServer();
+                return;
+            }
+
+            // Placeholder local reply so the UI still works without backend integration.
             setTimeout(() => {
-                history.innerHTML += `
-                    <div class="ai-bubble" style="background: #e9ecef; color: black; padding: 8px; border-radius: 4px; margin-bottom: 10px; width: fit-content;">
-                        I am a placeholder AI response!
-                    </div>`;
-                // Auto-scroll to bottom
-                history.scrollTop = history.scrollHeight;
-            }, 500);
+                addMessage('ai-bubble', 'Thanks for your message. A real AI backend can be connected next.');
+            }, 450);
         }
+
+        function handleKey(e) { if (e.key === 'Enter') sendMessage(); }
+
+        async function initChat() {
+            if (useServerApi) {
+                try {
+                    await syncConversationsFromServer();
+                    openFreshDraftSession();
+                    saveConversations();
+                    renderConversationList();
+                    renderMessages();
+                } catch (error) {
+                    console.error(error);
+                    ensureDraftConversation();
+                    renderConversationList();
+                    renderMessages();
+                }
+                return;
+            }
+
+            loadConversationsFromLocal();
+            renderConversationList();
+            renderMessages();
+        }
+
+        initChat();
     </script>
+
+    <button onclick="logout()" class="logout-btn">Log Out</button>
+
+<script>
+    async function logout() {
+        if (typeof window.fetch === 'function' && window.location.protocol.startsWith('http')) {
+            try {
+                await fetch('/api/logout', { method: 'POST' });
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        alert("You have been logged out.");
+        window.location.href = "/";
+    }
+</script>
 </body>
 </html>
