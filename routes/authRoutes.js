@@ -8,7 +8,8 @@ const {
     getResetToken,
     deleteResetToken,
     createSession,
-    deleteSession
+    deleteSession,
+    updateUserPassword
 } = require('../utils/authStore');
 const { getSessionFromRequest } = require('../utils/sessionUtils');
 
@@ -111,7 +112,7 @@ router.post('/reset-password', (req, res) => {
         return res.status(400).json({ error: 'Account no longer exists.' });
     }
 
-    user.password = newPassword.trim();
+    updateUserPassword(tokenRecord.email, newPassword.trim());
     deleteResetToken(token);
     console.log(`[Auth] Password reset completed for ${user.email}`);
     return res.json({ success: true, message: 'Password updated successfully.' });
