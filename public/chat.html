@@ -474,6 +474,44 @@
             renderMessages();
         }
 
+        function getCurrentPersonaName(){
+            const params = new URLSearchParams(window.location.search);
+            const persona = params.get('persona');
+
+            if(persona === 'sweetheart') return 'Miss Sweetheart';
+            if(persona === 'professional') return 'Mr. Professional';
+            if(persona === 'silly') return "Lord Silly The Ninth";
+
+            return 'AI';
+        }
+
+        function addTypingBubble(personaName){
+            const id = `typing-${Date.now()}`;
+
+            const bubble = document.createElement('div');
+            bubble.className = 'ai-bubble bubble'
+            bubble.id = id;
+
+            bubble.innerHTML = `
+                <div class="typing">
+                    <span>${personaName} is thinking</span>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+
+            document.querySelector('#messages').appendChild(bubble);
+            return id;
+        }   
+
+        function replaceTypingBubble(id,finalText){
+            const bubble = document.getElementById(id);
+            if(!bubble) return;
+            bubble.textContent = finalText;
+        }
+
+
         async function sendMessage() {
             const isOnline = await ollamaStatus();
 
@@ -490,6 +528,9 @@
 
             await addMessage('user-bubble', text);
             input.value = '';
+
+            const personaName = getCurrentPersonaName();
+            const typingId = addTypingBubble(personaName);
 
             if (useServerApi) {
                 const current = getActiveConversation();
@@ -508,12 +549,17 @@
                 }
 
                 await syncConversationsFromServer();
+
+                const updated = getActiveConversation();
+                const last = updated.messages[updated.messages.length -1];
+                replaceTypingBubble(typingId, last.text);
+
                 return;
             }
 
             // Placeholder local reply so the UI still works without backend integration.
             setTimeout(() => {
-                addMessage('ai-bubble', 'Thanks for your message. A real AI backend can be connected next.');
+                replaceTypingBubble(typingId, 'Thanks for your message. A real AI backend can be connected next.');
             }, 450);
         }
 

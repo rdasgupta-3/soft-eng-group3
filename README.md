@@ -40,15 +40,18 @@ Located in /data/:
 
 This project can generate AI chat replies from a local Ollama instance (no API key required).
 
-1. Install Ollama from the official site.
-2. Pull a model (default used by this project):
-	- `ollama pull llama3.2:1b`
-3. Start Ollama (default local server):
+1. Install Ollama from the official site: https://ollama.com
+2. Install a model (default used by this project):
+	- `llama3.2:latest`
+3. Pull the model
+	-`ollama pull llama3.2:latest`
+
+4. Start Ollama (default local server):
 	- `ollama serve`
 
-Optional environment variables:
+You can override the default environment variables using an .env in the project root. If no .env is provided, the app automatically defaults to: 
 
-- `OLLAMA_BASE_URL` (default: `http://127.0.0.1:11434`)
-- `OLLAMA_MODEL` (default: `llama3.2:1b`)
+- `OLLAMA_BASE_URL = http://127.0.0.1:11434`
+- `OLLAMA_MODEL = llama3.2:latest`
 
-Ollama runs entirely on the user’s machine, so no external API keys or cloud services are required. The frontend checks `/api/ollama-status` to determine whether Ollama is running. If Ollama is unavailable, the chat UI displays a warning banner and disables message input. If this error check fails, the backend falls back to a safe placeholder assistant response so chat flow still works.
+The frontend checks `/api/ollama-status` to determine whether Ollama is running. If Ollama is offline or unavailable, the chat UI displays a warning banner and disables message input. If this error check fails, the backend falls back to a safe placeholder assistant response so chat flow still works.
