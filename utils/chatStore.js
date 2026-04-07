@@ -1,4 +1,17 @@
-const chatByUser = new Map();
+const fs = require('fs');
+const path = require('path');
+
+const dataDir = path.join(__dirname,'..', 'data');
+const CONVO_FILE = path.join(dataDir,'conversations.json');
+
+function load(){
+    if(!fs.existsSync(CONVO_FILE)) return {};
+    return JSON.parse(fs.readFileSync(CONVO_FILE));
+}
+
+function save(data){
+    fs.writeFileSync(CONVO_FILE, JSON.stringify(data, null, 2));
+}
 
 function buildConversation() {
     const now = Date.now();
@@ -12,11 +25,12 @@ function buildConversation() {
 }
 
 function getUserConversations(email) {
-    if (!chatByUser.has(email)) {
-        chatByUser.set(email, []);
+    const data = load();
+    if(!data[email]){
+        data[email] = [];
+        save(data);
     }
-
-    return chatByUser.get(email);
+    return data[email];
 }
 
 function listConversations(email) {
@@ -24,20 +38,24 @@ function listConversations(email) {
 }
 
 function createConversation(email) {
-    const conversations = getUserConversations(email);
+    const data = load();
+    if(!data[email]) data[email] = [];
+
     const created = buildConversation();
-    conversations.push(created);
+    data[email].push(created);
+
+    save(data);
     return created;
 }
 
 function getConversation(email, conversationId) {
-    const conversations = getUserConversations(email);
-    return conversations.find(c => c.id === conversationId) || null;
+    const data = load();
+    return data[email]?.find(c => c.id === conversationId) || null;
 }
 
 function updateConversation(email, conversationId, updates) {
-    const conversations = getUserConversations(email);
-    const conv = conversations.find(c => c.id === conversationId);
+    const data = load();
+    const conv = data[email]?.find(c => c.id === conversationId);
 
     if (!conv) {
         return null;
@@ -52,25 +70,28 @@ function updateConversation(email, conversationId, updates) {
     }
 
     conv.updatedAt = Date.now();
+    save(data);
     return conv;
 }
 
 function deleteConversation(email, conversationId) {
-    const conversations = getUserConversations(email);
-    const exists = conversations.some(c => c.id === conversationId);
+    const data = load();
+    if(!data[email]) return null;
 
+    const exists = data[email].some(c => c.id === conversationId);
     if (!exists) {
         return null;
     }
 
-    const updated = conversations.filter(c => c.id !== conversationId);
-    chatByUser.set(email, updated);
-    return updated;
+    data[email] = data[email].filter(c=> c.id !== conversationId);
+    save(data);
+
+    return data[email];
 }
 
 function addMessage(email, conversationId, type, text) {
-    const conversations = getUserConversations(email);
-    const conv = conversations.find(c => c.id === conversationId);
+    const data = load();
+    const conv = data[email]?.find(c => c.id === conversationId);
 
     if (!conv) {
         return { error: 'not-found' };
@@ -94,6 +115,7 @@ function addMessage(email, conversationId, type, text) {
     }
 
     conv.updatedAt = Date.now();
+    save(data);
     return { conversation: conv };
 }
 
