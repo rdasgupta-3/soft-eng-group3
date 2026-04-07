@@ -12,6 +12,17 @@ const { generateReplyFromOllama } = require('../utils/ollamaClient');
 
 const router = express.Router();
 
+// checking if ollama is available and running
+router.get('/ollama-status', async(req,res) =>{
+    try {
+        const response = await fetch('http://127.0.0.1:11434/api/tags');
+        if(!response.ok) throw new Error();
+        return res.json({ok:true});
+    } catch(err){
+        return res.json({ok:false});
+    }
+});
+
 function requireAuth(req, res, next) {
     const session = getSessionFromRequest(req);
     if (!session) {

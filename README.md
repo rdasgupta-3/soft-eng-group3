@@ -11,6 +11,7 @@ Below is the current routing table for our Express.js backend, separating our fr
 | **GET** | `/choose-player` | Renders the Persona Selection screen |
 | **GET** | `/chat` | Renders the main LLM Chat interface |
 | **POST** | `/api/signup` | Accepts `{email, password}` to register a new user |
+| **GET** | `/api/ollama-status` | Checks if Ollama is running |
 | **POST** | `/api/login` | Validates `{email, password}` to authenticate users |
 
 ---
@@ -19,7 +20,15 @@ Below is the current routing table for our Express.js backend, separating our fr
 
 
 
-For the current development iteration, we are utilizing an in-memory data store (a server-side array) to rapidly prototype the login and sign-up flows before integrating a formal database (like MongoDB or PostgreSQL). 
+For the current development iteration, we are utilizing a File-Based JSON Storage so that the user data is persistent across server restarts. This allows login, logout, and password reset to persist even if the server restarts. The files in our data folder files are loaded and saved using Node’s fs module. Conversation history is currently kept in memory for this iteration.
+
+Located in /data/:
+| File | Purpose |
+| :--- | :--- |
+| users.json | Stores registered users email and password |
+| sessions.json | Stores active login sesssions |
+| resetTokens.json | Stores password-reset tokens with expiration timestamps |
+
 
 **Entity: User**
 * `email` (String) - acts as the unique identifier/username.
@@ -42,4 +51,4 @@ Optional environment variables:
 - `OLLAMA_BASE_URL` (default: `http://127.0.0.1:11434`)
 - `OLLAMA_MODEL` (default: `llama3.2:1b`)
 
-If Ollama is unavailable, the backend falls back to a safe placeholder assistant response so chat flow still works.
+Ollama runs entirely on the user’s machine, so no external API keys or cloud services are required. The frontend checks `/api/ollama-status` to determine whether Ollama is running. If Ollama is unavailable, the chat UI displays a warning banner and disables message input. If this error check fails, the backend falls back to a safe placeholder assistant response so chat flow still works.

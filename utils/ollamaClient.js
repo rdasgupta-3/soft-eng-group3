@@ -47,7 +47,7 @@ async function generateReplyFromOllama(conversationMessages) {
         return content;
     } catch (error) {
         console.warn('[LLM] Falling back to local placeholder response:', error.message);
-        return 'I could not reach local Ollama right now. Please make sure Ollama is running, then try again.';
+        return 'I could not reach local Ollama right now. Please make sure Ollama is running, then try again.'; // fallback response if frontend fails
     } finally {
         clearTimeout(timeout);
     }

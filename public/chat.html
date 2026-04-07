@@ -20,6 +20,16 @@
         </aside>
 
         <section class="chat-main">
+
+            <!--ollama warning if not available -->
+            <div id = "ollama-warning" style="display: none; background: #ffdddd; color: #a00;
+            padding: 12px; border: 1px solid #a00; border-radius: 6px; margin-bottom: 10px;">
+
+            <strong>Ollama is not installed or not running.</strong><br>
+            Please install it from <a href="https://ollama.com" target="_blank">https://ollama.com</a><br>
+            Then run: <code>ollama serve</code>
+            </div>
+
             <header class="chat-header">
                 <h1>AI Chat Assistant</h1>
                 <p>Ask anything and continue the conversation naturally.</p>
@@ -46,6 +56,30 @@
         );
 
         let conversations = [];
+
+        // checking for ollama
+        async function ollamaStatus(){
+            const res = await fetch('/api/ollama-status');
+            const data = await res.json();
+            return data.ok;
+        }
+
+        async function initOllamaStatus(){
+            const isOnline = await ollamaStatus();
+
+            const warning = document.getElementById('ollama-warning');
+            const input = document.getElementById('userInput');
+            const sendBtn = document.querySelector('.input-area button');
+
+            if (!isOnline) {
+                warning.style.display = 'block';
+                input.disabled = true;
+                sendBtn.disabled = true;
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', initOllamaStatus);
+
         let activeConversationId = null;
         let historySearchQuery = '';
 
@@ -441,6 +475,13 @@
         }
 
         async function sendMessage() {
+            const isOnline = await ollamaStatus();
+
+            if(!isOnline){
+                await addMessage("ai-bubble", "Sorry, I can't respond right now :( ");
+                return;
+            }
+
             const input = document.getElementById('userInput');
             const text = input.value.trim();
             if (!text) {
