@@ -24,6 +24,16 @@ router.get('/ollama-status', async(req,res) =>{
     }
 });
 
+// warm up ollama when frontent detects its online, trying to help with initial reply speed 
+router.get('/warmup', async(req,res) =>{
+    try {
+        await generateReplyFromOllama([{ type: "user-bubble", text: "hello" }]);
+        return res.json({warmed:true});
+    } catch(err){
+        return res.json({warmed: false});
+    }
+});
+
 function requireAuth(req, res, next) {
     const session = getSessionFromRequest(req);
     if (!session) {
@@ -97,7 +107,14 @@ router.post('/conversations/:conversationId/ai-reply', async (req, res) => {
         return res.status(400).json({ error: 'No user message found to respond to.' });
     }
 
-    const aiText = await generateReplyFromOllama(conversation.messages);
+    let aiText;
+    try{
+        aiText = await generateReplyFromOllama(conversation.messages);
+    }catch(err){
+        return res.status(503).json({error: 'ollama-failed'});
+    }
+
+
     const result = addMessage(req.session.email, conversationId, 'ai-bubble', aiText);
 
     if (result.error) {

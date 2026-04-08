@@ -21,7 +21,7 @@ async function generateReplyFromOllama(conversationMessages) {
     };
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 25000);
+    const timeout = setTimeout(() => controller.abort(), 30000);
 
     try {
         const response = await fetch(`${OLLAMA_BASE_URL}/api/chat`, {
@@ -46,8 +46,8 @@ async function generateReplyFromOllama(conversationMessages) {
 
         return content;
     } catch (error) {
-        console.warn('[LLM] Falling back to local placeholder response:', error.message);
-        return 'I couldn’t reach the Ollama model. Make sure Ollama is running and that the model is installed.'; // fallback response if frontend fails
+        console.warn('[LLM] Ollama error:', error.message);
+        throw new Error('ollama-failed');
     } finally {
         clearTimeout(timeout);
     }

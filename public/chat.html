@@ -75,6 +75,12 @@
                 warning.style.display = 'block';
                 input.disabled = true;
                 sendBtn.disabled = true;
+                addMessage("ai-bubble", "Sorry, I can't talk right now. Please check the warning above.");
+
+            }
+
+            if(isOnline){
+                fetch('/api/warmup');
             }
         }
 
@@ -286,7 +292,7 @@
             unpinned.forEach(appendConversationItem);
         }
 
-        function renderMessages() {
+        function renderMessages(skipLastAi = false) {
             const msgContainer = document.getElementById('messages');
             const current = getActiveConversation();
             msgContainer.innerHTML = '';
@@ -295,7 +301,16 @@
                 return;
             }
 
-            current.messages.forEach(msg => {
+            const messages = [...current.messages];
+
+            if(skipLastAi){
+                const last = messages[messages.length - 1];
+                if(last && last.type === 'ai-bubble'){
+                    messages.pop();
+                }
+            }
+
+            messages.forEach(msg => {
                 const bubble = document.createElement('div');
                 bubble.className = `bubble ${msg.type}`;
                 bubble.innerText = msg.text;
@@ -508,7 +523,23 @@
         function replaceTypingBubble(id,finalText){
             const bubble = document.getElementById(id);
             if(!bubble) return;
-            bubble.textContent = finalText;
+
+            bubble.innerHTML = "";
+
+            let i = 0;
+            const speed = 18; //typing speed
+
+            function typeChar(){
+                if(i < finalText.length){
+                    bubble.innerHTML += finalText.charAt(i);
+                    i++;
+                    const chatWindow = document.getElementById('chat-window');
+                    chatWindow.scrollTop = chatWindow.scrollHeight;
+
+                    setTimeout(typeChar, speed);
+                }
+            }
+            typeChar();
         }
 
 
@@ -543,6 +574,12 @@
                     headers: { 'Content-Type': 'application/json' }
                 });
 
+                if(response.status === 503){
+                    await addMessage("ai-bubble","Sorry, I'm having trouble responding right now. Please try again.");
+                    replaceTypingBubble(typingId,"Sorry, I'm having trouble responding right now. Please try again.");
+                    return;
+                }
+
                 if (response.status === 401) {
                     window.location.href = '/';
                     return;
@@ -550,9 +587,21 @@
 
                 await syncConversationsFromServer();
 
+                const typingBubble = document.getElementById(typingId);
+                if(typingBubble){
+                    typingBubble.remove();
+                }
+
+                renderMessages(true);
+
                 const updated = getActiveConversation();
-                const last = updated.messages[updated.messages.length -1];
-                replaceTypingBubble(typingId, last.text);
+                const last = updated.messages[updated.messages.length - 1];
+
+                const finalBubble = document.createElement('div');
+                finalBubble.className = `bubble ai-bubble`;
+                finalBubble.id = `ai-${Date.now()}`;
+                document.getElementById('messages').appendChild(finalBubble);
+                replaceTypingBubble(finalBubble.id, last.text);
 
                 return;
             }

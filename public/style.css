@@ -412,6 +412,36 @@ h1 { margin-bottom: 30px; color: #333; }
     background: #c82333;
 }
 
+.typing {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    opacity: 0.7;
+    font-style: italic;
+}
+
+.typing-dot {
+    width: 6px;
+    height: 6px;
+    background: #aaa;
+    border-radius: 50%;
+    animation: blink 1.4s infinite both;
+}
+
+.typing-dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes blink {
+    0% { opacity: .2; }
+    20% { opacity: 1; }
+    100% { opacity: .2; }
+}
+
 @media (max-width: 700px) {
     .chat-page {
         padding: 10px;
@@ -442,37 +472,8 @@ h1 { margin-bottom: 30px; color: #333; }
         font-size: 0.9rem;
     }
 
-    .typing {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        opacity: 0.7;
-        font-style: italic;
-    }
 
-    .typing-dot {
-        width: 6px;
-        height: 6px;
-        background: #aaa;
-        border-radius: 50%;
-        animation: blink 1.4s infinite both;
-    }
-    
-    .typing-dot:nth-child(2) {
-        animation-delay: 0.2s;
-    }
-
-    .typing-dot:nth-child(3) {
-        animation-delay: 0.4s;
-    }
-
-    @keyframes blink {
-        0%{opacity: .2;}
-        20%{opacity: 1;}
-        100%{opacity: .2;}
-    }
-
-    .ai-bubble.bubble .typing{
+    .ai-bubble .typing{
         padding: 6px 8px;
     }
     
