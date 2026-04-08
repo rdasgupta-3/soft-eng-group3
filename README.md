@@ -5,7 +5,7 @@
 Below is the current routing table for our Express.js backend, separating our frontend page routes from our backend API endpoints.
 
 ---
-### Frontend Page Routes
+## Frontend Page Routes
 | Method | Endpoint | Purpose |
 | :--- | :--- | :--- |
 | **GET** | `/` | Renders the Landing/Login page |
@@ -39,6 +39,7 @@ Below is the current routing table for our Express.js backend, separating our fr
 | **POST** | `/api/conversations/:conversationId/messages` | Adds user input or AI responses into chat |
 | **POST** | `/api/conversations/:conversationId/ai-reply` | Generates an AI reply using Ollama |
 
+---
 
 ### Database Design
 
@@ -54,11 +55,11 @@ For the current development iteration, we are utilizing a **File-Based JSON Stor
 | conversations.json | Stores all users conversations |
 
 
-### Entity: User
+## Entity: User
 * `email` (String) - acts as the unique identifier/username.
 * `password` (String) - currently stored as plaintext for QA testing (Note: Password hashing via bcrypt will be implemented in future iterations).
 
-### Entity: Conversation
+## Entity: Conversation
 * `id` - unique conversation ID
 * `email` - owner of the conversation
 * `messages[]` - array of `{type, text, at}`
