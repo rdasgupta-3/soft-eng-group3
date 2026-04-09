@@ -1,0 +1,226 @@
+[33mcommit 03c88288ea8232edea52026a01faf038a414efff[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32miteration-2-dev[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m
+Author: Vaanika <vaanika06@gmail.com>
+Date:   Mon Apr 6 00:33:36 2026 -0400
+
+    Add step definitions for the acceptance tests
+
+[33mcommit 541efa1fa3d636de5af10f747b1b4db6593b1c0c[m
+Author: Mehal Bhattacharya <mehalbhatta@gmail.com>
+Date:   Sun Mar 22 00:47:55 2026 -0400
+
+    Fix: Updated chat UI with correct CSS selectors and mock logic to pass Cucumber QA tests
+
+[33mcommit 0d688a6a98c35eb2f82c3f08799b7f0fa6c2845c[m
+Author: Mehal Bhattacharya <mehalbhatta@gmail.com>
+Date:   Sun Mar 22 00:40:37 2026 -0400
+
+    Test: Fixed QA test selectors, seeded in-memory DB, and updated assertions to pass Cucumber suite
+
+[33mcommit a3fd587ca590471a857fd47375097dd12ea399d2[m
+Author: Mehal Bhattacharya <mehalbhatta@gmail.com>
+Date:   Sun Mar 22 00:25:49 2026 -0400
+
+    Test: Updated Cucumber step definitions to use localhost and Express routes
+
+[33mcommit 98b2029158db4f1951e67c81068dad9cf647d900[m
+Author: jul-424 <j.aantoinette.3@gmail.com>
+Date:   Sun Mar 22 00:14:13 2026 -0400
+
+    changed selectsteps
+
+[33mcommit 13616427535255eeb88c53f34fa8735ddc06756f[m
+Author: jul-424 <j.aantoinette.3@gmail.com>
+Date:   Sun Mar 22 00:09:34 2026 -0400
+
+    changed select tests- took out description checking
+
+[33mcommit 5b2efff7febe7abb6219680125e3c61655f65b4f[m
+Author: jul-424 <j.aantoinette.3@gmail.com>
+Date:   Sun Mar 22 00:01:51 2026 -0400
+
+    added timeout file
+
+[33mcommit 2b4c12cc33ef21f3d8b50cd7d1b59db2ada4ab3a[m
+Author: jul-424 <j.aantoinette.3@gmail.com>
+Date:   Sat Mar 21 23:46:14 2026 -0400
+
+    fixing puppeteer issues pt.4
+
+[33mcommit f636d655431c4379d9f3c5645c6003231951cfb7[m
+Author: jul-424 <j.aantoinette.3@gmail.com>
+Date:   Sat Mar 21 23:44:05 2026 -0400
+
+    fixing puppeteer issues pt.3
+
+[33mcommit edc71f64791e79dae6a6d2ec3eb0726dd6327813[m
+Author: jul-424 <j.aantoinette.3@gmail.com>
+Date:   Sat Mar 21 23:38:07 2026 -0400
+
+    fixing puppeteer issues pt.2
+
+[33mcommit d1f0ffe41ca6d4ac45747030fad5d6a06481acaf[m
+Author: jul-424 <j.aantoinette.3@gmail.com>
+Date:   Sat Mar 21 23:31:57 2026 -0400
+
+    fixing puppeteer issues
+
+[33mcommit c7b6833badfb8a9110446997b2d9dadcf938346a[m
+Author: jul-424 <j.aantoinette.3@gmail.com>
+Date:   Sat Mar 21 23:25:05 2026 -0400
+
+    fixed path issues for the cucumber tests
+
+[33mcommit 982a1f5aa5962fb580191535d583bf85b3d58feb[m
+Author: jul-424 <j.aantoinette.3@gmail.com>
+Date:   Sat Mar 21 23:14:34 2026 -0400
+
+    changed selectsteps for demo :P
+
+[33mcommit 24e569e177b2c6d2b6f78830cb098a54495f4aa2[m
+Author: jul-424 <j.aantoinette.3@gmail.com>
+Date:   Sat Mar 21 23:09:48 2026 -0400
+
+    changed chatsteps.js for demo :)
+
+[33mcommit a804acbbee4898765d383c5aa3bdc0a065ab9459[m
+Author: jul-424 <j.aantoinette.3@gmail.com>
+Date:   Sat Mar 21 23:04:07 2026 -0400
+
+    changed loginSteps.js for demo video :O
+
+[33mcommit 428f58833a03d8f6ac634b23a6c85cc03b703a7a[m
+Author: jul-424 <j.aantoinette.3@gmail.com>
+Date:   Sat Mar 21 22:57:48 2026 -0400
+
+    reverted login.feature back to original, also took out chat response test :)
+
+[33mcommit 41b866d836e40d48aed06c531a78bd9ace0f0ece[m
+Author: Mehal Bhattacharya <mehalbhatta@gmail.com>
+Date:   Sat Mar 21 20:48:49 2026 -0400
+
+    Docs: Added REST API routing table and Database design to README
+
+[33mcommit b73720f35378a3b8dfea22ec01dff45be1a37c97[m
+Author: Mehal Bhattacharya <mehalbhatta@gmail.com>
+Date:   Sat Mar 21 20:39:33 2026 -0400
+
+    UI: Replaced Rutgers CAS button with a Coming Soon alert
+
+[33mcommit aab91b70c8c9c67b48d2671997e15c15ed579d1a[m
+Author: Mehal Bhattacharya <mehalbhatta@gmail.com>
+Date:   Sat Mar 21 20:37:45 2026 -0400
+
+    UI: Replaced broken Google Auth with a Coming Soon placeholder
+
+[33mcommit 292e335ebc8fbeea454d5943698b4d080240ec82[m
+Author: Mehal Bhattacharya <mehalbhatta@gmail.com>
+Date:   Sat Mar 21 20:34:15 2026 -0400
+
+    Feat: Added in-memory database for working account creation and real login validation
+
+[33mcommit 8759fb0ef30c1cb2eaabaf0e6c5473138480dea9[m
+Author: Mehal Bhattacharya <mehalbhatta@gmail.com>
+Date:   Sat Mar 21 20:30:56 2026 -0400
+
+    Feat: Updated landing page UI with Signup/CAS options and added Logout buttons
+
+[33mcommit a8bc5fecf21bd6a4dc2f04cf788d106914f73442[m
+Author: Mehal Bhattacharya <mehalbhatta@gmail.com>
+Date:   Sat Mar 21 20:16:29 2026 -0400
+
+    Feat: Added frontend validation and error handling for login to pass acceptance tests
+
+[33mcommit e6f950ff6329f28aca8de6bd520aa652aae996da[m
+Author: Mehal Bhattacharya <mehalbhatta@gmail.com>
+Date:   Sat Mar 21 20:06:10 2026 -0400
+
+    Assets: Added avatar images for the persona selection screen
+
+[33mcommit c05fcbf19e6fdd9f982093aedbd220eac959ad6e[m
+Author: Mehal Bhattacharya <mehalbhatta@gmail.com>
+Date:   Sat Mar 21 20:02:00 2026 -0400
+
+    Fix: Added missing persona descriptions to pass selectSteps.js acceptance test
+
+[33mcommit 0079082a20cbd34cb18b9215452cc9f17f7f0836[m
+Author: Mehal Bhattacharya <mehalbhatta@gmail.com>
+Date:   Sat Mar 21 14:38:41 2026 -0400
+
+    Fix: Corrected __dirname typo in server routing
+
+[33mcommit c5786faa625cca916698c17d875501e9fc882813[m
+Author: Mehal Bhattacharya <mehalbhattacharya@MacBook-Pro.local>
+Date:   Fri Mar 20 21:20:02 2026 -0400
+
+    Refactor: Organized project structure and added Node.js backend
+    
+    git rebase --continue
+    
+    :wq
+
+[33mcommit 2d25e228b6a2735a3b700e705fc4ef900c1de769[m
+Author: jasleenc2 <92887700+jasleenc2@users.noreply.github.com>
+Date:   Sat Mar 21 11:46:19 2026 -0400
+
+    Update .gitignore
+
+[33mcommit 51ba8b7a568f56653b2f3ed896fec55e8a584f5a[m
+Author: jasleenc2 <92887700+jasleenc2@users.noreply.github.com>
+Date:   Thu Mar 19 20:31:10 2026 -0400
+
+    Update package.json to run cucumber tests
+
+[33mcommit 06574c5bf6704de5cbb2dfc05d2831275f9a5f04[m
+Author: jasleenc2 <92887700+jasleenc2@users.noreply.github.com>
+Date:   Thu Mar 19 20:29:26 2026 -0400
+
+    Delete node_modules directory
+
+[33mcommit 30931f5005c578a7c3cfb525406c552ff476ea78[m
+Author: jasleenc2 <92887700+jasleenc2@users.noreply.github.com>
+Date:   Thu Mar 19 20:23:42 2026 -0400
+
+    Add tests for select and chat webpages
+
+[33mcommit b1746615319d61dc0be0e9ee1ec848ed716fb553[m
+Author: jasleenc2 <92887700+jasleenc2@users.noreply.github.com>
+Date:   Thu Mar 19 20:17:49 2026 -0400
+
+    Add .gitignore
+
+[33mcommit a4a1e0c54cc86433acd76eb662da8c3d8e5946ea[m
+Merge: f1c7f26 a12dcf1
+Author: jul-424 <j.aantoinette.3@gmail.com>
+Date:   Thu Mar 19 16:47:49 2026 -0400
+
+    Merge branch 'main' of https://github.com/rdasgupta-3/soft-eng-group3
+
+[33mcommit f1c7f267ac9bceb068f5f36f6837bc971ca255a3[m
+Author: jul-424 <j.aantoinette.3@gmail.com>
+Date:   Thu Mar 19 16:44:26 2026 -0400
+
+    Fixing my previous pushes since i messed up, sorry !!
+
+[33mcommit baebb34cc365597c25a779159ca11b00f41c4ea4[m
+Author: jul-424 <j.aantoinette.3@gmail.com>
+Date:   Thu Mar 19 16:31:02 2026 -0400
+
+    Remove node_modules from repo
+
+[33mcommit cc531226e03b4b0c11e9fbed517cb75c71c398ba[m
+Author: jul-424 <j.aantoinette.3@gmail.com>
+Date:   Thu Mar 19 16:30:16 2026 -0400
+
+    Add node_modules to gitignore
+
+[33mcommit 0cc778da177a0af2e9c41736808448eaf4f9f2fe[m
+Author: jul-424 <j.aantoinette.3@gmail.com>
+Date:   Thu Mar 19 16:12:52 2026 -0400
+
+    Added Cucumber tests for login method :)
+
+[33mcommit a12dcf118d9dc76bb5f42ad9cbc0b5b603218781[m
+Author: Mehal Bhattacharya <mehalbhattacharya@MacBook-Pro.local>
+Date:   Thu Mar 19 14:11:08 2026 -0400
+
+    Initial commit: Added HTML UI pages for Iteration 1
