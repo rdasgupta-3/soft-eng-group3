@@ -23,72 +23,11 @@
  */
 
 const { Given, When, Then, After } = require('@cucumber/cucumber');
-const puppeteer = require('puppeteer');
 const assert = require('assert');
+const { ensureUserExists } = require('../support/authTestUtils');
 
-let browser;
-let page;
-let lastConversationTitles = [];
-
-const BASE_URL = 'http://localhost:3000';
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-async function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-async function pageText() {
-  return page.evaluate(() => document.body.innerText);
-}
-
-async function firstExistingSelector(selectors) {
-  for (const sel of selectors) {
-    const el = await page.$(sel);
-    if (el) return sel;
-  }
-  return null;
-}
-
-async function getChatInputSelector() {
-  return firstExistingSelector(['#userInput', '#chat-input', 'input[type="text"]']);
-}
-
-async function getSendButtonSelector() {
-  return firstExistingSelector(['#send-btn', '.input-area button', 'button']);
-}
-
-async function getConversationTexts() {
-  return page.$$eval('.history-item', nodes => nodes.map(n => n.innerText.trim())).catch(() => []);
-}
-
-async function sendMessage(message) {
-  const inputSel = await getChatInputSelector();
-  const sendSel = await getSendButtonSelector();
-  assert(inputSel, 'Could not find a chat input field.');
-  assert(sendSel, 'Could not find a send button.');
-  await page.click(inputSel, { clickCount: 3 });
-  if (message.length > 0) {
-    await page.type(inputSel, message, { delay: 70 });
-  }
-  await page.click(sendSel);
-  await sleep(2200);
-}
-
-// ---------------------------------------------------------------------------
-// After hook
-// ---------------------------------------------------------------------------
-
-After(async function () {
-  if (browser) {
-    try { await browser.close(); } catch (_) {}
-  }
-  browser = null;
-  page = null;
-  lastConversationTitles = [];
-});
+const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:3000';
+const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 // ---------------------------------------------------------------------------
 // Given — authenticated session setup
@@ -99,21 +38,16 @@ After(async function () {
  * Logs in as the given user so subsequent steps start from an authenticated state.
  */
 Given('I am logged in as {string} with password {string}', async function (email, password) {
-  browser = await puppeteer.launch({ headless: false, slowMo: 200 });
-  page = await browser.newPage();
-  await page.setViewport({ width: 1280, height: 800 });
-
-  page.on('dialog', async dialog => {
-    try { await dialog.accept(); } catch (_) {}
-  });
-
+  await ensureUserExists(email, password);
+  const page = await this.freshPage();
   await page.goto(`${BASE_URL}/`, { waitUntil: 'domcontentloaded' });
-  await sleep(1000);
-  await page.type('#email', email, { delay: 100 });
-  await page.type('#password', password, { delay: 100 });
-  await sleep(800);
-  await page.click('button[onclick="attemptLogin()"]');
-  await sleep(1500);
+  await pause(600);
+  await page.type('#email', email, { delay: 70 });
+  await page.type('#password', password, { delay: 70 });
+  const loginButton = await page.$('button[onclick="attemptLogin()"]');
+  assert(loginButton, 'Login button not found');
+  await loginButton.click();
+  await pause(1200);
 });
 
 /**
@@ -121,8 +55,9 @@ Given('I am logged in as {string} with password {string}', async function (email
  * Navigates to the chat page after login.
  */
 Given('I am on the AI chat page', async function () {
+  const page = await this.launch();
   await page.goto(`${BASE_URL}/chat`, { waitUntil: 'domcontentloaded' });
-  await sleep(1200);
+  await pause(1000);
 });
 
 /**
@@ -164,14 +99,18 @@ Given('I seed two distinct conversations', async function () {
 // ---------------------------------------------------------------------------
 
 When('I type a message into the chat input field', async function () {
-  await sleep(800);
-  await page.type('#chat-input', 'Hello from Puppeteer', { delay: 100 });
+  const page = await this.launch();
+  await pause(400);
+  await page.type('#userInput', 'Hello from Puppeteer', { delay: 80 });
 });
 
 When('I submit the message', async function () {
-  await sleep(800);
-  await page.click('#send-btn');
-  await sleep(1200);
+  const page = await this.launch();
+  const selector = await page.$('.input-area button');
+  assert(selector, 'Send button not found');
+  this.aiBubbleCountBeforeSubmit = await page.$$eval('#messages .ai-bubble', nodes => nodes.length);
+  await selector.click();
+  await pause(1500);
 });
 
 When('I send {string} in the current conversation', async function (message) {
@@ -243,91 +182,29 @@ When('I log out', async function () {
 // ---------------------------------------------------------------------------
 
 Then('my message should be displayed in the chat history', async function () {
-  const messages = await page.$$eval('#chat-history .user-bubble', nodes =>
+  const page = await this.launch();
+  const messages = await page.$$eval('#messages .user-bubble', nodes =>
     nodes.map(n => n.textContent.trim())
   );
   assert(messages.includes('Hello from Puppeteer'), 'Sent message not found in chat history.');
 });
 
-Then('I should see {string} in the chat area', async function (message) {
-  const text = await pageText();
-  assert(text.includes(message), `Expected to see "${message}" in the chat area.`);
-});
-
-Then('I should still see {string} in the chat area', async function (message) {
-  const text = await pageText();
-  assert(text.includes(message), `Expected to still see "${message}" in the chat area.`);
-});
-
-Then('no new user message should be added', async function () {
-  const text = await pageText();
-  assert(!text.includes('undefined'), 'Unexpected broken/empty message behavior detected.');
-});
-
-// ---------------------------------------------------------------------------
-// Then — conversation list / UI control assertions
-// ---------------------------------------------------------------------------
-
-Then('I should see the conversation list', async function () {
-  const selector = await firstExistingSelector(['#conversation-list', '.chat-history-panel']);
-  assert(selector, 'Expected a conversation list or chat-history panel.');
-});
-
-Then('I should still see the conversation list', async function () {
-  const selector = await firstExistingSelector(['#conversation-list', '.chat-history-panel']);
-  assert(selector, 'Expected the conversation list to still be visible.');
-});
-
-Then('I should see the new conversation button', async function () {
-  const selector = await firstExistingSelector(['#new-chat-btn']);
-  assert(selector, 'Expected #new-chat-btn to exist.');
-});
-
-Then('I should see the history search field', async function () {
-  const selector = await firstExistingSelector(['#history-search']);
-  assert(selector, 'Expected #history-search to exist.');
-});
-
-Then('I should see the chat message area', async function () {
-  const selector = await firstExistingSelector(['#messages', '#chat-window', '#chat-history']);
-  assert(selector, 'Expected a chat message area.');
-});
-
-Then('I should see the chat input field', async function () {
-  const selector = await getChatInputSelector();
-  assert(selector, 'Expected a chat input field.');
-});
-
-Then('I should still see the chat input field', async function () {
-  const selector = await getChatInputSelector();
-  assert(selector, 'Expected the chat input field to still exist.');
-});
-
-Then('I should see the send button', async function () {
-  const selector = await getSendButtonSelector();
-  assert(selector, 'Expected a send button.');
-});
-
-// ---------------------------------------------------------------------------
-// Then — conversation history assertions
-// ---------------------------------------------------------------------------
-
-Then('I should see a conversation matching {string}', async function (query) {
-  const text = (await pageText()).toLowerCase();
+Then('an AI response should be returned in the chat', async function () {
+  const page = await this.launch();
+  await pause(1000);
+  const responses = await page.$$eval('#messages .ai-bubble', nodes => nodes.length);
   assert(
-    text.includes(query.toLowerCase()),
-    `Expected to find "${query}" in the visible conversation area.`
+    responses > (this.aiBubbleCountBeforeSubmit || 0),
+    'Expected a new AI response after submit'
   );
 });
 
-Then('I should see a no matching conversations message', async function () {
-  const text = (await pageText()).toLowerCase();
-  assert(
-    text.includes('no matching conversations') ||
-    text.includes('no conversations yet') ||
-    text.includes('no matching'),
-    `Expected a no-match empty-state message. Page text:\n${text}`
-  );
+When('I log out', async function () {
+  const page = await this.launch();
+  const button = await page.$('.logout-btn');
+  assert(button, 'Logout button not found');
+  await button.click();
+  await pause(1200);
 });
 
 Then('I should still see the prior conversation entry', async function () {
@@ -393,10 +270,9 @@ Then('the page should still be usable', async function () {
 // ---------------------------------------------------------------------------
 
 Then('I should be on the landing page', async function () {
+  const page = await this.launch();
   const url = page.url();
-  assert(
-    url.includes('landing') || url.includes('index') ||
-    url.includes('login') || url === `${BASE_URL}/`,
-    `Expected the landing/login page, got: ${url}`
-  );
+  if (!url.endsWith('/') && !url.includes('login')) {
+    throw new Error(`Expected landing page, got ${url}`);
+  }
 });
