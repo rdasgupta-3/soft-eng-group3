@@ -1,84 +1,74 @@
 const { Given, When, Then, After } = require('@cucumber/cucumber');
-const puppeteer = require('puppeteer');
 const assert = require('assert');
+const { ensureUserExists } = require('../support/authTestUtils');
 
-let browser;
-let page;
-let aiBubbleCountBeforeSubmit = 0;
-
-After(async function () {
-  if (browser) {
-    try {
-      await browser.close();
-    } catch (error) {}
-  }
-  browser = null;
-  page = null;
-  aiBubbleCountBeforeSubmit = 0;
-});
+const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:3000';
+const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 Given('I am logged in as {string} with password {string}', async function (email, password) {
-  browser = await puppeteer.launch({
-  headless: false,
-  slowMo: 300 
-});
-  page = await browser.newPage();
-  await page.setViewport({ width: 1280, height: 800 });
-
-  // UPDATED TO LOCALHOST
-  await page.goto('http://localhost:3000/');
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  await page.type('#email', email, { delay: 100 });
-  await page.type('#password', password, { delay: 100 });
-  await new Promise(resolve => setTimeout(resolve, 800));
-await page.click('button[onclick="attemptLogin()"]');
-  await new Promise(resolve => setTimeout(resolve, 1500));
+  await ensureUserExists(email, password);
+  const page = await this.freshPage();
+  await page.goto(`${BASE_URL}/`, { waitUntil: 'domcontentloaded' });
+  await pause(600);
+  await page.type('#email', email, { delay: 70 });
+  await page.type('#password', password, { delay: 70 });
+  const loginButton = await page.$('button[onclick="attemptLogin()"]');
+  assert(loginButton, 'Login button not found');
+  await loginButton.click();
+  await pause(1200);
 });
 
 Given('I am on the AI chat page', async function () {
-  // UPDATED TO LOCALHOST
-  await page.goto('http://localhost:3000/chat', { waitUntil: 'domcontentloaded' });
-  await new Promise(resolve => setTimeout(resolve, 1200));
+  const page = await this.launch();
+  await page.goto(`${BASE_URL}/chat`, { waitUntil: 'domcontentloaded' });
+  await pause(1000);
 });
 
 When('I type a message into the chat input field', async function () {
-  await new Promise(resolve => setTimeout(resolve, 800));
-  await page.type('#chat-input', 'Hello from Puppeteer', { delay: 100 });
+  const page = await this.launch();
+  await pause(400);
+  await page.type('#userInput', 'Hello from Puppeteer', { delay: 80 });
 });
 
 When('I submit the message', async function () {
-  aiBubbleCountBeforeSubmit = await page.$$eval('#chat-history .ai-bubble', nodes => nodes.length);
-  await new Promise(resolve => setTimeout(resolve, 800));
-  await page.click('#send-btn');
-  await new Promise(resolve => setTimeout(resolve, 1200));
+  const page = await this.launch();
+  const selector = await page.$('.input-area button');
+  assert(selector, 'Send button not found');
+  this.aiBubbleCountBeforeSubmit = await page.$$eval('#messages .ai-bubble', nodes => nodes.length);
+  await selector.click();
+  await pause(1500);
 });
 
 Then('my message should be displayed in the chat history', async function () {
-  const messages = await page.$$eval('#chat-history .user-bubble', nodes =>
+  const page = await this.launch();
+  const messages = await page.$$eval('#messages .user-bubble', nodes =>
     nodes.map(n => n.textContent.trim())
   );
   assert(messages.includes('Hello from Puppeteer'), 'Sent message not found in chat history');
 });
 
 Then('an AI response should be returned in the chat', async function () {
-  const responses = await page.$$eval('#chat-history .ai-bubble', nodes => nodes.length);
+  const page = await this.launch();
+  await pause(1000);
+  const responses = await page.$$eval('#messages .ai-bubble', nodes => nodes.length);
   assert(
-    responses > aiBubbleCountBeforeSubmit,
-    `Expected a new AI response after submit (before: ${aiBubbleCountBeforeSubmit}, after: ${responses})`
+    responses > (this.aiBubbleCountBeforeSubmit || 0),
+    'Expected a new AI response after submit'
   );
-  await browser.close();
 });
 
 When('I log out', async function () {
-  await new Promise(resolve => setTimeout(resolve, 800)); 
-  await page.click('.logout-btn');
-  await new Promise(resolve => setTimeout(resolve, 1500));
+  const page = await this.launch();
+  const button = await page.$('.logout-btn');
+  assert(button, 'Logout button not found');
+  await button.click();
+  await pause(1200);
 });
 
 Then('I should be on the landing page', async function () {
+  const page = await this.launch();
   const url = page.url();
-  if (!url.includes('landing') && !url.includes('index') && !url.includes('login.html') && url !== 'http://localhost:3000/') {
+  if (!url.endsWith('/') && !url.includes('login')) {
     throw new Error(`Expected landing page, got ${url}`);
   }
-  await browser.close();
 });
