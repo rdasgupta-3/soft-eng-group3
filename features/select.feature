@@ -8,5 +8,3 @@ Scenario: AI model selector shows multiple options and allows exactly one choice
   Then exactly one model should be selected
   And the selected model should be saved
   And I can continue to the AI chat page
-
-
