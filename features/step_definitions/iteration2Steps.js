@@ -274,7 +274,7 @@ Given('I seed two distinct conversations', async function () {
   await sendMessage(this, 'first thread unique text');
   const page = await currentPage(this);
   await page.click('#new-chat-btn');
-  await pause(600);
+  await pause(1000);
   await sendMessage(this, 'second thread unique text');
   this.lastConversationTitles = await getConversationTexts(this);
 });
