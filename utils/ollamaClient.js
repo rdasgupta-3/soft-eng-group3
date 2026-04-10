@@ -1,5 +1,5 @@
 const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434';
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.2:1b';
+const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.2:latest';
 
 function toOllamaMessages(conversationMessages) {
     const recent = (conversationMessages || []).slice(-16);
@@ -21,7 +21,7 @@ async function generateReplyFromOllama(conversationMessages) {
     };
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 12000);
+    const timeout = setTimeout(() => controller.abort(), 30000);
 
     try {
         const response = await fetch(`${OLLAMA_BASE_URL}/api/chat`, {
@@ -46,8 +46,8 @@ async function generateReplyFromOllama(conversationMessages) {
 
         return content;
     } catch (error) {
-        console.warn('[LLM] Falling back to local placeholder response:', error.message);
-        return 'I could not reach local Ollama right now. Please make sure Ollama is running, then try again.';
+        console.warn('[LLM] Ollama error:', error.message);
+        throw new Error('ollama-failed');
     } finally {
         clearTimeout(timeout);
     }

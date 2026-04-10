@@ -6,20 +6,23 @@
     <title>AI Chat - LLM</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body class="chat-page">
-    <div class="chat-shell">
-        <aside class="chat-history-panel">
-            <div class="history-header">
-                <h2>Chat History</h2>
-                <button id="new-chat-btn" type="button" onclick="createNewConversation()">+ New</button>
-            </div>
-            <div class="history-search-wrap">
-                <input type="text" id="history-search" placeholder="Search chats..." oninput="updateHistorySearch(this.value)">
-            </div>
-            <div id="conversation-list"></div>
-        </aside>
+<body>
+    <div class="container" style="max-width: 600px; margin: 0 auto; padding: 20px;">
+        <button class="logout-btn" onclick="location.href='/'" style="float: right; background-color: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">Log Out</button>
+        
+        <h1>AI Chat Interface</h1>
 
         <section class="chat-main">
+
+            <!--ollama warning if not available -->
+            <div id = "ollama-warning" style="display: none; background: #ffdddd; color: #a00;
+            padding: 12px; border: 1px solid #a00; border-radius: 6px; margin-bottom: 10px;">
+
+            <strong>Ollama is not installed or not running.</strong><br>
+            Please install it from <a href="https://ollama.com" target="_blank">https://ollama.com</a><br>
+            Then run: <code>ollama serve</code>
+            </div>
+
             <header class="chat-header">
                 <h1>AI Chat Assistant</h1>
                 <p>Ask anything and continue the conversation naturally.</p>
@@ -28,12 +31,12 @@
             <div id="chat-window">
                 <div id="messages"></div>
             </div>
+        </div>
 
-            <div class="input-area">
-                <input type="text" id="userInput" placeholder="Type your message here..." onkeypress="handleKey(event)">
-                <button onclick="sendMessage()">Send</button>
-            </div>
-        </section>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="chat-input" placeholder="Type your message..." style="flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;" required>
+            <button id="send-btn" onclick="sendMessage()" style="background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer;">Send</button>
+        </div>
     </div>
 
     <script>
@@ -46,6 +49,36 @@
         );
 
         let conversations = [];
+
+        // checking for ollama
+        async function ollamaStatus(){
+            const res = await fetch('/api/ollama-status');
+            const data = await res.json();
+            return data.ok;
+        }
+
+        async function initOllamaStatus(){
+            const isOnline = await ollamaStatus();
+
+            const warning = document.getElementById('ollama-warning');
+            const input = document.getElementById('userInput');
+            const sendBtn = document.querySelector('.input-area button');
+
+            if (!isOnline) {
+                warning.style.display = 'block';
+                input.disabled = true;
+                sendBtn.disabled = true;
+                addMessage("ai-bubble", "Sorry, I can't talk right now. Please check the warning above.");
+
+            }
+
+            if(isOnline){
+                fetch('/api/warmup');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', initOllamaStatus);
+
         let activeConversationId = null;
         let historySearchQuery = '';
 
@@ -252,7 +285,7 @@
             unpinned.forEach(appendConversationItem);
         }
 
-        function renderMessages() {
+        function renderMessages(skipLastAi = false) {
             const msgContainer = document.getElementById('messages');
             const current = getActiveConversation();
             msgContainer.innerHTML = '';
@@ -261,7 +294,16 @@
                 return;
             }
 
-            current.messages.forEach(msg => {
+            const messages = [...current.messages];
+
+            if(skipLastAi){
+                const last = messages[messages.length - 1];
+                if(last && last.type === 'ai-bubble'){
+                    messages.pop();
+                }
+            }
+
+            messages.forEach(msg => {
                 const bubble = document.createElement('div');
                 bubble.className = `bubble ${msg.type}`;
                 bubble.innerText = msg.text;
@@ -440,7 +482,68 @@
             renderMessages();
         }
 
+        function getCurrentPersonaName(){
+            const params = new URLSearchParams(window.location.search);
+            const persona = params.get('persona');
+
+            if(persona === 'sweetheart') return 'Miss Sweetheart';
+            if(persona === 'professional') return 'Mr. Professional';
+            if(persona === 'silly') return "Lord Silly The Ninth";
+
+            return 'AI';
+        }
+
+        function addTypingBubble(personaName){
+            const id = `typing-${Date.now()}`;
+
+            const bubble = document.createElement('div');
+            bubble.className = 'ai-bubble bubble'
+            bubble.id = id;
+
+            bubble.innerHTML = `
+                <div class="typing">
+                    <span>${personaName} is thinking</span>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            `;
+
+            document.querySelector('#messages').appendChild(bubble);
+            return id;
+        }   
+
+        function replaceTypingBubble(id,finalText){
+            const bubble = document.getElementById(id);
+            if(!bubble) return;
+
+            bubble.innerHTML = "";
+
+            let i = 0;
+            const speed = 18; //typing speed
+
+            function typeChar(){
+                if(i < finalText.length){
+                    bubble.innerHTML += finalText.charAt(i);
+                    i++;
+                    const chatWindow = document.getElementById('chat-window');
+                    chatWindow.scrollTop = chatWindow.scrollHeight;
+
+                    setTimeout(typeChar, speed);
+                }
+            }
+            typeChar();
+        }
+
+
         async function sendMessage() {
+            const isOnline = await ollamaStatus();
+
+            if(!isOnline){
+                await addMessage("ai-bubble", "Sorry, I can't respond right now :( ");
+                return;
+            }
+
             const input = document.getElementById('userInput');
             const text = input.value.trim();
             if (!text) {
@@ -449,6 +552,9 @@
 
             await addMessage('user-bubble', text);
             input.value = '';
+
+            const personaName = getCurrentPersonaName();
+            const typingId = addTypingBubble(personaName);
 
             if (useServerApi) {
                 const current = getActiveConversation();
@@ -461,63 +567,43 @@
                     headers: { 'Content-Type': 'application/json' }
                 });
 
+                if(response.status === 503){
+                    await addMessage("ai-bubble","Sorry, I'm having trouble responding right now. Please try again.");
+                    replaceTypingBubble(typingId,"Sorry, I'm having trouble responding right now. Please try again.");
+                    return;
+                }
+
                 if (response.status === 401) {
                     window.location.href = '/';
                     return;
                 }
 
                 await syncConversationsFromServer();
+
+                const typingBubble = document.getElementById(typingId);
+                if(typingBubble){
+                    typingBubble.remove();
+                }
+
+                renderMessages(true);
+
+                const updated = getActiveConversation();
+                const last = updated.messages[updated.messages.length - 1];
+
+                const finalBubble = document.createElement('div');
+                finalBubble.className = `bubble ai-bubble`;
+                finalBubble.id = `ai-${Date.now()}`;
+                document.getElementById('messages').appendChild(finalBubble);
+                replaceTypingBubble(finalBubble.id, last.text);
+
                 return;
             }
 
             // Placeholder local reply so the UI still works without backend integration.
             setTimeout(() => {
-                addMessage('ai-bubble', 'Thanks for your message. A real AI backend can be connected next.');
+                replaceTypingBubble(typingId, 'Thanks for your message. A real AI backend can be connected next.');
             }, 450);
         }
-
-        function handleKey(e) { if (e.key === 'Enter') sendMessage(); }
-
-        async function initChat() {
-            if (useServerApi) {
-                try {
-                    await syncConversationsFromServer();
-                    openFreshDraftSession();
-                    saveConversations();
-                    renderConversationList();
-                    renderMessages();
-                } catch (error) {
-                    console.error(error);
-                    ensureDraftConversation();
-                    renderConversationList();
-                    renderMessages();
-                }
-                return;
-            }
-
-            loadConversationsFromLocal();
-            renderConversationList();
-            renderMessages();
-        }
-
-        initChat();
     </script>
-
-    <button onclick="logout()" class="logout-btn">Log Out</button>
-
-<script>
-    async function logout() {
-        if (typeof window.fetch === 'function' && window.location.protocol.startsWith('http')) {
-            try {
-                await fetch('/api/logout', { method: 'POST' });
-            } catch (error) {
-                console.error(error);
-            }
-        }
-
-        alert("You have been logged out.");
-        window.location.href = "/";
-    }
-</script>
 </body>
 </html>

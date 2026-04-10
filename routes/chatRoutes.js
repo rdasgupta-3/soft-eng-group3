@@ -12,6 +12,28 @@ const { generateReplyFromOllama } = require('../utils/ollamaClient');
 
 const router = express.Router();
 
+// checking if ollama is available and running
+router.get('/ollama-status', async(req,res) =>{
+    res.set('Cache-Control', 'no-store');
+    try {
+        const response = await fetch('http://127.0.0.1:11434/api/tags');
+        if(!response.ok) throw new Error();
+        return res.json({ok:true});
+    } catch(err){
+        return res.json({ok:false});
+    }
+});
+
+// warm up ollama when frontent detects its online, trying to help with initial reply speed 
+router.get('/warmup', async(req,res) =>{
+    try {
+        await generateReplyFromOllama([{ type: "user-bubble", text: "hello" }]);
+        return res.json({warmed:true});
+    } catch(err){
+        return res.json({warmed: false});
+    }
+});
+
 function requireAuth(req, res, next) {
     const session = getSessionFromRequest(req);
     if (!session) {
@@ -85,7 +107,14 @@ router.post('/conversations/:conversationId/ai-reply', async (req, res) => {
         return res.status(400).json({ error: 'No user message found to respond to.' });
     }
 
-    const aiText = await generateReplyFromOllama(conversation.messages);
+    let aiText;
+    try{
+        aiText = await generateReplyFromOllama(conversation.messages);
+    }catch(err){
+        return res.status(503).json({error: 'ollama-failed'});
+    }
+
+
     const result = addMessage(req.session.email, conversationId, 'ai-bubble', aiText);
 
     if (result.error) {

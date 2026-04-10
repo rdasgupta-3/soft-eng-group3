@@ -31,14 +31,12 @@
         </button>
         
         <div class="links" style="margin-top: 20px; display: flex; justify-content: space-between; font-size: 0.9em;">
-            <a href="/forgot-password" style="color: #007bff; text-decoration: none;">Forgot Password?</a>
-            <!-- <a href="#" style="color: #007bff; text-decoration: none;">Forgot Email?</a> -->
+            <a href="#" style="color: #007bff; text-decoration: none;">Forgot Password?</a>
+            <a href="#" style="color: #007bff; text-decoration: none;">Forgot Email?</a>
         </div>
     </div>
 
     <script>
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
         // Standard Email/Password Validation via Backend API
         async function attemptLogin() {
             const email = document.getElementById('email').value.trim();
@@ -53,16 +51,9 @@
                 return;
             }
 
-            if (!emailRegex.test(email)) {
-                errorDiv.innerText = "Please enter a valid email address (example@domain.com).";
-                errorDiv.style.display = 'block';
-                return;
-            }
-
             // Ask the server to verify the credentials
             const response = await fetch('/api/login', {
                 method: 'POST',
-                credentials: 'same-origin',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
             });

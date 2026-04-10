@@ -20,8 +20,6 @@
     </div>
 
     <script>
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
         async function createAccount() {
             const email = document.getElementById('new-email').value.trim();
             const password = document.getElementById('new-password').value.trim();
@@ -33,12 +31,6 @@
 
             if (!email || !password) {
                 errorDiv.innerText = "Email and password are required.";
-                errorDiv.style.display = 'block';
-                return;
-            }
-
-            if (!emailRegex.test(email)) {
-                errorDiv.innerText = "Please enter a valid email address (example@domain.com).";
                 errorDiv.style.display = 'block';
                 return;
             }
