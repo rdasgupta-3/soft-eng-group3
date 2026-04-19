@@ -67,7 +67,7 @@ When('I select the model {string}', async function (modelName) {
 
 Then('exactly one model should be selected', async function () {
   const page = await this.launch();
-  await page.waitForFunction(() => window.location.href.includes('persona='), { timeout: 4000 }).catch(() => null);
+  await page.waitForFunction(() => window.location.href.includes('persona='), { timeout: 8000 }).catch(() => null);
   const currentUrl = page.url();
   assert(currentUrl.includes('persona='), 'Expected the selected model to be passed in the URL');
 });

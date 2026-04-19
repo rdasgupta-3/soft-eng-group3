@@ -290,12 +290,21 @@
             }
 
             if (useServerApi) {
-                const draft = buildDraftConversation();
-                conversations.push(draft);
-                activeConversationId = draft.id;
-                saveConversations();
-                renderConversationList();
-                renderMessages();
+                (async () => {
+                    try {
+                        const res = await fetch('/api/conversations', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' }
+                        });
+                        const data = await res.json();
+                        await syncConversationsFromServer();
+                        activeConversationId = data.conversation.id;
+                        renderConversationList();
+                        renderMessages();
+                    } catch (err) {
+                        console.error('Failed to create conversation:', err);
+                    }
+                })();
                 return;
             }
 
