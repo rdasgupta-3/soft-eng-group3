@@ -44,6 +44,8 @@ Optional environment variables:
 
 If Ollama is unavailable, the backend falls back to a safe placeholder assistant response so chat flow still works.
 
-#Pupeteer Demo: 
+---
+
+### Pupeteer Demo: 
 
 https://youtu.be/_1y57lcVm14
