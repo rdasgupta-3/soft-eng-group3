@@ -43,3 +43,7 @@ Optional environment variables:
 - `OLLAMA_MODEL` (default: `llama3.2:1b`)
 
 If Ollama is unavailable, the backend falls back to a safe placeholder assistant response so chat flow still works.
+
+#Pupeteer Demo: 
+
+https://youtu.be/_1y57lcVm14
