@@ -4,6 +4,7 @@ const {
     findUserByEmail,
     createUser,
     validateUser,
+    setUserPassword,
     createResetToken,
     getResetToken,
     deleteResetToken,
@@ -111,7 +112,7 @@ router.post('/reset-password', (req, res) => {
         return res.status(400).json({ error: 'Account no longer exists.' });
     }
 
-    user.password = newPassword.trim();
+    setUserPassword(tokenRecord.email, newPassword.trim());
     deleteResetToken(token);
     console.log(`[Auth] Password reset completed for ${user.email}`);
     return res.json({ success: true, message: 'Password updated successfully.' });

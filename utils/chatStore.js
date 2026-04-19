@@ -1,121 +1,77 @@
-const fs = require('fs');
-const path = require('path');
+// conversations stored in memory: { [email]: [ conversation, ... ] }
+const store = {};
 
-const dataDir = path.join(__dirname,'..', 'data');
-const CONVO_FILE = path.join(dataDir,'conversations.json');
-
-function load(){
-    if(!fs.existsSync(CONVO_FILE)) return {};
-    return JSON.parse(fs.readFileSync(CONVO_FILE));
-}
-
-function save(data){
-    fs.writeFileSync(CONVO_FILE, JSON.stringify(data, null, 2));
-}
-
-function buildConversation() {
+function buildConversation(persona) {
     const now = Date.now();
     return {
         id: `conv-${now}-${Math.floor(Math.random() * 10000)}`,
         title: 'New Conversation',
         pinned: false,
+        persona: persona || null,
         updatedAt: now,
         messages: []
     };
 }
 
 function getUserConversations(email) {
-    const data = load();
-    if(!data[email]){
-        data[email] = [];
-        save(data);
-    }
-    return data[email];
+    if (!store[email]) store[email] = [];
+    return store[email];
 }
 
 function listConversations(email) {
     return getUserConversations(email);
 }
 
-function createConversation(email) {
-    const data = load();
-    if(!data[email]) data[email] = [];
-
-    const created = buildConversation();
-    data[email].push(created);
-
-    save(data);
+function createConversation(email, persona) {
+    const list = getUserConversations(email);
+    const created = buildConversation(persona);
+    list.push(created);
     return created;
 }
 
 function getConversation(email, conversationId) {
-    const data = load();
-    return data[email]?.find(c => c.id === conversationId) || null;
+    return getUserConversations(email).find(c => c.id === conversationId) || null;
 }
 
 function updateConversation(email, conversationId, updates) {
-    const data = load();
-    const conv = data[email]?.find(c => c.id === conversationId);
+    const conv = getConversation(email, conversationId);
+    if (!conv) return null;
 
-    if (!conv) {
-        return null;
-    }
-
-    if (typeof updates.pinned === 'boolean') {
-        conv.pinned = updates.pinned;
-    }
-
-    if (typeof updates.title === 'string' && updates.title.trim()) {
-        conv.title = updates.title.trim();
-    }
+    if (typeof updates.pinned === 'boolean') conv.pinned = updates.pinned;
+    if (typeof updates.title === 'string' && updates.title.trim()) conv.title = updates.title.trim();
 
     conv.updatedAt = Date.now();
-    save(data);
     return conv;
 }
 
 function deleteConversation(email, conversationId) {
-    const data = load();
-    if(!data[email]) return null;
+    const list = getUserConversations(email);
+    const exists = list.some(c => c.id === conversationId);
+    if (!exists) return null;
 
-    const exists = data[email].some(c => c.id === conversationId);
-    if (!exists) {
-        return null;
-    }
-
-    data[email] = data[email].filter(c=> c.id !== conversationId);
-    save(data);
-
-    return data[email];
+    store[email] = list.filter(c => c.id !== conversationId);
+    return store[email];
 }
 
-function addMessage(email, conversationId, type, text) {
-    const data = load();
-    const conv = data[email]?.find(c => c.id === conversationId);
+function addMessage(email, conversationId, type, text, model) {
+    const conv = getConversation(email, conversationId);
+    if (!conv) return { error: 'not-found' };
 
-    if (!conv) {
-        return { error: 'not-found' };
-    }
-
-    if (!text || typeof text !== 'string' || !text.trim()) {
-        return { error: 'invalid-text' };
-    }
+    if (!text || typeof text !== 'string' || !text.trim()) return { error: 'invalid-text' };
 
     const validType = (type === 'user-bubble' || type === 'ai-bubble') ? type : 'user-bubble';
     const cleanText = text.trim();
 
-    conv.messages.push({
-        type: validType,
-        text: cleanText,
-        at: Date.now()
-    });
+    const msg = { type: validType, text: cleanText, at: Date.now() };
+    if (model && typeof model === 'string') msg.model = model;
+
+    conv.messages.push(msg);
 
     if (conv.title === 'New Conversation' && validType === 'user-bubble') {
         conv.title = cleanText.length > 28 ? `${cleanText.slice(0, 28)}...` : cleanText;
     }
 
     conv.updatedAt = Date.now();
-    save(data);
     return { conversation: conv };
 }
 
@@ -127,3 +83,4 @@ module.exports = {
     deleteConversation,
     addMessage
 };
+

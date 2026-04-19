@@ -4,6 +4,7 @@
   "description": "Below is the current routing table for our Express.js backend, separating our frontend views from our backend data endpoints.",
   "main": "index.js",
   "scripts": {
+    "setup": "node scripts/setup-models.js",
     "test": "cucumber-js features/**/*.feature --require features/step_definitions/**/*.js",
     "test:unit": "jasmine",
     "test:all": "npm run test:unit && npm run test",

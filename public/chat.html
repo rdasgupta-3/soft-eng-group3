@@ -21,12 +21,25 @@
 
         <section class="chat-main">
             <header class="chat-header">
-                <h1>AI Chat Assistant</h1>
-                <p>Ask anything and continue the conversation naturally.</p>
+                <div class="chat-header-info">
+                    <h1>AI Chat Assistant</h1>
+                    <div id="chat-persona-badge"></div>
+                </div>
+                <button onclick="openSettings()" class="settings-btn" title="Accessibility settings">Accessibility</button>
             </header>
+
+            <div id="ollama-warning" style="display: none; margin: 10px 16px 0; padding: 12px; background: #ffdddd; color: #a00; border: 1px solid #a00; border-radius: 6px; font-size: 0.9rem;">
+                <strong>Ollama is not running.</strong> Please start Ollama, then refresh this page.<br>
+                Install from <a href="https://ollama.com" target="_blank" rel="noopener noreferrer" style="color: #a00;">https://ollama.com</a> and run: <code>ollama serve</code>
+            </div>
 
             <div id="chat-window">
                 <div id="messages"></div>
+            </div>
+
+            <div class="model-selector" id="model-selector" style="display:none;">
+                <span class="model-selector-label">Compare&nbsp;Models:</span>
+                <div id="model-checkboxes" class="model-checkboxes"></div>
             </div>
 
             <div class="input-area">
@@ -48,6 +61,16 @@
         let conversations = [];
         let activeConversationId = null;
         let historySearchQuery = '';
+
+        const PERSONA_BADGES = {
+            sweetheart:   { emoji: '💗', label: 'Miss Sweetheart' },
+            professional: { emoji: '💼', label: 'Mr. Professional' },
+            silly:        { emoji: '👑', label: 'Lord Silly' }
+        };
+
+        function getPagePersona() {
+            return new URLSearchParams(window.location.search).get('persona') || null;
+        }
 
         function loadConversationsFromLocal() {
             try {
@@ -71,7 +94,7 @@
             }
         }
 
-        async function syncConversationsFromServer() {
+        async function syncConversationsData() {
             const response = await fetch('/api/conversations');
             if (response.status === 401) {
                 window.location.href = '/';
@@ -89,6 +112,10 @@
             }
 
             saveConversations();
+        }
+
+        async function syncConversationsFromServer() {
+            await syncConversationsData();
             renderConversationList();
             renderMessages();
         }
@@ -172,7 +199,7 @@
             const list = document.getElementById('conversation-list');
             list.innerHTML = '';
 
-            const ordered = sortedConversations().filter(conversationMatchesSearch);
+            const ordered = sortedConversations().filter(c => c.messages.length > 0).filter(conversationMatchesSearch);
             if (!ordered.length) {
                 const empty = document.createElement('div');
                 empty.className = 'history-empty-state';
@@ -193,12 +220,22 @@
                 title.className = 'history-title';
                 title.innerText = conv.title;
 
+                const badge = conv.persona && PERSONA_BADGES[conv.persona]
+                    ? (() => {
+                        const b = document.createElement('span');
+                        b.className = `persona-badge persona-badge-${conv.persona}`;
+                        b.textContent = `${PERSONA_BADGES[conv.persona].emoji} ${PERSONA_BADGES[conv.persona].label}`;
+                        return b;
+                    })()
+                    : null;
+
                 const preview = document.createElement('div');
                 preview.className = 'history-preview';
                 const last = conv.messages[conv.messages.length - 1];
                 preview.innerText = last ? last.text : 'No messages yet';
 
                 item.appendChild(title);
+                if (badge) item.appendChild(badge);
                 item.appendChild(preview);
 
                 if (hasUserMessages(conv)) {
@@ -252,7 +289,7 @@
             unpinned.forEach(appendConversationItem);
         }
 
-        function renderMessages() {
+        function renderMessages(skipLastAi = false) {
             const msgContainer = document.getElementById('messages');
             const current = getActiveConversation();
             msgContainer.innerHTML = '';
@@ -261,17 +298,106 @@
                 return;
             }
 
-            current.messages.forEach(msg => {
+            const messages = [...current.messages];
+            if (skipLastAi) {
+                const last = messages[messages.length - 1];
+                if (last && last.type === 'ai-bubble') {
+                    messages.pop();
+                }
+            }
+
+            messages.forEach(msg => {
                 const bubble = document.createElement('div');
                 bubble.className = `bubble ${msg.type}`;
-                bubble.innerText = msg.text;
+                if (msg.type === 'ai-bubble' && msg.model) {
+                    const label = document.createElement('div');
+                    label.className = 'ai-model-label';
+                    label.textContent = msg.model;
+                    bubble.appendChild(label);
+                    const textDiv = document.createElement('div');
+                    textDiv.className = 'ai-bubble-text';
+                    textDiv.innerText = msg.text;
+                    bubble.appendChild(textDiv);
+                } else {
+                    bubble.innerText = msg.text;
+                }
                 msgContainer.appendChild(bubble);
             });
 
             msgContainer.scrollTop = msgContainer.scrollHeight;
         }
 
+        async function ollamaStatus() {
+            try {
+                const res = await fetch('/api/ollama-status');
+                const data = await res.json();
+                return data.ok === true;
+            } catch (err) {
+                return false;
+            }
+        }
+
+        async function initOllamaStatus() {
+            if (!useServerApi) return;
+            const isOnline = await ollamaStatus();
+            const warning = document.getElementById('ollama-warning');
+            const input = document.getElementById('userInput');
+            const sendBtn = document.querySelector('.input-area button');
+            if (!isOnline) {
+                warning.style.display = 'block';
+                input.disabled = true;
+                sendBtn.disabled = true;
+            } else {
+                fetch('/api/warmup').catch(() => {});
+            }
+        }
+
+        function getCurrentPersonaName() {
+            const persona = getPagePersona();
+            return (persona && PERSONA_BADGES[persona]) ? PERSONA_BADGES[persona].label : 'AI';
+        }
+
+        let _typingBubbleCount = 0;
+
+        function addTypingBubble(label) {
+            const id = `typing-${Date.now()}-${++_typingBubbleCount}`;
+            const bubble = document.createElement('div');
+            bubble.className = 'ai-bubble bubble';
+            bubble.id = id;
+            bubble.innerHTML = `<div class="typing"><span>${label} is thinking</span><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
+            document.getElementById('messages').appendChild(bubble);
+            const chatWindow = document.getElementById('chat-window');
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+            return id;
+        }
+
+        function replaceTypingBubble(id, finalText, modelName) {
+            const bubble = document.getElementById(id);
+            if (!bubble) return;
+            bubble.innerHTML = '';
+            if (modelName) {
+                const label = document.createElement('div');
+                label.className = 'ai-model-label';
+                label.textContent = modelName;
+                bubble.appendChild(label);
+                const textDiv = document.createElement('div');
+                textDiv.className = 'ai-bubble-text';
+                textDiv.innerText = finalText;
+                bubble.appendChild(textDiv);
+            } else {
+                bubble.innerText = finalText;
+            }
+            const chatWindow = document.getElementById('chat-window');
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+            renderConversationList();
+        }
+
         function switchConversation(conversationId) {
+            if (conversationId === activeConversationId) return;
+            const current = getActiveConversation();
+            if (current && current.isDraft && current.messages.length === 0) {
+                conversations = conversations.filter(c => c.id !== current.id);
+            }
             activeConversationId = conversationId;
             saveConversations();
             renderConversationList();
@@ -294,7 +420,8 @@
                     try {
                         const res = await fetch('/api/conversations', {
                             method: 'POST',
-                            headers: { 'Content-Type': 'application/json' }
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ persona: getPagePersona() })
                         });
                         const data = await res.json();
                         await syncConversationsFromServer();
@@ -397,7 +524,8 @@
                 if (current.isDraft && type === 'user-bubble') {
                     const createResponse = await fetch('/api/conversations', {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ persona: getPagePersona() })
                     });
 
                     if (createResponse.status === 401) {
@@ -465,17 +593,54 @@
                     return;
                 }
 
-                const response = await fetch(`/api/conversations/${current.id}/ai-reply`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
+                const selectedModels = getSelectedModels();
+                const isMulti = selectedModels.length > 1;
+                let typingIds;
+
+                if (isMulti) {
+                    typingIds = selectedModels.map(m => addTypingBubble(m));
+                } else {
+                    typingIds = [addTypingBubble(getCurrentPersonaName())];
+                }
+
+                let response;
+                try {
+                    const body = selectedModels.length > 0 ? { models: selectedModels } : {};
+                    response = await fetch(`/api/conversations/${current.id}/ai-reply`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(body)
+                    });
+                } catch (err) {
+                    typingIds.forEach(id => replaceTypingBubble(id, 'Could not connect to the server. Please check your connection.'));
+                    return;
+                }
 
                 if (response.status === 401) {
                     window.location.href = '/';
                     return;
                 }
 
-                await syncConversationsFromServer();
+                if (response.status === 503) {
+                    typingIds.forEach(id => replaceTypingBubble(id, 'Ollama is not running. Please start Ollama and try again.'));
+                    return;
+                }
+
+                if (!response.ok) {
+                    typingIds.forEach(id => replaceTypingBubble(id, 'Something went wrong. Please try again.'));
+                    return;
+                }
+
+                const data = await response.json();
+                await syncConversationsData();
+
+                if (isMulti && Array.isArray(data.responses)) {
+                    data.responses.forEach((r, i) => {
+                        replaceTypingBubble(typingIds[i], r.text, r.model);
+                    });
+                } else {
+                    replaceTypingBubble(typingIds[0], data.aiReply);
+                }
                 return;
             }
 
@@ -487,11 +652,70 @@
 
         function handleKey(e) { if (e.key === 'Enter') sendMessage(); }
 
+        function getSelectedModels() {
+            return [...document.querySelectorAll('#model-checkboxes input[type="checkbox"]:checked')]
+                .map(cb => cb.value);
+        }
+
+        async function loadAvailableModels() {
+            if (!useServerApi) return;
+            try {
+                const res = await fetch('/api/ollama-models');
+                if (!res.ok) return;
+                const data = await res.json();
+                const models = data.models || [];
+                if (!models.length) return;
+
+                const container = document.getElementById('model-checkboxes');
+                const selector = document.getElementById('model-selector');
+                if (!container || !selector) return;
+
+                container.innerHTML = '';
+                const DEFAULT_MODEL = 'llama3.2:latest';
+                const hasDefault = models.includes(DEFAULT_MODEL);
+                models.forEach((model, index) => {
+                    const lbl = document.createElement('label');
+                    lbl.className = 'model-checkbox-label';
+                    const cb = document.createElement('input');
+                    cb.type = 'checkbox';
+                    cb.value = model;
+                    cb.checked = hasDefault ? model === DEFAULT_MODEL : index === 0;
+                    cb.addEventListener('change', () => {
+                        const checkedCount = document.querySelectorAll('#model-checkboxes input:checked').length;
+                        if (checkedCount === 0) { cb.checked = true; return; }
+                        document.querySelectorAll('#model-checkboxes input').forEach(el => {
+                            el.disabled = !el.checked && checkedCount >= 3;
+                        });
+                    });
+                    lbl.appendChild(cb);
+                    lbl.appendChild(document.createTextNode(' ' + model));
+                    container.appendChild(lbl);
+                });
+
+                selector.style.display = 'flex';
+            } catch { }
+        }
+
+        function initHeaderPersonaBadge() {
+            const persona = getPagePersona();
+            const container = document.getElementById('chat-persona-badge');
+            if (!container) return;
+            if (persona && PERSONA_BADGES[persona]) {
+                const badge = document.createElement('span');
+                badge.className = `persona-badge persona-badge-${persona}`;
+                badge.textContent = `${PERSONA_BADGES[persona].emoji} ${PERSONA_BADGES[persona].label}`;
+                container.appendChild(badge);
+            }
+        }
+
         async function initChat() {
             if (useServerApi) {
                 try {
+                    activeConversationId = localStorage.getItem(ACTIVE_KEY);
                     await syncConversationsFromServer();
-                    openFreshDraftSession();
+                    if (!getActiveConversation()) {
+                        openFreshDraftSession();
+                    }
                     saveConversations();
                     renderConversationList();
                     renderMessages();
@@ -501,6 +725,8 @@
                     renderConversationList();
                     renderMessages();
                 }
+                initOllamaStatus();
+                loadAvailableModels();
                 return;
             }
 
@@ -509,10 +735,38 @@
             renderMessages();
         }
 
+        initHeaderPersonaBadge();
         initChat();
     </script>
 
     <button onclick="logout()" class="logout-btn">Log Out</button>
+    <button onclick="window.location.href='/choose-player'" class="back-btn">&#8592; Characters</button>
+
+    <div id="settings-overlay" class="settings-overlay" onclick="closeSettings()" style="display:none;"></div>
+    <div id="settings-panel" class="settings-panel" style="display:none;">
+        <h2 class="settings-title">Accessibility</h2>
+
+        <div class="settings-row">
+            <label class="settings-label" for="toggle-bold">Bold message text</label>
+            <input type="checkbox" id="toggle-bold" onchange="applySettings()">
+        </div>
+
+        <div class="settings-row">
+            <label class="settings-label">Font size</label>
+            <div class="settings-radio-group">
+                <label><input type="radio" name="font-size" value="normal" checked onchange="applySettings()"> Normal</label>
+                <label><input type="radio" name="font-size" value="large" onchange="applySettings()"> Large</label>
+                <label><input type="radio" name="font-size" value="xlarge" onchange="applySettings()"> Extra large</label>
+            </div>
+        </div>
+
+        <div class="settings-row">
+            <label class="settings-label" for="toggle-spacing">Increased line spacing</label>
+            <input type="checkbox" id="toggle-spacing" onchange="applySettings()">
+        </div>
+
+        <button class="settings-close-btn" onclick="closeSettings()">Close</button>
+    </div>
 
 <script>
     async function logout() {
@@ -527,6 +781,61 @@
         alert("You have been logged out.");
         window.location.href = "/";
     }
+
+    const SETTINGS_KEY = 'llmChatSettings';
+
+    function loadSettings() {
+        try {
+            return JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {};
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function saveSettings(s) {
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify(s));
+    }
+
+    function applySettings() {
+        const bold    = document.getElementById('toggle-bold').checked;
+        const spacing = document.getElementById('toggle-spacing').checked;
+        const size    = document.querySelector('input[name="font-size"]:checked').value;
+
+        const body = document.body;
+        body.classList.toggle('a11y-bold',    bold);
+        body.classList.toggle('a11y-spacing', spacing);
+        body.classList.remove('a11y-font-large', 'a11y-font-xlarge');
+        if (size === 'large')  body.classList.add('a11y-font-large');
+        if (size === 'xlarge') body.classList.add('a11y-font-xlarge');
+
+        saveSettings({ bold, spacing, size });
+    }
+
+    function openSettings() {
+        const s = loadSettings();
+        document.getElementById('toggle-bold').checked    = !!s.bold;
+        document.getElementById('toggle-spacing').checked = !!s.spacing;
+        const sizeVal = s.size || 'normal';
+        document.querySelector(`input[name="font-size"][value="${sizeVal}"]`).checked = true;
+        applySettings();
+        document.getElementById('settings-overlay').style.display = 'block';
+        document.getElementById('settings-panel').style.display    = 'flex';
+    }
+
+    function closeSettings() {
+        document.getElementById('settings-overlay').style.display = 'none';
+        document.getElementById('settings-panel').style.display    = 'none';
+    }
+
+    (function initSettings() {
+        const s = loadSettings();
+        if (!s || !Object.keys(s).length) return;
+        const body = document.body;
+        if (s.bold)    body.classList.add('a11y-bold');
+        if (s.spacing) body.classList.add('a11y-spacing');
+        if (s.size === 'large')  body.classList.add('a11y-font-large');
+        if (s.size === 'xlarge') body.classList.add('a11y-font-xlarge');
+    })();
 </script>
 </body>
 </html>

@@ -2,8 +2,8 @@ const { Before } = require('@cucumber/cucumber');
 const { ensureUserExists, sendJsonRequest } = require('./authTestUtils');
 
 const TEST_ACCOUNTS = [
-  { email: 'test@test.com', password: '123456' },
-  { email: 'user@example.com', password: 'ValidPass123!' }
+  { email: 'test@test.com', password: 'Xk9#mQvT3p@L' },
+  { email: 'user@example.com', password: 'Px2@vNw7mQzK!' }
 ];
 
 async function clearConversationsForAccount({ email, password }) {

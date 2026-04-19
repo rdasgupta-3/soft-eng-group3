@@ -8,7 +8,7 @@ const { ensureUserExists } = require('../support/authTestUtils');
 const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:3000';
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 const TEST_EMAIL = 'test@test.com';
-const TEST_PASSWORD = '123456';
+const TEST_PASSWORD = 'Xk9#mQvT3p@L';
 
 Given('I am on the login page', async function () {
   await ensureUserExists(TEST_EMAIL, TEST_PASSWORD);
@@ -19,16 +19,14 @@ Given('I am on the login page', async function () {
 
 When('I enter a valid email and password', async function () {
   const page = await this.launch();
-  await pause(300);
-  await page.type('#email', TEST_EMAIL, { delay: 80 });
-  await page.type('#password', TEST_PASSWORD, { delay: 80 });
+  await page.$eval('#email', (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }, TEST_EMAIL);
+  await page.$eval('#password', (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }, TEST_PASSWORD);
 });
 
 When('I enter an invalid email and password', async function () {
   const page = await this.launch();
-  await pause(300);
-  await page.type('#email', 'wrong@test.com', { delay: 80 });
-  await page.type('#password', 'wrongpassword', { delay: 80 });
+  await page.$eval('#email', (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }, 'wrong@test.com');
+  await page.$eval('#password', (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }, 'wrongpassword');
 });
 
 When('I click the login button', async function () {

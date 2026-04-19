@@ -18,10 +18,7 @@ After(async function () {
 // ─── Shared setup ────────────────────────────────────────────────────────────
 
 async function launchOnLoginPage() {
-  browser = await puppeteer.launch({
-    headless: false,
-    slowMo: 300
-  });
+  browser = await puppeteer.launch({ headless: false });
   page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 800 });
   await page.goto('http://localhost:3000/', { waitUntil: 'domcontentloaded' });
@@ -76,10 +73,9 @@ Given('I am on the Forgot Password page', async function () {
 });
 
 When('I enter my email {string}', async function (email) {
-  await new Promise(resolve => setTimeout(resolve, 500));
   const emailInput = await page.$('input[type="email"], input[name="email"], input[id="email"]');
   assert(emailInput, 'Email input field not found');
-  await emailInput.type(email, { delay: 100 });
+  await page.$eval('input[type="email"], input[name="email"], input[id="email"]', (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }, email);
 });
 
 When('I click {string}', async function (buttonText) {

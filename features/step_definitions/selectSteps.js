@@ -6,12 +6,12 @@ const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:3000';
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 
 Given('I am on the AI model selector page as an authenticated user', async function () {
-  await ensureUserExists('test@test.com', '123456');
+  await ensureUserExists('test@test.com', 'Xk9#mQvT3p@L');
   const page = await this.freshPage();
   await page.goto(`${BASE_URL}/`, { waitUntil: 'domcontentloaded' });
   await pause(600);
-  await page.type('#email', 'test@test.com', { delay: 70 });
-  await page.type('#password', '123456', { delay: 70 });
+  await page.$eval('#email', (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }, 'test@test.com');
+  await page.$eval('#password', (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }, 'Xk9#mQvT3p@L');
   const loginButton = await page.$('button[onclick="attemptLogin()"]');
   assert(loginButton, 'Login button not found');
   await loginButton.click();

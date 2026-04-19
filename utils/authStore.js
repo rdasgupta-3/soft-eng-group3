@@ -4,18 +4,42 @@ const users = [];
 const resetTokens = new Map();
 const sessions = new Map();
 
+const SCRYPT_KEYLEN = 64;
+
+function hashPassword(plainText) {
+    const salt = crypto.randomBytes(16).toString('hex');
+    const hash = crypto.scryptSync(plainText, salt, SCRYPT_KEYLEN).toString('hex');
+    return `${salt}:${hash}`;
+}
+
+function verifyPassword(plainText, stored) {
+    const separatorIndex = stored.indexOf(':');
+    if (separatorIndex === -1) return false;
+    const salt = stored.slice(0, separatorIndex);
+    const storedHash = stored.slice(separatorIndex + 1);
+    const hash = crypto.scryptSync(plainText, salt, SCRYPT_KEYLEN).toString('hex');
+    return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(storedHash, 'hex'));
+}
+
 function findUserByEmail(email) {
     return users.find(u => u.email === email);
 }
 
 function createUser(email, password) {
-    const user = { email, password };
+    const user = { email, password: hashPassword(password) };
     users.push(user);
     return user;
 }
 
 function validateUser(email, password) {
-    return users.find(u => u.email === email && u.password === password) || null;
+    const user = users.find(u => u.email === email);
+    if (!user) return null;
+    return verifyPassword(password, user.password) ? user : null;
+}
+
+function setUserPassword(email, newPassword) {
+    const user = users.find(u => u.email === email);
+    if (user) user.password = hashPassword(newPassword);
 }
 
 function createResetToken(email) {
@@ -60,6 +84,7 @@ module.exports = {
     findUserByEmail,
     createUser,
     validateUser,
+    setUserPassword,
     createResetToken,
     getResetToken,
     deleteResetToken,

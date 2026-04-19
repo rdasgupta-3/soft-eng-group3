@@ -6,7 +6,7 @@ Feature: Reset password
 
   Scenario: Reject reset with invalid token
     Given I open the reset password page with token "badtoken123"
-    When I enter "new123456" into the reset password field
+    When I enter "Nx5@wPm8vQzR" into the reset password field
     And I submit the reset password form
     Then I should see a reset token error message
 

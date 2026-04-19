@@ -8,9 +8,34 @@ const {
     addMessage
 } = require('../utils/chatStore');
 const { getSessionFromRequest } = require('../utils/sessionUtils');
-const { generateReplyFromOllama } = require('../utils/ollamaClient');
+const { generateReplyFromOllama, getAvailableModels } = require('../utils/ollamaClient');
 
 const router = express.Router();
+
+router.get('/ollama-status', async (req, res) => {
+    res.set('Cache-Control', 'no-store');
+    try {
+        const response = await fetch('http://127.0.0.1:11434/api/tags');
+        if (!response.ok) throw new Error();
+        return res.json({ ok: true });
+    } catch (err) {
+        return res.json({ ok: false });
+    }
+});
+
+router.get('/warmup', async (req, res) => {
+    try {
+        await generateReplyFromOllama([{ type: 'user-bubble', text: 'hello' }]);
+        return res.json({ warmed: true });
+    } catch (err) {
+        return res.json({ warmed: false });
+    }
+});
+
+router.get('/ollama-models', async (req, res) => {
+    const models = await getAvailableModels();
+    return res.json({ models });
+});
 
 function requireAuth(req, res, next) {
     const session = getSessionFromRequest(req);
@@ -30,7 +55,8 @@ router.get('/conversations', (req, res) => {
 });
 
 router.post('/conversations', (req, res) => {
-    const conversation = createConversation(req.session.email);
+    const { persona } = req.body;
+    const conversation = createConversation(req.session.email, persona || null);
     res.status(201).json({ conversation });
 });
 
@@ -85,8 +111,36 @@ router.post('/conversations/:conversationId/ai-reply', async (req, res) => {
         return res.status(400).json({ error: 'No user message found to respond to.' });
     }
 
-    const aiText = await generateReplyFromOllama(conversation.messages);
-    const result = addMessage(req.session.email, conversationId, 'ai-bubble', aiText);
+    const requestedModels = Array.isArray(req.body.models) && req.body.models.length > 0
+        ? req.body.models.slice(0, 3)
+        : null;
+
+    if (requestedModels && requestedModels.length > 1) {
+        const results = await Promise.all(
+            requestedModels.map(async (model) => {
+                try {
+                    const text = await generateReplyFromOllama(conversation.messages, conversation.persona, model);
+                    return { model, text };
+                } catch {
+                    return { model, text: `${model} failed to respond. Is it installed? Run: ollama pull ${model}` };
+                }
+            })
+        );
+        for (const r of results) {
+            addMessage(req.session.email, conversationId, 'ai-bubble', r.text, r.model);
+        }
+        const updated = getConversation(req.session.email, conversationId);
+        return res.status(201).json({ responses: results, conversation: updated });
+    }
+
+    const modelOverride = requestedModels ? requestedModels[0] : null;
+    let aiText;
+    try {
+        aiText = await generateReplyFromOllama(conversation.messages, conversation.persona, modelOverride);
+    } catch (err) {
+        return res.status(503).json({ error: 'ollama-failed' });
+    }
+    const result = addMessage(req.session.email, conversationId, 'ai-bubble', aiText, modelOverride || undefined);
 
     if (result.error) {
         return res.status(500).json({ error: 'Failed to save AI reply.' });

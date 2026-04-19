@@ -49,9 +49,8 @@ async function sendMessage(world, message) {
 
   assert(inputSelector && sendSelector, 'Could not find chat input or send button.');
 
-  await page.click(inputSelector, { clickCount: 3 });
   if (message.length > 0) {
-    await page.type(inputSelector, message, { delay: 60 });
+    await page.$eval(inputSelector, (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }, message);
   }
   await page.click(sendSelector);
   await pause(1500);
@@ -92,7 +91,7 @@ When('I navigate to the chat page', async function () {
 });
 
 When('I navigate directly to the chat page', async function () {
-  await ensureUserExists('test@test.com', '123456');
+  await ensureUserExists('test@test.com', 'Xk9#mQvT3p@L');
   const page = await currentPage(this);
   await page.goto(`${BASE_URL}/chat`, { waitUntil: 'domcontentloaded' });
   await pause(600);
@@ -112,9 +111,8 @@ When('I navigate to the reset password page with token {string}', async function
 
 When('I enter a valid email and an invalid password', async function () {
   const page = await currentPage(this);
-  await pause(300);
-  await page.type('#email', 'test@test.com', { delay: 70 });
-  await page.type('#password', 'wrongpassword', { delay: 70 });
+  await page.$eval('#email', (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }, 'test@test.com');
+  await page.$eval('#password', (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }, 'wrongpassword');
 });
 
 When('I submit the login form', async function () {
@@ -145,9 +143,8 @@ When('I enter {string} into the forgot password email field', async function (em
   const page = await currentPage(this);
   const selector = await firstExistingSelector(this, ['#email', 'input[type="email"]', 'input[name="email"]']);
   assert(selector, 'Could not find forgot password email field.');
-  await page.click(selector, { clickCount: 3 });
   if (email.length > 0) {
-    await page.type(selector, email, { delay: 70 });
+    await page.$eval(selector, (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }, email);
   }
 });
 
@@ -163,17 +160,13 @@ When('I enter {string} into the reset password field', async function (password)
   const page = await currentPage(this);
   const passwordSelector = await firstExistingSelector(this, ['#password', 'input[name="password"]', 'input[type="password"]']);
   assert(passwordSelector, 'Could not find reset password field.');
-  await page.click(passwordSelector, { clickCount: 3 });
   if (password.length > 0) {
-    await page.type(passwordSelector, password, { delay: 70 });
+    await page.$eval(passwordSelector, (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }, password);
   }
 
   const confirmSelector = await firstExistingSelector(this, ['#confirmPassword', '#confirm-password', 'input[name="confirmPassword"]', 'input[name="confirm-password"]']);
-  if (confirmSelector) {
-    await page.click(confirmSelector, { clickCount: 3 });
-    if (password.length > 0) {
-      await page.type(confirmSelector, password, { delay: 70 });
-    }
+  if (confirmSelector && password.length > 0) {
+    await page.$eval(confirmSelector, (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }, password);
   }
 });
 
@@ -241,18 +234,24 @@ When('I delete the first conversation', async function () {
 When('I switch to the second conversation', async function () {
   const page = await currentPage(this);
   await page.waitForSelector('.history-item');
-  const items = await page.$$('.history-item');
-  assert(items.length >= 2, `Expected at least 2 conversation items, found ${items.length}`);
-  await items[1].click();
+  const count = await page.$$eval('.history-item', nodes => nodes.length);
+  assert(count >= 2, `Expected at least 2 conversation items, found ${count}`);
+  await page.evaluate(() => {
+    const items = document.querySelectorAll('.history-item');
+    if (items[1]) items[1].click();
+  });
   await pause(1000);
 });
 
 When('I switch back to the first conversation', async function () {
   const page = await currentPage(this);
   await page.waitForSelector('.history-item');
-  const items = await page.$$('.history-item');
-  assert(items.length >= 1, 'Expected at least 1 conversation item.');
-  await items[0].click();
+  const count = await page.$$eval('.history-item', nodes => nodes.length);
+  assert(count >= 1, 'Expected at least 1 conversation item.');
+  await page.evaluate(() => {
+    const items = document.querySelectorAll('.history-item');
+    if (items[0]) items[0].click();
+  });
   await pause(1000);
 });
 

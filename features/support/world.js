@@ -2,7 +2,13 @@ const { setWorldConstructor, After } = require('@cucumber/cucumber');
 const puppeteer = require('puppeteer');
 
 const HEADLESS_MODE = process.env.HEADLESS === 'false' ? false : 'new';
-const DEFAULT_ARGS = ['--no-sandbox', '--disable-setuid-sandbox'];
+const DEFAULT_ARGS = [
+  '--no-sandbox',
+  '--disable-setuid-sandbox',
+  '--disable-features=PasswordLeakDetection,SafeBrowsing,SafeBrowsingEnhancedProtection',
+  '--disable-save-password-bubble',
+  '--password-store=basic'
+];
 
 class BrowserWorld {
   constructor() {
@@ -19,14 +25,19 @@ class BrowserWorld {
 
   async launch(options = {}) {
     if (!this.browser) {
-      const merged = { ...this.launchOptions, ...options };
+      const merged = {
+        ...this.launchOptions,
+        ...options,
+        args: [
+          ...(this.launchOptions.args || []),
+          '--window-size=1280,720'
+        ]
+      };
       this.browser = await puppeteer.launch(merged);
       this.page = await this.browser.newPage();
-      await this.page.setViewport({ width: 1280, height: 800 });
+      await this.page.setViewport({ width: 1280, height: 720 });
       this.page.on('dialog', async dialog => {
-        try {
-          await dialog.accept();
-        } catch (error) {}
+        try { await dialog.accept(); } catch (error) {}
       });
     }
     return this.page;

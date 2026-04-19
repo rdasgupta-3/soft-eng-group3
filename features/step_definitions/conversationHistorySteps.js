@@ -18,10 +18,7 @@ After(async function () {
 // ─── Shared setup ────────────────────────────────────────────────────────────
 
 async function launchOnChatPage() {
-  browser = await puppeteer.launch({
-    headless: false,
-    slowMo: 300
-  });
+  browser = await puppeteer.launch({ headless: false });
   page = await browser.newPage();
   await page.setViewport({ width: 1280, height: 800 });
   await page.goto('http://localhost:3000/chat', { waitUntil: 'domcontentloaded' });

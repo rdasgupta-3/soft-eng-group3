@@ -10,8 +10,8 @@ Given('I am logged in as {string} with password {string}', async function (email
   const page = await this.freshPage();
   await page.goto(`${BASE_URL}/`, { waitUntil: 'domcontentloaded' });
   await pause(600);
-  await page.type('#email', email, { delay: 70 });
-  await page.type('#password', password, { delay: 70 });
+  await page.$eval('#email', (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }, email);
+  await page.$eval('#password', (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }, password);
   const loginButton = await page.$('button[onclick="attemptLogin()"]');
   assert(loginButton, 'Login button not found');
   await loginButton.click();
@@ -26,8 +26,7 @@ Given('I am on the AI chat page', async function () {
 
 When('I type a message into the chat input field', async function () {
   const page = await this.launch();
-  await pause(400);
-  await page.type('#userInput', 'Hello from Puppeteer', { delay: 80 });
+  await page.$eval('#userInput', (el, v) => { el.value = v; el.dispatchEvent(new Event('input', { bubbles: true })); }, 'Hello from Puppeteer');
 });
 
 When('I submit the message', async function () {
