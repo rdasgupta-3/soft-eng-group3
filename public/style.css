@@ -319,6 +319,33 @@ h1 { margin-bottom: 30px; color: #333; }
     font-size: 0.9rem;
 }
 
+.model-toolbar {
+    margin-top: 14px;
+    display: grid;
+    gap: 6px;
+}
+
+.model-toolbar label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #495057;
+}
+
+.model-toolbar input {
+    width: min(100%, 420px);
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    padding: 9px 11px;
+    font-size: 0.92rem;
+}
+
+.model-toolbar-help {
+    color: #6c757d;
+    font-size: 0.82rem;
+}
+
 #chat-window {
     flex: 1;
     overflow-y: auto;
@@ -354,6 +381,21 @@ h1 { margin-bottom: 30px; color: #333; }
     background: #ffffff;
     color: #333;
     border: 1px solid #dde2e7;
+}
+
+.model-badge {
+    display: inline-block;
+    margin-bottom: 6px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: #eef3ff;
+    color: #214da3;
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+.bubble-text {
+    white-space: pre-wrap;
 }
 
 .input-area {

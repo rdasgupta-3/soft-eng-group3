@@ -1,14 +1,18 @@
 const { Before } = require('@cucumber/cucumber');
-const { ensureUserExists, sendJsonRequest } = require('./authTestUtils');
+const {
+  DEFAULT_TEST_PASSWORD,
+  ensureUserExists,
+  sendJsonRequestWithRetry
+} = require('./authTestUtils');
 
 const TEST_ACCOUNTS = [
-  { email: 'test@test.com', password: '123456' },
+  { email: 'test@test.com', password: DEFAULT_TEST_PASSWORD },
   { email: 'user@example.com', password: 'ValidPass123!' }
 ];
 
 async function clearConversationsForAccount({ email, password }) {
   await ensureUserExists(email, password);
-  const loginResponse = await sendJsonRequest('POST', '/api/login', { email, password });
+  const loginResponse = await sendJsonRequestWithRetry('POST', '/api/login', { email, password });
 
   if (loginResponse.status !== 200) {
     return;
@@ -22,7 +26,7 @@ async function clearConversationsForAccount({ email, password }) {
     return;
   }
 
-  const listResponse = await sendJsonRequest('GET', '/api/conversations', null, { Cookie: cookieHeader });
+  const listResponse = await sendJsonRequestWithRetry('GET', '/api/conversations', null, { Cookie: cookieHeader });
   if (listResponse.status !== 200) {
     return;
   }
@@ -37,7 +41,7 @@ async function clearConversationsForAccount({ email, password }) {
   const conversations = Array.isArray(payload.conversations) ? payload.conversations : [];
   for (const conversation of conversations) {
     if (conversation && conversation.id) {
-      await sendJsonRequest('DELETE', `/api/conversations/${conversation.id}`, null, { Cookie: cookieHeader });
+      await sendJsonRequestWithRetry('DELETE', `/api/conversations/${conversation.id}`, null, { Cookie: cookieHeader });
     }
   }
 }

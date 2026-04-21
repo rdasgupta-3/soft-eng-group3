@@ -5,6 +5,10 @@
       "title": "hi how are you today lord si...",
       "pinned": true,
       "updatedAt": 1775600895585,
+      "selectedModels": [
+        "llama3.2:1b",
+        "llama3.2:3b"
+      ],
       "messages": [
         {
           "type": "user-bubble",
@@ -23,6 +27,10 @@
       "title": "whats up buddy",
       "pinned": false,
       "updatedAt": 1775660060119,
+      "selectedModels": [
+        "llama3.2:1b",
+        "llama3.2:3b"
+      ],
       "messages": [
         {
           "type": "user-bubble",
@@ -121,6 +129,10 @@
       "title": "hi! can you give me game rec...",
       "pinned": false,
       "updatedAt": 1775660705948,
+      "selectedModels": [
+        "llama3.2:1b",
+        "llama3.2:3b"
+      ],
       "messages": [
         {
           "type": "user-bubble",
@@ -179,6 +191,10 @@
       "title": "hi!!",
       "pinned": false,
       "updatedAt": 1775663025904,
+      "selectedModels": [
+        "llama3.2:1b",
+        "llama3.2:3b"
+      ],
       "messages": [
         {
           "type": "user-bubble",
@@ -232,5 +248,7 @@
         }
       ]
     }
-  ]
+  ],
+  "test@test.com": [],
+  "user@example.com": []
 }

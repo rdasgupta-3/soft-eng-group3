@@ -1,5 +1,16 @@
 const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434';
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.2:1b';
+const REQUEST_TIMEOUT_MS = Number(process.env.OLLAMA_TIMEOUT_MS || 3000);
+
+function getConfiguredModels() {
+    const configured = process.env.OLLAMA_MODELS || `${OLLAMA_MODEL},llama3.2:3b`;
+    return [...new Set(
+        configured
+            .split(',')
+            .map(model => model.trim())
+            .filter(Boolean)
+    )];
+}
 
 function toOllamaMessages(conversationMessages) {
     const recent = (conversationMessages || []).slice(-16);
@@ -13,15 +24,15 @@ function toOllamaMessages(conversationMessages) {
     });
 }
 
-async function generateReplyFromOllama(conversationMessages) {
+async function requestReplyFromModel(conversationMessages, model) {
     const payload = {
-        model: OLLAMA_MODEL,
+        model,
         stream: false,
         messages: toOllamaMessages(conversationMessages)
     };
 
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 12000);
+    const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
     try {
         const response = await fetch(`${OLLAMA_BASE_URL}/api/chat`, {
@@ -46,13 +57,30 @@ async function generateReplyFromOllama(conversationMessages) {
 
         return content;
     } catch (error) {
-        console.warn('[LLM] Falling back to local placeholder response:', error.message);
-        return 'I could not reach local Ollama right now. Please make sure Ollama is running, then try again.';
+        console.warn(`[LLM] Falling back for model ${model}:`, error.message);
+        return `Model ${model} is unavailable right now. Please make sure Ollama is running, then try again.`;
     } finally {
         clearTimeout(timeout);
     }
 }
 
+async function generateReplyFromOllama(conversationMessages, model = OLLAMA_MODEL) {
+    return requestReplyFromModel(conversationMessages, model);
+}
+
+async function generateRepliesFromOllama(conversationMessages, models = getConfiguredModels()) {
+    const targetModels = Array.isArray(models) && models.length ? models : getConfiguredModels();
+    return Promise.all(
+        targetModels.map(async model => ({
+            provider: 'ollama',
+            model,
+            text: await requestReplyFromModel(conversationMessages, model)
+        }))
+    );
+}
+
 module.exports = {
-    generateReplyFromOllama
+    generateReplyFromOllama,
+    generateRepliesFromOllama,
+    getConfiguredModels
 };

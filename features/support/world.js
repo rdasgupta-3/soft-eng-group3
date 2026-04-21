@@ -1,7 +1,7 @@
 const { setWorldConstructor, After } = require('@cucumber/cucumber');
 const puppeteer = require('puppeteer');
 
-const HEADLESS_MODE = process.env.HEADLESS === 'false' ? false : 'new';
+const HEADLESS_MODE = process.env.HEADLESS === 'true' ? 'new' : false;
 const DEFAULT_ARGS = ['--no-sandbox', '--disable-setuid-sandbox'];
 
 class BrowserWorld {

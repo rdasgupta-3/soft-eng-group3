@@ -5,10 +5,16 @@ const {
     getConversation,
     updateConversation,
     deleteConversation,
-    addMessage
+    addMessage,
+    addMessages,
+    normalizeSelectedModels
 } = require('../utils/chatStore');
 const { getSessionFromRequest } = require('../utils/sessionUtils');
-const { generateReplyFromOllama } = require('../utils/ollamaClient');
+const {
+    generateReplyFromOllama,
+    generateRepliesFromOllama,
+    getConfiguredModels
+} = require('../utils/ollamaClient');
 
 const router = express.Router();
 
@@ -85,8 +91,37 @@ router.post('/conversations/:conversationId/ai-reply', async (req, res) => {
         return res.status(400).json({ error: 'No user message found to respond to.' });
     }
 
-    const aiText = await generateReplyFromOllama(conversation.messages);
-    const result = addMessage(req.session.email, conversationId, 'ai-bubble', aiText);
+    const requestedModels = normalizeSelectedModels(
+        req.query?.model || req.body?.model || req.body?.models || conversation.selectedModels || getConfiguredModels()
+    );
+
+    if (requestedModels.length > 1) {
+        const replies = await generateRepliesFromOllama(conversation.messages, requestedModels);
+        const multiResult = addMessages(
+            req.session.email,
+            conversationId,
+            replies.map(reply => ({
+                type: 'ai-bubble',
+                text: reply.text,
+                meta: {
+                    provider: reply.provider,
+                    model: reply.model
+                }
+            }))
+        );
+
+        if (multiResult.error) {
+            return res.status(500).json({ error: 'Failed to save AI replies.' });
+        }
+
+        return res.status(201).json({ conversation: multiResult.conversation, aiReplies: replies });
+    }
+
+    const aiText = await generateReplyFromOllama(conversation.messages, requestedModels[0]);
+    const result = addMessage(req.session.email, conversationId, 'ai-bubble', aiText, {
+        provider: 'ollama',
+        model: requestedModels[0] || getConfiguredModels()[0]
+    });
 
     if (result.error) {
         return res.status(500).json({ error: 'Failed to save AI reply.' });
@@ -94,5 +129,4 @@ router.post('/conversations/:conversationId/ai-reply', async (req, res) => {
 
     return res.status(201).json({ conversation: result.conversation, aiReply: aiText });
 });
-
 module.exports = router;

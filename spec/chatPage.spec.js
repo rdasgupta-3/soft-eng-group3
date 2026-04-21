@@ -8,6 +8,7 @@ describe('chat.html', () => {
 
         expect(stored.length).toBe(1);
         expect(stored[0].messages.length).toBe(0);
+        expect(stored[0].selectedModels).toEqual(['llama3.2:1b', 'llama3.2:3b']);
         expect(messagesEl.children.length).toBe(0);
     });
 
@@ -35,5 +36,36 @@ describe('chat.html', () => {
         win.deleteConversation(idToPin);
         stored = JSON.parse(win.localStorage.getItem('llmChatConversations'));
         expect(stored.length).toBe(1);
+    });
+
+    it('persists selected models for the active conversation', async () => {
+        const win = loadPage('chat.html', 'http://localhost/chat');
+        const modelInput = win.document.getElementById('model-selection');
+
+        modelInput.value = 'llama3.2:1b, mistral, llama3.2:1b';
+        await win.saveModelSelection();
+
+        const stored = JSON.parse(win.localStorage.getItem('llmChatConversations'));
+        expect(stored[0].selectedModels).toEqual(['llama3.2:1b', 'mistral']);
+    });
+
+    it('creates one local AI reply per selected model', async () => {
+        const win = loadPage('chat.html', 'http://localhost/chat');
+        win.document.getElementById('model-selection').value = 'llama3.2:1b, llama3.2:3b';
+        await win.saveModelSelection();
+
+        win.document.getElementById('userInput').value = 'Compare answers';
+        await win.sendMessage();
+        await new Promise(resolve => setTimeout(resolve, 900));
+
+        const aiBubbles = [...win.document.querySelectorAll('#messages .ai-bubble')];
+        const badges = aiBubbles.map(node => {
+            const badge = node.querySelector('.model-badge');
+            const text = badge ? (badge.textContent || badge.innerText || '') : '';
+            return text.trim();
+        });
+
+        expect(aiBubbles.length).toBe(2);
+        expect(badges).toEqual(['llama3.2:1b', 'llama3.2:3b']);
     });
 });

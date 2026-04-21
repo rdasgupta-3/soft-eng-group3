@@ -4,6 +4,11 @@ const https = require('https');
 const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:3000';
 const parsed = new URL(BASE_URL);
 const protocol = parsed.protocol === 'https:' ? https : http;
+const DEFAULT_TEST_PASSWORD = '12345678';
+
+function wait(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 function sendJsonRequest(method, path, body, extraHeaders = {}) {
   return new Promise((resolve, reject) => {
@@ -41,9 +46,26 @@ function sendJsonRequest(method, path, body, extraHeaders = {}) {
   });
 }
 
+async function sendJsonRequestWithRetry(method, path, body, extraHeaders = {}, attempts = 5) {
+  let lastError = null;
+
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      return await sendJsonRequest(method, path, body, extraHeaders);
+    } catch (error) {
+      lastError = error;
+      if (attempt < attempts) {
+        await wait(250 * attempt);
+      }
+    }
+  }
+
+  throw lastError;
+}
+
 async function ensureUserExists(email, password) {
   try {
-    const response = await sendJsonRequest('POST', '/api/signup', { email, password });
+    const response = await sendJsonRequestWithRetry('POST', '/api/signup', { email, password });
     if (response.status !== 200 && response.status !== 400) {
       throw new Error(`Signup failed with status ${response.status}: ${response.body}`);
     }
@@ -53,6 +75,8 @@ async function ensureUserExists(email, password) {
 }
 
 module.exports = {
+  DEFAULT_TEST_PASSWORD,
   ensureUserExists,
-  sendJsonRequest
+  sendJsonRequest,
+  sendJsonRequestWithRetry
 };

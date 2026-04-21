@@ -23,6 +23,11 @@
             <header class="chat-header">
                 <h1>AI Chat Assistant</h1>
                 <p>Ask anything and continue the conversation naturally.</p>
+                <div class="model-toolbar">
+                    <label for="model-selection">Parallel models</label>
+                    <input type="text" id="model-selection" placeholder="llama3.2:1b, llama3.2:3b" onblur="saveModelSelection()">
+                    <div class="model-toolbar-help">Comma-separated model names. Each message requests replies from all listed models.</div>
+                </div>
             </header>
 
             <div id="chat-window">
@@ -39,6 +44,7 @@
     <script>
         const STORAGE_KEY = 'llmChatConversations';
         const ACTIVE_KEY = 'llmActiveConversationId';
+        const DEFAULT_SELECTED_MODELS = ['llama3.2:1b', 'llama3.2:3b'];
         const useServerApi = (
             typeof window.fetch === 'function' &&
             window.location.protocol.startsWith('http') &&
@@ -49,10 +55,30 @@
         let activeConversationId = null;
         let historySearchQuery = '';
 
+        function normalizeModelList(value) {
+            const parts = Array.isArray(value) ? value : String(value || '').split(',');
+            const cleaned = [...new Set(
+                parts
+                    .map(item => String(item || '').trim())
+                    .filter(Boolean)
+            )];
+
+            return cleaned.length ? cleaned : [...DEFAULT_SELECTED_MODELS];
+        }
+
+        function applyConversationDefaults(conversation) {
+            return {
+                ...conversation,
+                pinned: Boolean(conversation && conversation.pinned),
+                selectedModels: normalizeModelList(conversation && conversation.selectedModels),
+                messages: Array.isArray(conversation && conversation.messages) ? conversation.messages : []
+            };
+        }
+
         function loadConversationsFromLocal() {
             try {
                 const saved = localStorage.getItem(STORAGE_KEY);
-                conversations = saved ? JSON.parse(saved) : [];
+                conversations = saved ? JSON.parse(saved).map(applyConversationDefaults) : [];
             } catch (error) {
                 conversations = [];
             }
@@ -82,7 +108,9 @@
             }
 
             const payload = await response.json();
-            conversations = Array.isArray(payload.conversations) ? payload.conversations : [];
+            conversations = Array.isArray(payload.conversations)
+                ? payload.conversations.map(applyConversationDefaults)
+                : [];
 
             if (conversations.length && !conversations.find(c => c.id === activeConversationId)) {
                 activeConversationId = conversations[0].id;
@@ -94,6 +122,7 @@
         }
 
         function saveConversations() {
+            conversations = conversations.map(applyConversationDefaults);
             localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations));
             localStorage.setItem(ACTIVE_KEY, activeConversationId);
         }
@@ -106,6 +135,7 @@
                 pinned: false,
                 isDraft: false,
                 updatedAt: now,
+                selectedModels: [...DEFAULT_SELECTED_MODELS],
                 messages: []
             };
         }
@@ -134,6 +164,44 @@
 
         function getActiveConversation() {
             return conversations.find(c => c.id === activeConversationId);
+        }
+
+        function getSelectedModelsForConversation(conversation) {
+            return normalizeModelList(conversation && conversation.selectedModels);
+        }
+
+        function renderModelSelection() {
+            const current = getActiveConversation();
+            const input = document.getElementById('model-selection');
+            if (!input) {
+                return;
+            }
+
+            input.value = getSelectedModelsForConversation(current).join(', ');
+        }
+
+        async function saveModelSelection() {
+            const current = getActiveConversation();
+            const input = document.getElementById('model-selection');
+            if (!current || !input) {
+                return;
+            }
+
+            current.selectedModels = normalizeModelList(input.value);
+            saveConversations();
+
+            if (useServerApi && !current.isDraft) {
+                try {
+                    await fetch(`/api/conversations/${current.id}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ selectedModels: current.selectedModels.join(', ') })
+                    });
+                    await syncConversationsFromServer();
+                } catch (error) {
+                    console.error('Failed to save selected models:', error);
+                }
+            }
         }
 
         function sortedConversations() {
@@ -205,7 +273,7 @@
                     const pinBtn = document.createElement('button');
                     pinBtn.type = 'button';
                     pinBtn.className = 'history-pin-btn';
-                    pinBtn.innerText = conv.pinned ? '★' : '☆';
+                    pinBtn.innerText = conv.pinned ? '\u2605' : '\u2606';
                     pinBtn.title = conv.pinned ? 'Unpin conversation' : 'Pin conversation';
                     pinBtn.setAttribute('aria-label', pinBtn.title);
                     pinBtn.onclick = (event) => {
@@ -216,7 +284,7 @@
                     const deleteBtn = document.createElement('button');
                     deleteBtn.type = 'button';
                     deleteBtn.className = 'history-delete-btn';
-                    deleteBtn.innerText = '×';
+                    deleteBtn.innerText = '\u00d7';
                     deleteBtn.title = 'Delete conversation';
                     deleteBtn.setAttribute('aria-label', deleteBtn.title);
                     deleteBtn.onclick = (event) => {
@@ -258,17 +326,30 @@
             msgContainer.innerHTML = '';
 
             if (!current) {
+                renderModelSelection();
                 return;
             }
 
             current.messages.forEach(msg => {
                 const bubble = document.createElement('div');
                 bubble.className = `bubble ${msg.type}`;
-                bubble.innerText = msg.text;
+
+                if (msg.type === 'ai-bubble' && msg.meta && msg.meta.model) {
+                    const badge = document.createElement('div');
+                    badge.className = 'model-badge';
+                    badge.innerText = msg.meta.model;
+                    bubble.appendChild(badge);
+                }
+
+                const content = document.createElement('div');
+                content.className = 'bubble-text';
+                content.innerText = msg.text;
+                bubble.appendChild(content);
                 msgContainer.appendChild(bubble);
             });
 
             msgContainer.scrollTop = msgContainer.scrollHeight;
+            renderModelSelection();
         }
 
         function switchConversation(conversationId) {
@@ -385,7 +466,7 @@
             renderMessages();
         }
 
-        async function addMessage(type, text) {
+        async function addMessage(type, text, meta = undefined) {
             const current = getActiveConversation();
             if (!current) {
                 return;
@@ -416,6 +497,12 @@
 
                     targetConversationId = createPayload.conversation.id;
                     activeConversationId = targetConversationId;
+
+                    await fetch(`/api/conversations/${targetConversationId}`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ selectedModels: getSelectedModelsForConversation(current).join(', ') })
+                    });
                 }
 
                 const response = await fetch(`/api/conversations/${targetConversationId}/messages`, {
@@ -436,7 +523,8 @@
             current.messages.push({
                 type,
                 text,
-                at: Date.now()
+                at: Date.now(),
+                ...(meta ? { meta } : {})
             });
 
             if (current.title === 'New Conversation' && type === 'user-bubble') {
@@ -465,12 +553,15 @@
                     return;
                 }
 
-                const response = await fetch(`/api/conversations/${current.id}/ai-reply`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
+                const selectedModels = getSelectedModelsForConversation(current);
+                const responses = await Promise.all(
+                    selectedModels.map(model => fetch(
+                        `/api/conversations/${current.id}/ai-reply?model=${encodeURIComponent(model)}`,
+                        { method: 'POST' }
+                    ))
+                );
 
-                if (response.status === 401) {
+                if (responses.some(response => response.status === 401)) {
                     window.location.href = '/';
                     return;
                 }
@@ -479,13 +570,22 @@
                 return;
             }
 
-            // Placeholder local reply so the UI still works without backend integration.
-            setTimeout(() => {
-                addMessage('ai-bubble', 'Thanks for your message. A real AI backend can be connected next.');
-            }, 450);
+            getSelectedModelsForConversation(getActiveConversation()).forEach((model, index) => {
+                setTimeout(() => {
+                    addMessage(
+                        'ai-bubble',
+                        `Local placeholder reply from ${model}.`,
+                        { provider: 'local-fallback', model }
+                    );
+                }, 450 + (index * 120));
+            });
         }
 
-        function handleKey(e) { if (e.key === 'Enter') sendMessage(); }
+        function handleKey(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        }
 
         async function initChat() {
             if (useServerApi) {

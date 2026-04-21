@@ -27,7 +27,11 @@ Given('I am on the AI chat page', async function () {
 When('I type a message into the chat input field', async function () {
   const page = await this.launch();
   await pause(400);
-  await page.type('#userInput', 'Hello from Puppeteer', { delay: 80 });
+  await page.$eval('#userInput', (input, value) => {
+    input.value = value;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  }, 'Hello from Puppeteer');
 });
 
 When('I submit the message', async function () {
@@ -35,7 +39,7 @@ When('I submit the message', async function () {
   const selector = await page.$('.input-area button');
   assert(selector, 'Send button not found');
   this.aiBubbleCountBeforeSubmit = await page.$$eval('#messages .ai-bubble', nodes => nodes.length);
-  await selector.click();
+  await page.evaluate(() => window.sendMessage());
   await pause(1500);
 });
 

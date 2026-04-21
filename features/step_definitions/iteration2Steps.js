@@ -1,6 +1,6 @@
 const { Given, When, Then } = require('@cucumber/cucumber');
 const assert = require('assert');
-const { ensureUserExists } = require('../support/authTestUtils');
+const { DEFAULT_TEST_PASSWORD, ensureUserExists } = require('../support/authTestUtils');
 
 const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:3000';
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
@@ -49,11 +49,12 @@ async function sendMessage(world, message) {
 
   assert(inputSelector && sendSelector, 'Could not find chat input or send button.');
 
-  await page.click(inputSelector, { clickCount: 3 });
-  if (message.length > 0) {
-    await page.type(inputSelector, message, { delay: 60 });
-  }
-  await page.click(sendSelector);
+  await page.$eval(inputSelector, (input, value) => {
+    input.value = value;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  }, message);
+  await page.evaluate(() => window.sendMessage());
   await pause(1500);
 }
 
@@ -92,7 +93,7 @@ When('I navigate to the chat page', async function () {
 });
 
 When('I navigate directly to the chat page', async function () {
-  await ensureUserExists('test@test.com', '123456');
+  await ensureUserExists('test@test.com', DEFAULT_TEST_PASSWORD);
   const page = await currentPage(this);
   await page.goto(`${BASE_URL}/chat`, { waitUntil: 'domcontentloaded' });
   await pause(600);
@@ -187,6 +188,15 @@ When('I submit the reset password form', async function () {
 
 When('I send {string} in the current conversation', async function (message) {
   await sendMessage(this, message);
+});
+
+When('I set the active conversation models to {string}', async function (models) {
+  const page = await currentPage(this);
+  await page.waitForSelector('#model-selection');
+  await page.click('#model-selection', { clickCount: 3 });
+  await page.type('#model-selection', models, { delay: 40 });
+  await page.keyboard.press('Tab');
+  await pause(800);
 });
 
 When('I attempt to send an empty chat message', async function () {
@@ -509,6 +519,32 @@ Then('I should see an Ollama failure message', async function () {
 Then('the page should still be usable', async function () {
   const selector = await getChatInputSelector(this);
   assert(selector, 'Expected chat input to still exist after Ollama failure.');
+});
+
+Then('I should see multiple AI replies', async function () {
+  const page = await currentPage(this);
+  await page.waitForFunction(
+    () => document.querySelectorAll('#messages .ai-bubble').length >= 2,
+    { timeout: 12000 }
+  );
+  const aiCount = await page.$$eval('#messages .ai-bubble', nodes => nodes.length);
+  assert(aiCount >= 2, `Expected at least 2 AI replies, found ${aiCount}`);
+});
+
+Then('I should see model labels {string} and {string}', async function (modelA, modelB) {
+  const page = await currentPage(this);
+  await page.waitForFunction(
+    (first, second) => {
+      const text = document.body.innerText || '';
+      return text.includes(first) && text.includes(second);
+    },
+    { timeout: 12000 },
+    modelA,
+    modelB
+  );
+  const text = await pageText(this);
+  assert(text.includes(modelA), `Expected to find model label "${modelA}"`);
+  assert(text.includes(modelB), `Expected to find model label "${modelB}"`);
 });
 
 Then('I should see a new empty conversation state', async function () {

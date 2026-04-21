@@ -3,12 +3,12 @@ require('../support/serverLifecycle');
 require('../support/chatCleanup');
 const { Given, When, Then } = require('@cucumber/cucumber');
 const assert = require('assert');
-const { ensureUserExists } = require('../support/authTestUtils');
+const { DEFAULT_TEST_PASSWORD, ensureUserExists } = require('../support/authTestUtils');
 
 const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:3000';
 const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
 const TEST_EMAIL = 'test@test.com';
-const TEST_PASSWORD = '123456';
+const TEST_PASSWORD = DEFAULT_TEST_PASSWORD;
 
 Given('I am on the login page', async function () {
   await ensureUserExists(TEST_EMAIL, TEST_PASSWORD);
