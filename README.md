@@ -67,18 +67,18 @@ npm test
 
 ## Project Structure
 
-- [public/chat.html](/C:/Users/rishi/Documents/Playground/public/chat.html)
-- [public/style.css](/C:/Users/rishi/Documents/Playground/public/style.css)
-- [routes/chatRoutes.js](/C:/Users/rishi/Documents/Playground/routes/chatRoutes.js)
-- [utils/ollamaClient.js](/C:/Users/rishi/Documents/Playground/utils/ollamaClient.js)
-- [spec/chatPage.spec.js](/C:/Users/rishi/Documents/Playground/spec/chatPage.spec.js)
-- [spec/preferencesStore.spec.js](/C:/Users/rishi/Documents/Playground/spec/preferencesStore.spec.js)
-- [spec/ollamaClient.spec.js](/C:/Users/rishi/Documents/Playground/spec/ollamaClient.spec.js)
-- [spec/support/jasmine-pages.mjs](/C:/Users/rishi/Documents/Playground/spec/support/jasmine-pages.mjs)
-- [spec/support/jasmine-logic.mjs](/C:/Users/rishi/Documents/Playground/spec/support/jasmine-logic.mjs)
-- [features/individual/authentication.feature](/C:/Users/rishi/Documents/Playground/features/individual/authentication.feature)
-- [features/individual/ollama-behavior.feature](/C:/Users/rishi/Documents/Playground/features/individual/ollama-behavior.feature)
-- [features/individual/multi-model.feature](/C:/Users/rishi/Documents/Playground/features/individual/multi-model.feature)
-- [features/individual/persona-switching.feature](/C:/Users/rishi/Documents/Playground/features/individual/persona-switching.feature)
-- [features/individual/conversation-history.feature](/C:/Users/rishi/Documents/Playground/features/individual/conversation-history.feature)
-- [docs/individual-iteration-1-report.md](/C:/Users/rishi/Documents/Playground/docs/individual-iteration-1-report.md)
+- [public/chat.html]
+- [public/style.css]
+- [routes/chatRoutes.js]
+- [utils/ollamaClient.js]
+- [spec/chatPage.spec.js]
+- [spec/preferencesStore.spec.js]
+- [spec/ollamaClient.spec.js]
+- [spec/support/jasmine-pages.mjs]
+- [spec/support/jasmine-logic.mjs]
+- [features/individual/authentication.feature]
+- [features/individual/ollama-behavior.feature]
+- [features/individual/multi-model.feature]
+- [features/individual/persona-switching.feature]
+- [features/individual/conversation-history.feature]
+- [docs/individual-iteration-1-report.md]
