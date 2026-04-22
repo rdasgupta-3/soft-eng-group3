@@ -71,7 +71,7 @@ async function requestReset() {
         forgotError.style.display = 'block';
     }
 }
-
+// Rishita Dasgupta wrote this
 window.requestReset = requestReset;
 
 if (forgotButton) {

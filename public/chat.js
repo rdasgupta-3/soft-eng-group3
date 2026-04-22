@@ -4,7 +4,7 @@ const PROVIDERS = [
     { id: 'claude', label: 'Claude' }
 ];
 const VALID_PERSONAS = ['sweetheart', 'professional', 'silly'];
-
+// Rishita Dasgupta wrote this
 const STORAGE_KEY = 'llmChatConversations';
 const ACTIVE_KEY = 'llmActiveConversationId';
 const PREFS_KEY = 'llmChatPreferences';

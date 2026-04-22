@@ -71,7 +71,7 @@ window.createAccount = createAccount;
 if (signupButton) {
     signupButton.addEventListener('click', createAccount);
 }
-
+// Rishita Dasgupta wrote this
 document.addEventListener('keydown', event => {
     if (event.key === 'Enter') {
         createAccount();

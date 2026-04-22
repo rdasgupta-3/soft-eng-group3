@@ -10,7 +10,7 @@ body {
     --message-font-scale: 1;
     --message-font-weight: 400;
 }
-
+/* Rishita Dasgupta wrote this */
 body.bold-mode {
     --message-font-weight: 700;
 }

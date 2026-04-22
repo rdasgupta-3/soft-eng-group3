@@ -1,6 +1,6 @@
 const loginButton = document.getElementById('login-btn');
 const loginError = document.getElementById('error-message');
-
+// Rishita Dasgupta wrote this
 async function fetchJson(url, options = {}) {
     const response = await fetch(url, {
         credentials: 'same-origin',

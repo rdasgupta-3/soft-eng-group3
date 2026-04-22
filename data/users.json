@@ -379,9 +379,9 @@
   },
   "cat@cat.com": {
     "email": "cat@cat.com",
-    "passwordHash": "7ad5ad1a537de88ccb2decde00a035b0e616923b4e6eee5275623b7e8177e0370965c4291a8e65230c8039a2281320d17bd944f0411338a3464e23e00262975a",
-    "passwordSalt": "0f2cace1740313c27469802f4e477427",
+    "passwordHash": "8da1803375e5ddf9e638a4db2649db3702f90c047ba59890efa34958086b5e8ff3272c1ec5720908391ef5094600eacd7d4835901290f2f6508d9129952ffb9c",
+    "passwordSalt": "94d1515ce2d5d23bac216b2ef55682c3",
     "createdAt": 1776738404411,
-    "passwordUpdatedAt": 1776825682478
+    "passwordUpdatedAt": 1776875321984
   }
 }

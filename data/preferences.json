@@ -1,7 +1,7 @@
 {
   "cat@cat.com": {
-    "boldText": true,
+    "boldText": false,
     "highContrast": false,
-    "fontScale": 1.1
+    "fontScale": 0.8
   }
 }

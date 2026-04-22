@@ -69,7 +69,7 @@ async function submitReset() {
         resetError.style.display = 'block';
     }
 }
-
+// Rishita Dasgupta wrote this
 window.submitReset = submitReset;
 
 if (resetButton) {

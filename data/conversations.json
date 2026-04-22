@@ -3,9 +3,9 @@
     {
       "id": "conv-1776825713252-5197",
       "title": "what is 2+2",
-      "persona": "silly",
-      "pinned": true,
-      "updatedAt": 1776825740475,
+      "persona": "professional",
+      "pinned": false,
+      "updatedAt": 1776875517528,
       "messages": [
         {
           "type": "user-bubble",
@@ -35,6 +35,151 @@
             }
           ],
           "at": 1776825740475
+        },
+        {
+          "type": "user-bubble",
+          "text": "meow",
+          "at": 1776875337726
+        },
+        {
+          "type": "model-group",
+          "responses": [
+            {
+              "providerId": "openai",
+              "providerLabel": "GPT",
+              "mode": "fallback-mode",
+              "text": "GPT fallback for \"meow\" responds with playful energy by outlining the goal, suggesting a short plan, and ending with a quick verification step."
+            },
+            {
+              "providerId": "gemini",
+              "providerLabel": "Gemini",
+              "mode": "fallback-mode",
+              "text": "Gemini fallback for \"meow\" responds with playful energy by comparing likely options, highlighting tradeoffs, and recommending the clearest next move."
+            },
+            {
+              "providerId": "claude",
+              "providerLabel": "Claude",
+              "mode": "ollama-live",
+              "text": "It seems like we've got ourselves a curious kitty in the conversation!\n\nOptions:\n\n1. **The Classic**: Meow, let's just say 2+2 is still 4, and we're good to go! \n2. **The Playful**: I think our furry friend needs a little break from math. How about we play a game of virtual catnip instead? \n3. **The Whimsical**: Maybe in this parallel universe, meow's purr-fectly right, and 2+2 equals... TREATS?!"
+            }
+          ],
+          "at": 1776875367941
+        },
+        {
+          "type": "user-bubble",
+          "text": "what is hazbin hotel",
+          "at": 1776875385985
+        },
+        {
+          "type": "model-group",
+          "responses": [
+            {
+              "providerId": "openai",
+              "providerLabel": "GPT",
+              "mode": "ollama-live",
+              "text": "It seems like we've got a new chat friend! \n\nLet's see what's behind the mysterious question...\n\n**Hazbin Hotel** (get it?) refers to an upcoming animated series on Netflix, created by Vivienne \"VivziePop\" Medrano. The show is set in Hell and follows the story of Charlie Magne, the Princess of Hell, as she attends a rehabilitation center called Hazbin High. Think \"Stranger Things\" meets hellish drama!\n\nWould you like to know more about the series or dive into some... unconventional theories?"
+            },
+            {
+              "providerId": "gemini",
+              "providerLabel": "Gemini",
+              "mode": "fallback-mode",
+              "text": "Gemini fallback for \"what is hazbin hotel\" responds with playful energy by comparing likely options, highlighting tradeoffs, and recommending the clearest next move."
+            },
+            {
+              "providerId": "claude",
+              "providerLabel": "Claude",
+              "mode": "fallback-mode",
+              "text": "Claude fallback for \"what is hazbin hotel\" responds with playful energy by reassuring the user, explaining the idea plainly, and offering one manageable next action."
+            }
+          ],
+          "at": 1776875416167
+        },
+        {
+          "type": "user-bubble",
+          "text": "tell me what hazbin hotel is rn.",
+          "at": 1776875416522
+        },
+        {
+          "type": "model-group",
+          "responses": [
+            {
+              "providerId": "openai",
+              "providerLabel": "GPT",
+              "mode": "fallback-mode",
+              "text": "GPT fallback for \"tell me what hazbin hotel is rn.\" responds with extra warmth by outlining the goal, suggesting a short plan, and ending with a quick verification step."
+            },
+            {
+              "providerId": "gemini",
+              "providerLabel": "Gemini",
+              "mode": "fallback-mode",
+              "text": "Gemini fallback for \"tell me what hazbin hotel is rn.\" responds with extra warmth by comparing likely options, highlighting tradeoffs, and recommending the clearest next move."
+            },
+            {
+              "providerId": "claude",
+              "providerLabel": "Claude",
+              "mode": "fallback-mode",
+              "text": "Claude fallback for \"tell me what hazbin hotel is rn.\" responds with extra warmth by reassuring the user, explaining the idea plainly, and offering one manageable next action."
+            }
+          ],
+          "at": 1776875446636
+        },
+        {
+          "type": "user-bubble",
+          "text": "inform me of hazbin hotel",
+          "at": 1776875474334
+        },
+        {
+          "type": "user-bubble",
+          "text": "hello",
+          "at": 1776875487307
+        },
+        {
+          "type": "model-group",
+          "responses": [
+            {
+              "providerId": "openai",
+              "providerLabel": "GPT",
+              "mode": "fallback-mode",
+              "text": "GPT fallback for \"inform me of hazbin hotel\" responds with a professional tone by outlining the goal, suggesting a short plan, and ending with a quick verification step."
+            },
+            {
+              "providerId": "gemini",
+              "providerLabel": "Gemini",
+              "mode": "fallback-mode",
+              "text": "Gemini fallback for \"inform me of hazbin hotel\" responds with a professional tone by comparing likely options, highlighting tradeoffs, and recommending the clearest next move."
+            },
+            {
+              "providerId": "claude",
+              "providerLabel": "Claude",
+              "mode": "fallback-mode",
+              "text": "Claude fallback for \"inform me of hazbin hotel\" responds with a professional tone by reassuring the user, explaining the idea plainly, and offering one manageable next action."
+            }
+          ],
+          "at": 1776875504544
+        },
+        {
+          "type": "model-group",
+          "responses": [
+            {
+              "providerId": "openai",
+              "providerLabel": "GPT",
+              "mode": "fallback-mode",
+              "text": "GPT fallback for \"hello\" responds with a professional tone by outlining the goal, suggesting a short plan, and ending with a quick verification step."
+            },
+            {
+              "providerId": "gemini",
+              "providerLabel": "Gemini",
+              "mode": "fallback-mode",
+              "text": "Gemini fallback for \"hello\" responds with a professional tone by comparing likely options, highlighting tradeoffs, and recommending the clearest next move."
+            },
+            {
+              "providerId": "claude",
+              "providerLabel": "Claude",
+              "mode": "fallback-mode",
+              "text": "Claude fallback for \"hello\" responds with a professional tone by reassuring the user, explaining the idea plainly, and offering one manageable next action."
+            }
+          ],
+          "at": 1776875517528
         }
       ]
     }

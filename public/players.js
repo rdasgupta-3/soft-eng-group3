@@ -41,7 +41,7 @@ async function logout() {
 
     window.location.href = '/';
 }
-
+// Rishita Dasgupta wrote this
 window.choosePersona = choosePersona;
 window.logout = logout;
 
