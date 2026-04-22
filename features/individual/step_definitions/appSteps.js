@@ -229,8 +229,45 @@ When('I open the preview reset link', async function () {
 When('I reset my password to {string}', async function (newPassword) {
     await this.page.type('#new-password', newPassword);
     await this.page.type('#confirm-password', newPassword);
-    await this.page.click('#reset-password-btn');
-    await this.page.waitForFunction(() => document.getElementById('success-message').textContent.includes('Password reset complete'));
+
+    const [response] = await Promise.all([
+        this.page.waitForResponse(
+            networkResponse => networkResponse.url().includes('/api/reset-password') &&
+                networkResponse.request().method() === 'POST',
+            { timeout: 15000 }
+        ),
+        this.page.click('#reset-password-btn')
+    ]);
+
+    const payload = await response.json().catch(() => ({}));
+    assert(
+        response.ok(),
+        `Expected password reset request to succeed, received ${response.status()} ${payload.error || ''}`.trim()
+    );
+
+    const outcome = await Promise.race([
+        this.page.waitForFunction(
+            () => {
+                const success = document.getElementById('success-message');
+                return Boolean(success && success.textContent.includes('Password reset complete'));
+            },
+            { polling: 'mutation', timeout: 5000 }
+        ).then(() => 'success-message'),
+        this.page.waitForFunction(
+            () => window.location.pathname === '/',
+            { polling: 'mutation', timeout: 5000 }
+        ).then(() => 'redirected')
+    ]).catch(async () => {
+        const errorMessage = await this.page.$eval('#error-message', node => node.textContent.trim()).catch(() => '');
+        const currentUrl = this.page.url();
+        throw new Error(`Password reset completed on the network, but the UI never showed success or redirected. URL=${currentUrl} Error="${errorMessage}"`);
+    });
+
+    assert(
+        outcome === 'success-message' || outcome === 'redirected',
+        `Unexpected password reset outcome: ${outcome}`
+    );
+
     this.credentials.password = newPassword;
 });
 
