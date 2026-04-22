@@ -6,7 +6,7 @@ describe('Accessibility Controls', () => {
 
     beforeEach(() => {
         win = loadPage('chat.html', 'http://localhost/chat');
-        chatContainer = win.document.getElementById('chat-container');
+        chatContainer = win.document.getElementById('chat-window');
     });
 
     it('toggles bold formatting on the chat container', () => {
@@ -34,10 +34,19 @@ describe('Accessibility Controls', () => {
 
         await win.addMessage('user-bubble', 'Hello');
 
-        const lastMessage = chatContainer.querySelector('.message:last-child');
+        const lastMessage = win.document.querySelector('#messages .bubble:last-child');
 
         expect(lastMessage.classList.contains('bold')).toBeTrue();
         expect(lastMessage.style.fontSize).toBe(chatContainer.style.fontSize);
+    });
+
+    it('decreases text size when the button is clicked', () => {
+        const chatContainer = win.document.getElementById('chat-window');
+        chatContainer.style.fontSize = "20px";
+
+        win.decreaseTextSize();
+
+        expect(chatContainer.style.fontSize).not.toBe("20px");
     });
 
 });
