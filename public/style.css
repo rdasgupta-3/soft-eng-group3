@@ -1,37 +1,44 @@
-/* --- Keep existing base styles --- */
-body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background: #f0f2f5; margin: 0; padding: 20px;}
-h1 { margin-bottom: 30px; color: #333; }
-
-/* --- Updated Player Grid Styles --- */
-.player-grid { 
-    display: flex; 
-    gap: 30px; 
-    justify-content: center;
-    align-items: stretch;
-    flex-wrap: wrap; /* Good for responsiveness */
+body {
+    font-family: sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: #f0f2f5;
+    margin: 0;
+    padding: 20px;
 }
 
-/* Base style for all player cards */
-.player-card { 
-    width: 250px; /* Adjusted for better visibility */
+h1 {
+    margin-bottom: 30px;
+    color: #333;
+}
+
+.player-grid {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    align-items: stretch;
+    flex-wrap: wrap;
+}
+
+.player-card {
+    width: 250px;
     cursor: pointer;
     display: flex;
     flex-direction: column;
     background: white;
-    border-radius: 8px; /* Slight rounded corners, like the image plaques */
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    overflow: hidden; /* Keeps the image inside the border */
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     text-align: center;
 }
 
-/* The standard 'hover indicator' requirement */
-.player-card:hover { 
-    transform: translateY(-10px) scale(1.03); 
-    box-shadow: 0 12px 20px rgba(0,0,0,0.2);
+.player-card:hover {
+    transform: translateY(-10px) scale(1.03);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2);
 }
 
-/* The actual image inside the card */
 .player-card img {
     width: 100%;
     aspect-ratio: 825 / 1346;
@@ -39,63 +46,59 @@ h1 { margin-bottom: 30px; color: #333; }
     display: block;
 }
 
-/* The name tag below the image */
 .player-name {
     padding: 10px;
     font-weight: bold;
     font-size: 1.1rem;
-    background: #f8f9fa; /* Default nameplate background */
+    background: #f8f9fa;
 }
 
-/* --- Specific 'Frame' Styles (Mapping to your images) --- */
-
-/* 1. Miss Sweetheart (image_4.png) - Floral/Pink Frame */
 .frame-sweetheart {
-    border: 5px solid #f8bbd0; /* Soft pink border */
+    border: 5px solid #f8bbd0;
 }
+
 .frame-sweetheart .player-name {
-    color: #c2185b; /* Deep pink text */
-    background: #fce4ec; /* Very light pink nameplate */
-    font-family: 'Georgia', serif; /* A softer, classic font */
+    color: #c2185b;
+    background: #fce4ec;
+    font-family: Georgia, serif;
 }
-/* Specific hover highlight color for Sweetheart */
+
 .frame-sweetheart:hover {
     border-color: #f48fb1;
     box-shadow: 0 0 15px rgba(244, 143, 177, 0.6);
 }
 
-/* 2. Mr. Professional (image_6.png) - Corporate Blue Frame */
 .frame-professional {
-    border: 5px solid #1565c0; /* Strong professional blue */
+    border: 5px solid #1565c0;
 }
+
 .frame-professional .player-name {
-    color: white; /* White text on blue */
-    background: #0d47a1; /* Dark blue nameplate */
-    text-transform: uppercase; /* To match the metallic plaque */
+    color: white;
+    background: #0d47a1;
+    text-transform: uppercase;
     letter-spacing: 1px;
 }
-/* Specific hover highlight color for Professional */
+
 .frame-professional:hover {
     border-color: #1e88e5;
     box-shadow: 0 0 15px rgba(30, 136, 229, 0.6);
 }
 
-/* 3. Lord Silly The Ninth (image_5.png) - Royal Purple Frame */
 .frame-silly {
-    border: 5px solid #6a1b9a; /* Royal purple border */
+    border: 5px solid #6a1b9a;
 }
+
 .frame-silly .player-name {
-    color: #fbc02d; /* Royal gold/yellow text */
-    background: #4a148c; /* Very dark purple nameplate */
-    font-family: 'Cursive', 'Georgia', serif; /* Playful font */
+    color: #fbc02d;
+    background: #4a148c;
+    font-family: Georgia, serif;
 }
-/* Specific hover highlight color for Silly */
+
 .frame-silly:hover {
     border-color: #8e24aa;
     box-shadow: 0 0 15px rgba(142, 36, 170, 0.6);
 }
 
-/* --- Persona Descriptions --- */
 .player-description {
     font-size: 0.85rem;
     padding: 0 10px 15px 10px;
@@ -104,23 +107,164 @@ h1 { margin-bottom: 30px; color: #333; }
     flex-grow: 1;
 }
 
-/* Match the description background to the nameplate background */
 .frame-sweetheart .player-description {
     background: #fce4ec;
-    color: #880e4f; /* Darker pink for readability */
+    color: #880e4f;
 }
 
 .frame-professional .player-description {
     background: #0d47a1;
-    color: #bbdefb; /* Light blue text for readability */
+    color: #bbdefb;
 }
 
 .frame-silly .player-description {
     background: #4a148c;
-    color: #e1bee7; /* Light purple text for readability */
+    color: #e1bee7;
 }
 
-/* --- Chat Page Styles --- */
+.model-picker-page {
+    align-items: stretch;
+    padding: 32px;
+    background:
+        radial-gradient(circle at top left, rgba(244, 143, 177, 0.22), transparent 28%),
+        radial-gradient(circle at top right, rgba(21, 101, 192, 0.2), transparent 26%),
+        linear-gradient(180deg, #f8fbff 0%, #eef2f6 100%);
+}
+
+.model-picker-shell {
+    width: min(1180px, 100%);
+    margin: 0 auto;
+}
+
+.model-picker-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 24px;
+    align-items: flex-start;
+    margin-bottom: 22px;
+}
+
+.eyebrow,
+.selection-label {
+    margin: 0 0 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #51606f;
+}
+
+.model-picker-copy {
+    max-width: 700px;
+    line-height: 1.55;
+    color: #4d5a67;
+}
+
+.selection-status-panel {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(120, 136, 153, 0.18);
+    border-radius: 16px;
+    padding: 18px 20px;
+    box-shadow: 0 14px 30px rgba(30, 44, 68, 0.08);
+    margin-bottom: 24px;
+}
+
+.selected-model-pill-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.selected-model-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 7px 11px;
+    border-radius: 999px;
+    background: #e8f1ff;
+    color: #0d3e74;
+    font-size: 0.88rem;
+    font-weight: 600;
+}
+
+.selection-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.selection-hint {
+    color: #5f6c7a;
+    font-size: 0.9rem;
+}
+
+#continue-to-chat,
+.secondary-action-btn {
+    border: none;
+    border-radius: 999px;
+    padding: 11px 18px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+#continue-to-chat {
+    background: #114b8b;
+    color: #ffffff;
+}
+
+#continue-to-chat:disabled {
+    background: #a4b0bc;
+    cursor: not-allowed;
+}
+
+.model-grid {
+    align-items: stretch;
+}
+
+.model-card {
+    position: relative;
+    align-items: center;
+    padding-top: 22px;
+    border: none;
+}
+
+.model-avatar {
+    width: 76px;
+    height: 76px;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.45rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 auto 14px;
+    background: linear-gradient(135deg, #1e4d8f 0%, #3b82d0 100%);
+}
+
+.model-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    border-radius: 999px;
+    padding: 5px 9px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    background: rgba(255, 255, 255, 0.86);
+    color: #324354;
+}
+
+.selected-model-card {
+    transform: translateY(-10px) scale(1.03);
+    outline: 3px solid #1f6fca;
+    outline-offset: 3px;
+}
+
 .chat-page {
     height: 100vh;
     margin: 0;
@@ -143,6 +287,10 @@ h1 { margin-bottom: 30px; color: #333; }
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     overflow: hidden;
+}
+
+.compare-chat-shell {
+    width: min(1320px, 99vw);
 }
 
 .chat-history-panel {
@@ -239,13 +387,19 @@ h1 { margin-bottom: 30px; color: #333; }
     margin-bottom: 8px;
 }
 
+.history-model-summary {
+    font-size: 0.75rem;
+    color: #7a8694;
+    margin-bottom: 8px;
+}
+
 .history-pin-btn {
     border: none;
     background: #f1f3f5;
     color: #495057;
     border-radius: 4px;
     padding: 4px 7px;
-    font-size: 0.95rem;
+    font-size: 0.8rem;
     line-height: 1;
     cursor: pointer;
 }
@@ -265,7 +419,7 @@ h1 { margin-bottom: 30px; color: #333; }
     color: #9b2c2c;
     border-radius: 4px;
     padding: 4px 7px;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     line-height: 1;
     cursor: pointer;
 }
@@ -319,6 +473,99 @@ h1 { margin-bottom: 30px; color: #333; }
     font-size: 0.9rem;
 }
 
+.compare-chat-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: center;
+}
+
+.chat-header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.secondary-action-btn {
+    background: #edf4ff;
+    color: #174a83;
+}
+
+.selected-models-bar {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    align-items: center;
+    padding: 14px 16px;
+    border-bottom: 1px solid #e3e7eb;
+    background: #f7faff;
+}
+
+.latest-responses-wrap {
+    padding: 14px 16px;
+    border-bottom: 1px solid #e3e7eb;
+    background: #ffffff;
+}
+
+.section-title-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: baseline;
+    margin-bottom: 12px;
+}
+
+.section-title-row h2 {
+    margin: 0;
+    font-size: 1rem;
+    color: #243444;
+}
+
+#latest-response-caption {
+    font-size: 0.86rem;
+    color: #6b7785;
+}
+
+.latest-responses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+}
+
+.response-card {
+    min-height: 160px;
+    padding: 14px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #f9fbff 0%, #eef4fb 100%);
+    border: 1px solid #dce6f2;
+}
+
+.response-card h3 {
+    margin: 0 0 6px;
+    font-size: 1rem;
+    color: #223547;
+}
+
+.response-card-meta {
+    margin: 0 0 12px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #5f6f81;
+}
+
+.response-card-body {
+    margin: 0;
+    font-size: 0.92rem;
+    line-height: 1.5;
+    color: #314355;
+}
+
+.response-card-error {
+    background: linear-gradient(180deg, #fff7f7 0%, #fff0f0 100%);
+    border-color: #f0cfd3;
+}
+
 #chat-window {
     flex: 1;
     overflow-y: auto;
@@ -354,6 +601,15 @@ h1 { margin-bottom: 30px; color: #333; }
     background: #ffffff;
     color: #333;
     border: 1px solid #dde2e7;
+}
+
+.model-reply-label {
+    margin-bottom: 6px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #526274;
 }
 
 .input-area {
@@ -408,11 +664,32 @@ h1 { margin-bottom: 30px; color: #333; }
     font-weight: 600;
 }
 
+.inline-logout-btn,
+.picker-logout-btn {
+    position: static;
+}
+
 .logout-btn:hover {
     background: #c82333;
 }
 
 @media (max-width: 700px) {
+    .model-picker-page {
+        padding: 16px;
+    }
+
+    .model-picker-header,
+    .selection-status-panel,
+    .selected-models-bar,
+    .compare-chat-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .selection-actions {
+        align-items: stretch;
+    }
+
     .chat-page {
         padding: 10px;
     }

@@ -1,23 +1,32 @@
 const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434';
 const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.2:1b';
 
-function toOllamaMessages(conversationMessages) {
+function toOllamaMessages(conversationMessages, systemPrompt) {
     const recent = (conversationMessages || []).slice(-16);
+    const prepared = [];
 
-    return recent.map(msg => {
+    if (systemPrompt) {
+        prepared.push({ role: 'system', content: systemPrompt });
+    }
+
+    recent.forEach(msg => {
         if (msg.type === 'user-bubble') {
-            return { role: 'user', content: msg.text };
+            prepared.push({ role: 'user', content: msg.text });
+            return;
         }
 
-        return { role: 'assistant', content: msg.text };
+        prepared.push({ role: 'assistant', content: msg.text });
     });
+
+    return prepared;
 }
 
-async function generateReplyFromOllama(conversationMessages) {
+async function generateReplyFromOllama(conversationMessages, options = {}) {
+    const runtimeModel = options.runtimeModel || OLLAMA_MODEL;
     const payload = {
-        model: OLLAMA_MODEL,
+        model: runtimeModel,
         stream: false,
-        messages: toOllamaMessages(conversationMessages)
+        messages: toOllamaMessages(conversationMessages, options.systemPrompt)
     };
 
     const controller = new AbortController();
@@ -47,12 +56,13 @@ async function generateReplyFromOllama(conversationMessages) {
         return content;
     } catch (error) {
         console.warn('[LLM] Falling back to local placeholder response:', error.message);
-        return 'I could not reach local Ollama right now. Please make sure Ollama is running, then try again.';
+        return `I could not reach local Ollama model "${runtimeModel}" right now. Please make sure Ollama is running, then try again.`;
     } finally {
         clearTimeout(timeout);
     }
 }
 
 module.exports = {
-    generateReplyFromOllama
+    generateReplyFromOllama,
+    toOllamaMessages
 };

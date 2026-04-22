@@ -1,18 +1,25 @@
 const { loadPage } = require('./helpers/pageLoader');
 
 describe('chat.html', () => {
-    it('creates an initial empty conversation', () => {
+    it('creates an initial empty conversation', async () => {
         const win = loadPage('chat.html', 'http://localhost/chat');
+        await new Promise(resolve => setTimeout(resolve, 0));
         const stored = JSON.parse(win.localStorage.getItem('llmChatConversations'));
         const messagesEl = win.document.getElementById('messages');
 
         expect(stored.length).toBe(1);
         expect(stored[0].messages.length).toBe(0);
+        expect(stored[0].selectedModelIds).toEqual([
+            'ollama-llama3.2-1b',
+            'openai-gpt-4o-mini',
+            'google-gemini-2.0-flash'
+        ]);
         expect(messagesEl.children.length).toBe(0);
     });
 
     it('does not create another conversation when active chat is empty', async () => {
         const win = loadPage('chat.html', 'http://localhost/chat');
+        await new Promise(resolve => setTimeout(resolve, 0));
         win.confirm = () => true;
 
         win.createNewConversation();
@@ -35,5 +42,17 @@ describe('chat.html', () => {
         win.deleteConversation(idToPin);
         stored = JSON.parse(win.localStorage.getItem('llmChatConversations'));
         expect(stored.length).toBe(1);
+    });
+
+    it('renders one latest-response card per selected model', async () => {
+        const win = loadPage('chat.html', 'http://localhost/chat?models=ollama-llama3.2-1b,anthropic-claude-3-5-haiku');
+        await new Promise(resolve => setTimeout(resolve, 0));
+        const cards = win.document.querySelectorAll('.response-card');
+        const selectedPills = win.document.querySelectorAll('#selected-models .selected-model-pill');
+
+        expect(cards.length).toBe(2);
+        expect(selectedPills.length).toBe(2);
+        expect(cards[0].textContent).toContain('Local Llama 3.2 1B');
+        expect(cards[1].textContent).toContain('Claude 3.5 Haiku');
     });
 });

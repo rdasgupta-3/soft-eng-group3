@@ -232,5 +232,47 @@
         }
       ]
     }
-  ]
+  ],
+  "test@test.com": [
+    {
+      "id": "conv-1776820780778-505",
+      "title": "hello",
+      "pinned": false,
+      "updatedAt": 1776820780797,
+      "selectedModelIds": [
+        "google-gemini-2.0-flash",
+        "openai-gpt-4o-mini"
+      ],
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "hello",
+          "at": 1776820780784,
+          "modelId": null,
+          "modelName": null,
+          "provider": null,
+          "status": "ok"
+        },
+        {
+          "type": "ai-bubble",
+          "text": "Gemini 2.0 Flash is unavailable right now. Gemini 2.0 Flash is not configured on this server yet. Add a provider integration or inject a public-model adapter for tests.",
+          "at": 1776820780796,
+          "modelId": "google-gemini-2.0-flash",
+          "modelName": "Gemini 2.0 Flash",
+          "provider": "google",
+          "status": "error"
+        },
+        {
+          "type": "ai-bubble",
+          "text": "GPT-4o Mini is unavailable right now. GPT-4o Mini is not configured on this server yet. Add a provider integration or inject a public-model adapter for tests.",
+          "at": 1776820780797,
+          "modelId": "openai-gpt-4o-mini",
+          "modelName": "GPT-4o Mini",
+          "provider": "openai",
+          "status": "error"
+        }
+      ]
+    }
+  ],
+  "user@example.com": []
 }

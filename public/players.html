@@ -3,47 +3,173 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Choose Your Persona - LLM Project</title>
+    <title>Select AI Models - LLM Project</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <h1>Select Your Persona</h1>
-    
-<div class="player-grid">
-        <div class="player-card frame-sweetheart" onclick="location.href='/chat?persona=sweetheart'">
-            <img src="images/image_4.png" alt="Miss Sweetheart">
-            <div class="player-name">Miss Sweetheart</div>
-            <p class="player-description">A kind, empathetic companion who is always ready to cheer you up and offer emotional support.</p>
-        </div>
+<body class="model-picker-page">
+    <div class="model-picker-shell">
+        <header class="model-picker-header">
+            <div>
+                <p class="eyebrow">Iteration 3 Dev Team</p>
+                <h1>Select Up To Three LLMs</h1>
+                <p class="model-picker-copy">
+                    Choose a local model, public models, or a mix of both. Your next chat will send the same prompt to every selected backend.
+                </p>
+            </div>
+            <button type="button" onclick="logout()" class="logout-btn picker-logout-btn">Log Out</button>
+        </header>
 
-        <div class="player-card frame-professional" onclick="location.href='/chat?persona=professional'">
-            <img src="images/image_6.png" alt="Mr. Professional">
-            <div class="player-name">MR. PROFESSIONAL</div>
-            <p class="player-description">Direct, concise, and focused. He provides logical, business-oriented solutions to your problems.</p>
-        </div>
+        <section class="selection-status-panel">
+            <div>
+                <p class="selection-label">Selected models</p>
+                <div id="selected-model-pill-list" class="selected-model-pill-list"></div>
+            </div>
+            <div class="selection-actions">
+                <span id="selection-hint" class="selection-hint">Choose between 1 and 3 models.</span>
+                <button id="continue-to-chat" type="button" onclick="continueToChat()">Continue To Chat</button>
+            </div>
+        </section>
 
-        <div class="player-card frame-silly" onclick="location.href='/chat?persona=silly'">
-            <img src="images/image_5.png" alt="Lord Silly The Ninth">
-            <div class="player-name">Lord Silly The Ninth</div>
-            <p class="player-description">A chaotic royal who speaks in riddles, jokes, and absolute nonsense to keep you entertained.</p>
+        <div class="player-grid model-grid">
+            <button class="player-card model-card frame-professional" type="button" data-model-id="ollama-llama3.2-1b" onclick="toggleModelSelection('ollama-llama3.2-1b')">
+                <div class="model-avatar" aria-hidden="true">OL</div>
+                <div class="player-name">Local Llama 3.2 1B</div>
+                <p class="player-description">Runs locally with Ollama so the app still works without an external API.</p>
+                <span class="model-badge">LOCAL</span>
+            </button>
+
+            <button class="player-card model-card frame-sweetheart" type="button" data-model-id="openai-gpt-4o-mini" onclick="toggleModelSelection('openai-gpt-4o-mini')">
+                <div class="model-avatar" aria-hidden="true">GP</div>
+                <div class="player-name">GPT-4o Mini</div>
+                <p class="player-description">Public model slot for OpenAI-backed responses and side-by-side comparisons.</p>
+                <span class="model-badge">PUBLIC</span>
+            </button>
+
+            <button class="player-card model-card frame-silly" type="button" data-model-id="google-gemini-2.0-flash" onclick="toggleModelSelection('google-gemini-2.0-flash')">
+                <div class="model-avatar" aria-hidden="true">GE</div>
+                <div class="player-name">Gemini 2.0 Flash</div>
+                <p class="player-description">Public Google model slot for fast response comparisons in the same chat turn.</p>
+                <span class="model-badge">PUBLIC</span>
+            </button>
+
+            <button class="player-card model-card frame-professional" type="button" data-model-id="anthropic-claude-3-5-haiku" onclick="toggleModelSelection('anthropic-claude-3-5-haiku')">
+                <div class="model-avatar" aria-hidden="true">CL</div>
+                <div class="player-name">Claude 3.5 Haiku</div>
+                <p class="player-description">Public Anthropic model slot with graceful error handling if server credentials are missing.</p>
+                <span class="model-badge">PUBLIC</span>
+            </button>
+
+            <button class="player-card model-card frame-sweetheart" type="button" data-model-id="ollama-qwen2.5-1.5b" onclick="toggleModelSelection('ollama-qwen2.5-1.5b')">
+                <div class="model-avatar" aria-hidden="true">QW</div>
+                <div class="player-name">Local Qwen 2.5 1.5B</div>
+                <p class="player-description">Optional second local model for quick offline comparisons without leaving the app.</p>
+                <span class="model-badge">LOCAL</span>
+            </button>
         </div>
     </div>
 
     <script>
-        // Note: I added basic URL parameters (e.g., ?persona=silly) 
-        // to the 'onclick' events. This is a foundational step 
-        // for "Database design" (Image 2), as it tells the chat page
-        // which system prompt to load.
+        const SELECTED_MODELS_KEY = 'llmSelectedModelIds';
+        const DEFAULT_MODEL_IDS = ['ollama-llama3.2-1b', 'openai-gpt-4o-mini', 'google-gemini-2.0-flash'];
+        let selectedModelIds = [];
+
+        function loadSelectedModelIds() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(SELECTED_MODELS_KEY) || '[]');
+                if (Array.isArray(saved) && saved.length) {
+                    selectedModelIds = saved.slice(0, 3);
+                    return;
+                }
+            } catch (error) {
+                console.error(error);
+            }
+
+            selectedModelIds = [...DEFAULT_MODEL_IDS];
+        }
+
+        function saveSelectedModelIds() {
+            localStorage.setItem(SELECTED_MODELS_KEY, JSON.stringify(selectedModelIds));
+        }
+
+        function renderSelectedState() {
+            const pillList = document.getElementById('selected-model-pill-list');
+            const hint = document.getElementById('selection-hint');
+            const continueButton = document.getElementById('continue-to-chat');
+
+            pillList.innerHTML = '';
+            document.querySelectorAll('.model-card').forEach(card => {
+                const isSelected = selectedModelIds.includes(card.dataset.modelId);
+                card.classList.toggle('selected-model-card', isSelected);
+                card.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+            });
+
+            selectedModelIds.forEach(modelId => {
+                const card = document.querySelector(`[data-model-id="${modelId}"]`);
+                if (!card) {
+                    return;
+                }
+
+                const pill = document.createElement('span');
+                pill.className = 'selected-model-pill';
+                pill.textContent = card.querySelector('.player-name').textContent;
+                pillList.appendChild(pill);
+            });
+
+            if (!selectedModelIds.length) {
+                hint.textContent = 'Select at least one model to continue.';
+                continueButton.disabled = true;
+                return;
+            }
+
+            hint.textContent = `${selectedModelIds.length} model${selectedModelIds.length === 1 ? '' : 's'} selected.`;
+            continueButton.disabled = false;
+        }
+
+        function toggleModelSelection(modelId) {
+            if (selectedModelIds.includes(modelId)) {
+                selectedModelIds = selectedModelIds.filter(id => id !== modelId);
+                saveSelectedModelIds();
+                renderSelectedState();
+                return;
+            }
+
+            if (selectedModelIds.length >= 3) {
+                document.getElementById('selection-hint').textContent = 'You can compare at most 3 models in one chat.';
+                return;
+            }
+
+            selectedModelIds.push(modelId);
+            saveSelectedModelIds();
+            renderSelectedState();
+        }
+
+        function continueToChat() {
+            if (!selectedModelIds.length) {
+                renderSelectedState();
+                return;
+            }
+
+            saveSelectedModelIds();
+            const search = new URLSearchParams();
+            search.set('models', selectedModelIds.join(','));
+            window.location.href = `/chat?${search.toString()}`;
+        }
+
+        async function logout() {
+            if (typeof window.fetch === 'function' && window.location.protocol.startsWith('http')) {
+                try {
+                    await fetch('/api/logout', { method: 'POST' });
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+
+            window.location.href = '/';
+        }
+
+        loadSelectedModelIds();
+        saveSelectedModelIds();
+        renderSelectedState();
     </script>
-
-    <button onclick="logout()" style="position: absolute; top: 20px; right: 20px; background-color: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;">Log Out</button>
-
-<script>
-    function logout() {
-        // In the future, this will tell the backend to destroy the session cookie
-        alert("You have been logged out.");
-        window.location.href = "/";
-    }
-</script>
 </body>
 </html>
