@@ -1,6 +1,6 @@
-# Tri-LLM Studio
+# Triad.AI by Rishita Dasgupta
 
-Tri-LLM Studio is the completed Individual Iteration-1 project, rebuilt to stay close to the original Iteration 2 group UI and flow while adding the required solo features.
+Triad.AI is the completed Individual Iteration-1 project.
 
 The finished app includes:
 
@@ -57,7 +57,7 @@ npm run test:acceptance:visible
 npm run test:acceptance:headless
 ```
 
-`npm run test:acceptance` now launches a visible browser window by default so you can watch the automation. Puppeteer will prefer installed Google Chrome when available and fall back to its bundled Chromium if Chrome is not installed.
+`npm run test:acceptance` launches a visible browser window by default so you can watch the automation. Puppeteer will prefer installed Google Chrome when available and fall back to its bundled Chromium if Chrome is not installed.
 
 Run both:
 
