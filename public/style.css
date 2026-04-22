@@ -124,18 +124,17 @@ h1 { margin-bottom: 30px; color: #333; }
 .chat-page {
     height: 100vh;
     margin: 0;
-    padding: 10px 20px 20px;
+    padding: 20px;
     box-sizing: border-box;
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
     align-items: center;
     background: #f0f2f5;
     font-family: sans-serif;
-    overflow: hidden;
 }
 
 .chat-shell {
-    width: min(1040px, 98vw);
+    width: min(1200px, 98vw);
     height: min(720px, calc(100vh - 40px));
     display: flex;
     flex-direction: row;
@@ -428,12 +427,45 @@ h1 { margin-bottom: 30px; color: #333; }
     animation: blink 1.4s infinite both;
 }
 
+.bold{
+    font-weight: bold;
+}
+
 .typing-dot:nth-child(2) {
     animation-delay: 0.2s;
 }
 
 .typing-dot:nth-child(3) {
     animation-delay: 0.4s;
+}
+
+#accessibility-controls {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+
+#accessibility-controls button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    font-size: 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+#accessibility-controls button:hover {
+    background-color: #0069d9;
+}
+
+#accessibility-controls button:active {
+    transform: scale(0.97);
+}
+
+#accessibility-controls button:focus {
+    outline: 3px solid #4a90e2;
 }
 
 @keyframes blink {

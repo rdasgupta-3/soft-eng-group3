@@ -40,6 +40,12 @@
             </div>
 
             <div class="input-area">
+                <div id= "accessibility-controls">
+                    <button id = "boldToggleBtn">Bold</button>
+                    <button id = "increaseTextBtn">A+</button>
+                    <button id = "decreaseTextBtn">A-</button>
+                </div>
+                
                 <input type="text" id="userInput" placeholder="Type your message here..." onkeypress="handleKey(event)">
                 <button onclick="sendMessage()">Send</button>
             </div>
@@ -56,6 +62,8 @@
         );
 
         let conversations = [];
+        let boldEnabled= false;
+        let currTextSize = 16;
 
         // checking for ollama
         async function ollamaStatus(){
@@ -85,6 +93,9 @@
         }
 
         window.addEventListener('DOMContentLoaded', initOllamaStatus);
+        document.getElementById('boldToggleBtn').addEventListener('click', toggleBold);
+        document.getElementById('increaseTextBtn').addEventListener('click', increaseTextSize);
+        document.getElementById('decreaseTextBtn').addEventListener('click', decreaseTextSize);
 
         let activeConversationId = null;
         let historySearchQuery = '';
@@ -314,6 +325,7 @@
                 const bubble = document.createElement('div');
                 bubble.className = `bubble ${msg.type}`;
                 bubble.innerText = msg.text;
+                applyFormatting(bubble);
                 msgContainer.appendChild(bubble);
             });
 
@@ -517,6 +529,7 @@
             `;
 
             document.querySelector('#messages').appendChild(bubble);
+            applyFormatting(bubble);
             return id;
         }   
 
@@ -526,20 +539,97 @@
 
             bubble.innerHTML = "";
 
-            let i = 0;
-            const speed = 18; //typing speed
+            const html = parseFormattedText(finalText);
+            const temp = document.createElement("div");
+            temp.innerHTML = html;
+            
+            applyFormatting(bubble);
+            
+            let nodes = Array.from(temp.childNodes);
+            let index = 0;
 
-            function typeChar(){
-                if(i < finalText.length){
-                    bubble.innerHTML += finalText.charAt(i);
-                    i++;
-                    const chatWindow = document.getElementById('chat-window');
-                    chatWindow.scrollTop = chatWindow.scrollHeight;
+            function typeNode(){
+                
+                if(index >= nodes.length) return;
 
-                    setTimeout(typeChar, speed);
+                let node = nodes[index];
+
+                if(node.nodeType === Node.TEXT_NODE){
+
+                    let span = document.createElement("span");
+                    bubble.appendChild(span);
+
+                    let text = node.textContent;
+                    let i = 0;
+
+                    function typeChar(){
+                        if(i < text.length) {
+                            span.textContent += text[i];
+                            i++;
+                            applyFormatting(span);
+                            const chatWindow = document.getElementById('chat-window');
+                            chatWindow.scrollTop = chatWindow.scrollHeight;
+                            setTimeout(typeChar, 18);
+                        } else {
+                            index++;
+                            typeNode();
+                        }
+                    }
+
+                    typeChar();
+                } else {
+                    let clone = node.cloneNode(true);
+                    bubble.appendChild(clone);
+                    applyFormatting(clone);
+                    index++;
+                    setTimeout(typeNode, 18);
                 }
             }
-            typeChar();
+
+            typeNode();
+        }
+
+        function toggleBold(){
+            boldEnabled= !boldEnabled;
+            applyFormattingToAll();
+        }
+
+        function increaseTextSize(){
+            currTextSize += 2;
+            applyFormattingToAll();
+        }
+
+        function decreaseTextSize(){
+            currTextSize = Math.max(10, currTextSize - 2);
+            applyFormattingToAll();
+        }
+
+        function applyFormatting(messageEl){
+            if(boldEnabled){
+                messageEl.classList.add('bold');
+            } else {
+                messageEl.classList.remove('bold');
+            }
+            messageEl.style.fontSize = currTextSize + "px";
+        }
+
+        function applyFormattingToAll(){
+            const bubbles = document.querySelectorAll('#messages .bubble');
+            bubbles.forEach(bubble=>{
+                applyFormatting(bubble);
+
+                bubble.querySelectorAll('*').forEach(child=>{
+                    applyFormatting(child);
+                });
+            });
+        }
+
+        function parseFormattedText(text){
+
+            text = text.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>"); 
+            text = text.replace(/\*(.*?)\*/g, "<em>$1</em>");
+            text = text.replace(/\n/g, "<br>");
+            return text;
         }
 
 
