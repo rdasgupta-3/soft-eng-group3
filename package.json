@@ -1,0 +1,50 @@
+{
+  "name": "individual-iteration-1-llm-studio",
+  "version": "1.0.0",
+  "description": "Individual Iteration-1 project focused on accessible chat controls, three-model responses, and Iteration 2 compliant chat flows.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test:unit:pages": "jasmine --config=spec/support/jasmine-pages.mjs",
+    "test:unit:logic": "jasmine --config=spec/support/jasmine-logic.mjs",
+    "test:unit": "npm run test:unit:pages && npm run test:unit:logic",
+    "test:acceptance:auth": "cucumber-js features/individual/authentication.feature --require features/individual/support/**/*.js --require features/individual/step_definitions/**/*.js",
+    "test:acceptance:accessibility": "cucumber-js features/individual/accessibility.feature --require features/individual/support/**/*.js --require features/individual/step_definitions/**/*.js",
+    "test:acceptance:ollama": "cucumber-js features/individual/ollama-behavior.feature --require features/individual/support/**/*.js --require features/individual/step_definitions/**/*.js",
+    "test:acceptance:persona": "cucumber-js features/individual/persona-switching.feature --require features/individual/support/**/*.js --require features/individual/step_definitions/**/*.js",
+    "test:acceptance:comparison": "cucumber-js features/individual/multi-model.feature --require features/individual/support/**/*.js --require features/individual/step_definitions/**/*.js",
+    "test:acceptance:recovery": "cucumber-js features/individual/password-recovery.feature --require features/individual/support/**/*.js --require features/individual/step_definitions/**/*.js",
+    "test:acceptance:history": "cucumber-js features/individual/conversation-history.feature --require features/individual/support/**/*.js --require features/individual/step_definitions/**/*.js",
+    "test:acceptance": "npm run test:acceptance:auth && npm run test:acceptance:accessibility && npm run test:acceptance:ollama && npm run test:acceptance:persona && npm run test:acceptance:comparison && npm run test:acceptance:recovery && npm run test:acceptance:history",
+    "test:acceptance:visible": "set PUPPETEER_HEADLESS=0&& set PUPPETEER_SLOWMO=120&& npm run test:acceptance",
+    "test:acceptance:headless": "set PUPPETEER_HEADLESS=1&& npm run test:acceptance",
+    "test:browser": "npm run test:acceptance:visible",
+    "test": "npm run test:unit && npm run test:acceptance"
+  },
+  "keywords": [
+    "express",
+    "cucumber",
+    "jasmine",
+    "llm"
+  ],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@cucumber/cucumber": "^12.7.0",
+    "express": "^5.2.1",
+    "puppeteer": "^24.40.0"
+  },
+  "devDependencies": {
+    "jasmine": "^6.1.0",
+    "jsdom": "^29.0.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rdasgupta-3/soft-eng-group3.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rdasgupta-3/soft-eng-group3/issues"
+  },
+  "homepage": "https://github.com/rdasgupta-3/soft-eng-group3#readme"
+}

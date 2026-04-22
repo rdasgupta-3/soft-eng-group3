@@ -1,0 +1,42 @@
+{
+  "cat@cat.com": [
+    {
+      "id": "conv-1776825713252-5197",
+      "title": "what is 2+2",
+      "persona": "silly",
+      "pinned": true,
+      "updatedAt": 1776825740475,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "what is 2+2",
+          "at": 1776825713290
+        },
+        {
+          "type": "model-group",
+          "responses": [
+            {
+              "providerId": "openai",
+              "providerLabel": "GPT",
+              "mode": "ollama-live",
+              "text": "You're bringing up an old friend! \n\nHere are the options:\n\n1. **The Serious Route**: I'll play it safe with the math answer, which is 4.\n2. **The Humorist**: But let's be real, who needs actual math when we can talk about the existential implications of two plus two?\n3. **The Game-Changer**: Wait, what if I told you that in a parallel universe, 2+2 equals... CHOCOLATE?"
+            },
+            {
+              "providerId": "gemini",
+              "providerLabel": "Gemini",
+              "mode": "ollama-live",
+              "text": "A math question! Let's crunch some numbers. \n\nIn my mind (and in reality), the answer is... **4**!\n\nBut, if I'm being completely honest, this conversation just started, and we didn't actually have a previous conversation to build on. So, from a \"conversation history\" perspective, it's more like I'm starting from scratch.\n\nWould you like me to pretend we were chatting about something else before asking for the math question?"
+            },
+            {
+              "providerId": "claude",
+              "providerLabel": "Claude",
+              "mode": "ollama-live",
+              "text": "You're playing a math game of \"guess who's right?\" Well, I've got the winning ticket! The answer is... 4! Did you know that in some parts of the world, the number 2 and 2 are considered to be the most magical numbers ever? Just kidding, but seriously, it's just basic addition. If you're still unsure, feel free to ask me to explain it again or provide more context so I can give you a better answer!"
+            }
+          ],
+          "at": 1776825740475
+        }
+      ]
+    }
+  ]
+}

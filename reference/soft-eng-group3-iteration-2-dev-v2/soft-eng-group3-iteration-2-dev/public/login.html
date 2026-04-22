@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landing Page - LLM Chat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome</h1>
+        
+        <div id="error-message" style="color: #d32f2f; font-size: 0.9em; margin-bottom: 10px; display: none; background: #ffebee; padding: 8px; border-radius: 4px;"></div>
+
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Password" required>
+        
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button onclick="attemptLogin()" style="flex: 1; background-color: #007bff; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">Log In</button>
+            <button onclick="location.href='/signup'" style="flex: 1; background-color: #28a745; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">Create Account</button>
+        </div>
+        
+        <hr style="margin: 20px 0;">
+
+        <button onclick="alert('Rutgers CAS Login is coming soon!')" style="width: 100%; background-color: #cc0033; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; margin-bottom: 15px; font-weight: bold;">
+            Log in with Rutgers NetID (CAS) (Coming Soon)
+        </button>
+
+        <button onclick="alert('Google Sign-In is coming soon!')" style="width: 100%; background-color: #4285F4; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; margin-bottom: 15px; font-weight: bold;">
+            Sign in with Google (Coming Soon)
+        </button>
+        
+        <div class="links" style="margin-top: 20px; display: flex; justify-content: space-between; font-size: 0.9em;">
+            <a href="#" style="color: #007bff; text-decoration: none;">Forgot Password?</a>
+            <a href="#" style="color: #007bff; text-decoration: none;">Forgot Email?</a>
+        </div>
+    </div>
+
+    <script>
+        // Standard Email/Password Validation via Backend API
+        async function attemptLogin() {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const errorDiv = document.getElementById('error-message');
+
+            errorDiv.style.display = 'none';
+
+            if (email === "" || password === "") {
+                errorDiv.innerText = "Error: Email and password fields cannot be empty.";
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // Ask the server to verify the credentials
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                // Success! The server found the user.
+                window.location.href = "/choose-player";
+            } else {
+                // Failure! The server rejected the credentials.
+                errorDiv.innerText = result.error;
+                errorDiv.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

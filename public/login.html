@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landing Page - LLM Chat</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome</h1>
+        <p class="page-subtitle">Log in to continue to the persona chooser and multi-LLM workspace.</p>
+
+        <div id="error-message" class="status-message is-error" style="display: none;" aria-live="polite"></div>
+
+        <input type="email" id="email" placeholder="Email" autocomplete="email" required>
+        <input type="password" id="password" placeholder="Password" autocomplete="current-password" required>
+
+        <div class="button-row">
+            <button id="login-btn" class="btn-blue" type="button">Log In</button>
+            <button class="btn-green" type="button" onclick="location.href='/signup'">Create Account</button>
+        </div>
+
+        <hr>
+
+        <!-- <button class="identity-btn rutgers-btn" type="button" onclick="alert('Rutgers CAS Login is coming soon!')">
+            Log in with Rutgers NetID (CAS) (Coming Soon)
+        </button>
+
+        <button class="identity-btn google-btn" type="button" onclick="alert('Google Sign-In is coming soon!')">
+            Sign in with Google (Coming Soon)
+        </button> -->
+
+        <div class="links">
+            <a href="/forgot-password">Forgot Password?</a>
+            <a href="/signup">Need an account?</a>
+        </div>
+    </div>
+
+    <script src="/login.js"></script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Create Account</h1>
+        <p class="page-subtitle">Create an account before choosing a persona and starting a saved chat session.</p>
+
+        <div id="error-message" class="status-message is-error" style="display: none;" aria-live="polite"></div>
+        <div id="success-message" class="status-message is-success" style="display: none;" aria-live="polite"></div>
+
+        <input type="email" id="new-email" placeholder="Email" autocomplete="email" required>
+        <input type="password" id="new-password" placeholder="Password" autocomplete="new-password" required>
+
+        <button id="signup-btn" class="btn-green full-width-btn" type="button">Sign Up</button>
+        <button class="text-btn" type="button" onclick="location.href='/'">Back to Login</button>
+    </div>
+
+    <script src="/signup.js"></script>
+</body>
+</html>

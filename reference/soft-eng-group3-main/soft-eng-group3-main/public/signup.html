@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Create Account</h1>
+        <div id="error-message" style="color: #d32f2f; display: none; margin-bottom: 10px; background: #ffebee; padding: 8px; border-radius: 4px;"></div>
+        <div id="success-message" style="color: #155724; display: none; margin-bottom: 10px; background: #d4edda; padding: 8px; border-radius: 4px;"></div>
+
+        <input type="email" id="new-email" placeholder="Email" required>
+        <input type="password" id="new-password" placeholder="Password" required>
+        
+        <button onclick="createAccount()" style="width: 100%; background-color: #28a745; color: white; padding: 10px; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px;">Sign Up</button>
+        <button onclick="location.href='/'" style="width: 100%; background-color: transparent; color: #007bff; padding: 10px; border: none; cursor: pointer; margin-top: 5px;">Back to Login</button>
+    </div>
+
+    <script>
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        async function createAccount() {
+            const email = document.getElementById('new-email').value.trim();
+            const password = document.getElementById('new-password').value.trim();
+            const errorDiv = document.getElementById('error-message');
+            const successDiv = document.getElementById('success-message');
+
+            errorDiv.style.display = 'none';
+            successDiv.style.display = 'none';
+
+            if (!email || !password) {
+                errorDiv.innerText = "Email and password are required.";
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            if (!emailRegex.test(email)) {
+                errorDiv.innerText = "Please enter a valid email address (example@domain.com).";
+                errorDiv.style.display = 'block';
+                return;
+            }
+
+            // Send data to our Node.js server API
+            const response = await fetch('/api/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                successDiv.innerText = "Account created successfully! Redirecting to login...";
+                successDiv.style.display = 'block';
+                setTimeout(() => window.location.href = '/', 2000); // Send back to login after 2 seconds
+            } else {
+                errorDiv.innerText = result.error;
+                errorDiv.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>

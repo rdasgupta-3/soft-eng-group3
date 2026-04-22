@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choose Your Persona - LLM Project</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <button id="logout-btn" class="logout-btn player-logout-btn" type="button">Log Out</button>
+
+    <h1>Select Your Persona</h1>
+    <p class="page-subtitle">Pick the tone that should guide the conversation before you enter the chat.</p>
+
+    <div class="player-grid">
+        <div class="player-card frame-sweetheart" data-persona="sweetheart">
+            <img src="images/image_4.png" alt="Miss Sweetheart">
+            <div class="player-name">Miss Sweetheart</div>
+            <p class="player-description">A kind, empathetic companion who is always ready to cheer you up and offer emotional support.</p>
+        </div>
+
+        <div class="player-card frame-professional" data-persona="professional">
+            <img src="images/image_6.png" alt="Mr. Professional">
+            <div class="player-name">MR. PROFESSIONAL</div>
+            <p class="player-description">Direct, concise, and focused. He provides logical, business-oriented solutions to your problems.</p>
+        </div>
+
+        <div class="player-card frame-silly" data-persona="silly">
+            <img src="images/image_5.png" alt="Lord Silly The Ninth">
+            <div class="player-name">Lord Silly The Ninth</div>
+            <p class="player-description">A chaotic royal who speaks in riddles, jokes, and theatrical nonsense to keep you entertained.</p>
+        </div>
+    </div>
+
+    <script src="/players.js"></script>
+</body>
+</html>

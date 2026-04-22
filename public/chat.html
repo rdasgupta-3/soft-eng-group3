@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat - LLM</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="chat-page">
+    <button id="logout-btn" class="logout-btn" type="button">Log Out</button>
+
+    <div class="chat-shell">
+        <aside class="chat-history-panel">
+            <div class="history-header">
+                <h2>History</h2>
+                <button id="new-chat-btn" type="button">New Chat</button>
+            </div>
+
+            <div class="history-search-wrap">
+                <input type="search" id="history-search" placeholder="Search conversations">
+            </div>
+
+            <div id="conversation-list"></div>
+        </aside>
+
+        <section class="chat-main">
+            <div id="ollama-warning" class="warning-banner">
+                <strong>Ollama is not installed or not running.</strong><br>
+                Please install it from <a href="https://ollama.com" target="_blank">https://ollama.com</a><br>
+                Then run: <code>ollama serve</code>
+            </div>
+
+            <header class="chat-header">
+                <h1>Triad.ai by Rishita Dasgupta</h1>
+                <p>For users who would like to get answers from multiple LLMs simultaneously. Now with accessibility options: bold text, variable text size, and high contrast mode!</p>
+                <div class="chat-meta">
+                    <span>Logged in as <strong id="session-email"></strong></span>
+                    <span id="persona-label" class="persona-chip"></span>
+                    <a class="header-link" href="/choose-player">Change persona</a>
+                </div>
+            </header>
+
+            <div id="workspace-status" class="status-message workspace-status" aria-live="polite"></div>
+
+            <section class="accessibility-toolbar" aria-label="Accessibility controls">
+                <div class="toolbar-group">
+                    <span class="toolbar-label">Text size</span>
+                    <button id="decrease-text-btn" class="toolbar-btn" type="button" aria-label="Decrease text size">A-</button>
+                    <strong id="font-scale-value" class="toolbar-value">100%</strong>
+                    <button id="increase-text-btn" class="toolbar-btn" type="button" aria-label="Increase text size">A+</button>
+                </div>
+
+                <label class="toolbar-toggle" for="bold-toggle">
+                    <input id="bold-toggle" type="checkbox">
+                    <span>Bold</span>
+                </label>
+
+                <label class="toolbar-toggle" for="high-contrast-toggle">
+                    <input id="high-contrast-toggle" type="checkbox">
+                    <span>High Contrast</span>
+                </label>
+            </section>
+
+            <div id="chat-window">
+                <div id="messages"></div>
+            </div>
+
+            <div class="input-area">
+                <input type="text" id="chat-input" placeholder="Type your message..." required>
+                <button id="send-btn" type="button">Send</button>
+            </div>
+        </section>
+    </div>
+
+    <script src="/chat.js"></script>
+</body>
+</html>

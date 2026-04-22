@@ -1,0 +1,444 @@
+/* --- Keep existing base styles --- */
+body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; background: #f0f2f5; margin: 0; padding: 20px;}
+h1 { margin-bottom: 30px; color: #333; }
+
+/* --- Updated Player Grid Styles --- */
+.player-grid { 
+    display: flex; 
+    gap: 30px; 
+    justify-content: center;
+    align-items: stretch;
+    flex-wrap: wrap; /* Good for responsiveness */
+}
+
+/* Base style for all player cards */
+.player-card { 
+    width: 250px; /* Adjusted for better visibility */
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border-radius: 8px; /* Slight rounded corners, like the image plaques */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    overflow: hidden; /* Keeps the image inside the border */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+}
+
+/* The standard 'hover indicator' requirement */
+.player-card:hover { 
+    transform: translateY(-10px) scale(1.03); 
+    box-shadow: 0 12px 20px rgba(0,0,0,0.2);
+}
+
+/* The actual image inside the card */
+.player-card img {
+    width: 100%;
+    aspect-ratio: 825 / 1346;
+    object-fit: contain;
+    display: block;
+}
+
+/* The name tag below the image */
+.player-name {
+    padding: 10px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    background: #f8f9fa; /* Default nameplate background */
+}
+
+/* --- Specific 'Frame' Styles (Mapping to your images) --- */
+
+/* 1. Miss Sweetheart (image_4.png) - Floral/Pink Frame */
+.frame-sweetheart {
+    border: 5px solid #f8bbd0; /* Soft pink border */
+}
+.frame-sweetheart .player-name {
+    color: #c2185b; /* Deep pink text */
+    background: #fce4ec; /* Very light pink nameplate */
+    font-family: 'Georgia', serif; /* A softer, classic font */
+}
+/* Specific hover highlight color for Sweetheart */
+.frame-sweetheart:hover {
+    border-color: #f48fb1;
+    box-shadow: 0 0 15px rgba(244, 143, 177, 0.6);
+}
+
+/* 2. Mr. Professional (image_6.png) - Corporate Blue Frame */
+.frame-professional {
+    border: 5px solid #1565c0; /* Strong professional blue */
+}
+.frame-professional .player-name {
+    color: white; /* White text on blue */
+    background: #0d47a1; /* Dark blue nameplate */
+    text-transform: uppercase; /* To match the metallic plaque */
+    letter-spacing: 1px;
+}
+/* Specific hover highlight color for Professional */
+.frame-professional:hover {
+    border-color: #1e88e5;
+    box-shadow: 0 0 15px rgba(30, 136, 229, 0.6);
+}
+
+/* 3. Lord Silly The Ninth (image_5.png) - Royal Purple Frame */
+.frame-silly {
+    border: 5px solid #6a1b9a; /* Royal purple border */
+}
+.frame-silly .player-name {
+    color: #fbc02d; /* Royal gold/yellow text */
+    background: #4a148c; /* Very dark purple nameplate */
+    font-family: 'Cursive', 'Georgia', serif; /* Playful font */
+}
+/* Specific hover highlight color for Silly */
+.frame-silly:hover {
+    border-color: #8e24aa;
+    box-shadow: 0 0 15px rgba(142, 36, 170, 0.6);
+}
+
+/* --- Persona Descriptions --- */
+.player-description {
+    font-size: 0.85rem;
+    padding: 0 10px 15px 10px;
+    margin: 0;
+    line-height: 1.4;
+    flex-grow: 1;
+}
+
+/* Match the description background to the nameplate background */
+.frame-sweetheart .player-description {
+    background: #fce4ec;
+    color: #880e4f; /* Darker pink for readability */
+}
+
+.frame-professional .player-description {
+    background: #0d47a1;
+    color: #bbdefb; /* Light blue text for readability */
+}
+
+.frame-silly .player-description {
+    background: #4a148c;
+    color: #e1bee7; /* Light purple text for readability */
+}
+
+/* --- Chat Page Styles --- */
+.chat-page {
+    height: 100vh;
+    margin: 0;
+    padding: 10px 20px 20px;
+    box-sizing: border-box;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    background: #f0f2f5;
+    font-family: sans-serif;
+    overflow: hidden;
+}
+
+.chat-shell {
+    width: min(1040px, 98vw);
+    height: min(720px, calc(100vh - 40px));
+    display: flex;
+    flex-direction: row;
+    background: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.chat-history-panel {
+    width: 280px;
+    border-right: 1px solid #e3e7eb;
+    background: #f8f9fb;
+    display: flex;
+    flex-direction: column;
+}
+
+.history-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px;
+    border-bottom: 1px solid #e3e7eb;
+}
+
+.history-header h2 {
+    margin: 0;
+    font-size: 0.98rem;
+    color: #333;
+}
+
+#new-chat-btn {
+    border: none;
+    background: #28a745;
+    color: #fff;
+    border-radius: 4px;
+    padding: 7px 10px;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+#new-chat-btn:hover {
+    background: #23913c;
+}
+
+.history-search-wrap {
+    padding: 10px;
+    border-bottom: 1px solid #e3e7eb;
+}
+
+#history-search {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid #ced4da;
+    background: #ffffff;
+    border-radius: 4px;
+    padding: 8px 10px;
+    font-size: 0.88rem;
+    outline: none;
+}
+
+#history-search:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.18rem rgba(0, 123, 255, 0.17);
+}
+
+#conversation-list {
+    overflow-y: auto;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.history-item {
+    background: #fff;
+    border: 1px solid #e0e6ed;
+    border-radius: 6px;
+    padding: 10px;
+    cursor: pointer;
+}
+
+.history-item.active {
+    border-color: #007bff;
+    box-shadow: 0 0 0 1px #007bff;
+}
+
+.history-title {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 4px;
+}
+
+.history-preview {
+    font-size: 0.82rem;
+    color: #666;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 8px;
+}
+
+.history-pin-btn {
+    border: none;
+    background: #f1f3f5;
+    color: #495057;
+    border-radius: 4px;
+    padding: 4px 7px;
+    font-size: 0.95rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.history-pin-btn:hover {
+    background: #e2e6ea;
+}
+
+.history-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.history-delete-btn {
+    border: none;
+    background: #fdebec;
+    color: #9b2c2c;
+    border-radius: 4px;
+    padding: 4px 7px;
+    font-size: 0.95rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.history-delete-btn:hover {
+    background: #f8d7da;
+}
+
+.history-separator {
+    margin: 2px 2px 4px;
+    color: #7a8694;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+}
+
+.history-divider {
+    margin: 8px 2px;
+    border-top: 1px solid #d6dce3;
+}
+
+.history-empty-state {
+    font-size: 0.86rem;
+    color: #6c757d;
+    text-align: center;
+    padding: 18px 10px;
+}
+
+.chat-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.chat-header {
+    padding: 14px 16px;
+    border-bottom: 1px solid #e3e7eb;
+    background: #ffffff;
+}
+
+.chat-header h1 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.chat-header p {
+    margin: 4px 0 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+#chat-window {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    background: #f8f9fb;
+}
+
+#messages {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.bubble {
+    max-width: 74%;
+    padding: 10px 12px;
+    border-radius: 14px;
+    line-height: 1.45;
+    font-size: 0.95rem;
+    word-break: break-word;
+}
+
+.user-bubble {
+    align-self: flex-end;
+    border-bottom-right-radius: 4px;
+    background: #007bff;
+    color: #ffffff;
+}
+
+.ai-bubble {
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+    background: #ffffff;
+    color: #333;
+    border: 1px solid #dde2e7;
+}
+
+.input-area {
+    display: flex;
+    gap: 10px;
+    padding: 12px;
+    border-top: 1px solid #e3e7eb;
+    background: #ffffff;
+}
+
+.input-area input {
+    flex: 1;
+    border: 1px solid #ced4da;
+    background: #ffffff;
+    border-radius: 4px;
+    padding: 10px 12px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-area input:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.2);
+}
+
+.input-area button {
+    border: none;
+    border-radius: 4px;
+    padding: 10px 16px;
+    font-weight: 600;
+    color: #fff;
+    background: #007bff;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.input-area button:hover {
+    background: #0069d9;
+}
+
+.logout-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 14px;
+    color: #ffffff;
+    background: #dc3545;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.logout-btn:hover {
+    background: #c82333;
+}
+
+@media (max-width: 700px) {
+    .chat-page {
+        padding: 10px;
+    }
+
+    .chat-shell {
+        width: 100%;
+        height: calc(100vh - 20px);
+        border-radius: 10px;
+        flex-direction: column;
+    }
+
+    .chat-history-panel {
+        width: 100%;
+        height: 210px;
+        border-right: none;
+        border-bottom: 1px solid #e3e7eb;
+    }
+
+    .bubble {
+        max-width: 88%;
+    }
+
+    .logout-btn {
+        top: 12px;
+        right: 12px;
+        padding: 8px 10px;
+        font-size: 0.9rem;
+    }
+}
