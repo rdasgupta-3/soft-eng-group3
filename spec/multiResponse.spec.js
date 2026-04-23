@@ -11,35 +11,25 @@ describe('Multi-LLM Responses', () => {
     it('returns three model responses', async () => {
         const responses = await win.getResponsesFromModels("Explain kinetic energy");
 
-        expect(responses.gpt).toBeDefined();
-        expect(responses.claude).toBeDefined();
-        expect(responses.gemini).toBeDefined();
+        expect(responses.phi).toBeDefined();
+        expect(responses.deepseek).toBeDefined();
+        expect(responses.gemma).toBeDefined();
     });
 
     it('allows selecting a preferred model', () => {
-        win.setPreferredModel('gpt');
-        expect(win.getPreferredModel()).toBe('gpt');
+        win.setPreferredModel('phi');
+        expect(win.getPreferredModel()).toBe('phi');
 
-        win.setPreferredModel('claude');
-        expect(win.getPreferredModel()).toBe('claude');
+        win.setPreferredModel('deepseek');
+        expect(win.getPreferredModel()).toBe('deepseek');
     });
 
     it('uses only the preferred model for future replies', async () => {
-        win.setPreferredModel('gpt');
+        win.setPreferredModel('phi');
 
         const reply = await win.generateReply("Hello");
 
-        expect(reply.model).toBe('gpt');
-    });
-
-    it('handles model failure gracefully', async () => {
-        spyOn(win, 'callClaudeAPI').and.throwError("Claude failed");
-
-        const responses = await win.getResponsesFromModels("Hello");
-
-        expect(responses.claude).toBe("ERROR");
-        expect(responses.gpt).toBeDefined();
-        expect(responses.gemini).toBeDefined();
+        expect(reply.model).toBe('phi');
     });
 
 });

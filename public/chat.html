@@ -674,7 +674,7 @@
 
     
        async function getMultiModelReplies(conversationId, text) {
-            const typingId = addTypingBubble("Models");
+            const typingId = addTypingBubble(getCurrentPersonaName());
 
             const res = await fetch(`/api/conversations/${conversationId}/multi-reply`, {
                 method: 'POST',
@@ -789,28 +789,34 @@
         }
 
         async function selectModel(conversationId, modelKey, chosenText) {
-
             const btn = document.getElementById(`multi-btn-${modelKey}`);
             if (btn) btn.disabled = true;
 
-            await fetch(`/api/conversations/${conversationId}/select-model`, {
+            const selectRes = await fetch(`/api/conversations/${conversationId}/select-model`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ modelKey })
             });
 
-            const conv = getActiveConversation();
-            if (conv) conv.selectedModel = modelKey;
+            if (!selectRes.ok) {
+                console.error('[selectModel] Failed to save model selection on server');
+                if (btn) btn.disabled = false;
+                return;
+            }
 
             const container = document.getElementById('multi-model-container');
             if (container) container.remove();
 
             await addMessage('ai-bubble', chosenText);
+
+            const conv = getActiveConversation();
+            if (conv) conv.selectedModel = modelKey;
+
             saveConversations();
         }
-
-                async function getSingleModelReply(conversationId, text) {
-                    const typingId = addTypingBubble("AI");
+        
+        async function getSingleModelReply(conversationId, text) {
+             const typingId = addTypingBubble(getCurrentPersonaName());
 
                     const res = await fetch(`/api/conversations/${conversationId}/ai-reply`, {
                         method: "POST",
@@ -820,7 +826,7 @@
 
                     const data = await res.json();
                     replaceTypingBubble(typingId, data.aiReply);
-                }
+        }
 
         function handleKey(e) { if (e.key === 'Enter') sendMessage(); }
 

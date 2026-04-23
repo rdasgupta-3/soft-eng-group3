@@ -288,6 +288,103 @@
           "at": 1776912320469
         }
       ]
+    },
+    {
+      "id": "conv-1776912605059-3109",
+      "title": "heyoooo",
+      "pinned": false,
+      "updatedAt": 1776912657110,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "heyoooo",
+          "at": 1776912605076
+        },
+        {
+          "type": "ai-bubble",
+          "text": "Hey! How's it going? If you have any questions or need help with something, feel free to ask! 😊",
+          "at": 1776912635389
+        },
+        {
+          "type": "user-bubble",
+          "text": "what is kinetic energy",
+          "at": 1776912657110
+        }
+      ]
+    },
+    {
+      "id": "conv-1776913395560-9875",
+      "title": "hi!",
+      "pinned": false,
+      "updatedAt": 1776913468397,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "hi!",
+          "at": 1776913395597
+        },
+        {
+          "type": "ai-bubble",
+          "text": "Hello! How can I help you today?",
+          "at": 1776913431260
+        },
+        {
+          "type": "user-bubble",
+          "text": "what color is the sky",
+          "at": 1776913468397
+        }
+      ]
+    },
+    {
+      "id": "conv-1776914157400-5719",
+      "title": "heyoo",
+      "pinned": false,
+      "updatedAt": 1776914426036,
+      "selectedModel": "deepseek",
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "heyoo",
+          "at": 1776914157410
+        },
+        {
+          "type": "ai-bubble",
+          "text": "Hey! 😊 How's it going? Anything on your mind or need help with?",
+          "at": 1776914245218
+        },
+        {
+          "type": "user-bubble",
+          "text": "can you explain kinetic energy",
+          "at": 1776914283116
+        },
+        {
+          "type": "ai-bubble",
+          "text": "Sorry, I'm having trouble responding right now.",
+          "at": 1776914343149
+        },
+        {
+          "type": "user-bubble",
+          "text": "nauurr",
+          "at": 1776914348539
+        },
+        {
+          "type": "ai-bubble",
+          "text": "It seems like your message might be incomplete or unclear. Could you clarify or provide more context? Are you asking about something related to \"nauurr\" in a specific field, such as mathematics, physics, engineering, or another area? Let me know so I can assist you better!",
+          "at": 1776914373693
+        },
+        {
+          "type": "user-bubble",
+          "text": "i would like to know what kinetic energy is pls",
+          "at": 1776914404505
+        },
+        {
+          "type": "ai-bubble",
+          "text": "Kinetic energy refers to the energy an object possesses due to its motion. It is defined as the work needed to accelerate a body from rest to a given velocity. The formula for calculating kinetic energy is:\n\n\\[\nKE = \\frac{1}{2}mv^2\n\\]\n\nwhere:\n- \\( KE \\) is the kinetic energy,\n- \\( m \\) is the mass of the object,\n- \\( v \\) is its velocity.\n\nExamples of objects with different masses and velocities illustrate how kinetic energy varies:\n\n1. A heavy car moving quickly (\\( m = 5000 \\, \\text{kg}, v = 60 \\, \\text{m/s} \\)) has significant kinetic energy.\n2. A light bike moving slowly (\\( m = 10 \\, \\text{kg}, v = 3 \\, \\text{m/s} \\)) has less kinetic energy.\n\nIf an object is not moving (\\( v = 0 \\)), its kinetic energy is zero because there is no work done to accelerate it from rest.",
+          "at": 1776914426036
+        }
+      ]
     }
   ],
   "testuser@test.com": []

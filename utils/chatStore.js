@@ -70,6 +70,10 @@ function updateConversation(email, conversationId, updates) {
         conv.title = updates.title.trim();
     }
 
+    if (typeof updates.selectedModel === 'string' && updates.selectedModel) {
+        conv.selectedModel = updates.selectedModel;
+    }
+
     conv.updatedAt = Date.now();
     save(data);
     return conv;
