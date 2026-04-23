@@ -837,7 +837,6 @@
             const data = await res.json();
             replaceTypingBubble(typingId, data.aiReply);
 
-            // Return model info so tests can inspect it
             return { aiReply: data.aiReply, model: modelOverride || data.model };
         }
 

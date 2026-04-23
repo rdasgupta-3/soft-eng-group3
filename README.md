@@ -31,13 +31,14 @@ Below is the current routing table for our Express.js backend, separating our fr
 | Method | Endpoint | Purpose |
 | :--- | :--- | :--- |
 | **GET** | `/api/ollama-status` | Checks if Ollama is running |
-| **GET** | `/api/warmup` | Warms up the Ollama model to reduce first‑reply latency |
 | **GET** | `/api/conversations` | Returns all conversations for the logged‑in user |
 | **POST** | `/api/conversations` | Creates a new conversation |
-| **PATCH** | `/api/conversations/:conversationId` | Updates conversation metadata for favoriting |
+| **PATCH** | `/api/conversations/:conversationId` | Updates conversation metadata for favoriting, titling, and selecting an LLM model |
 | **DELETE** | `/api/conversations/:conversationId` | Deletes a conversation |
 | **POST** | `/api/conversations/:conversationId/messages` | Adds user input or AI responses into chat |
-| **POST** | `/api/conversations/:conversationId/ai-reply` | Generates an AI reply using Ollama |
+| **POST** | `/api/conversations/:conversationId/multi-reply` | Sends the same user input prompt to the 3 local LLM models simultaneously and returns three responses |
+| **POST** | `/api/conversations/:conversationId/select-model` | Saves the user's chosen model (phi, gemma, or deepseek) |
+| **POST** | `/api/conversations/:conversationId/ai-reply` | Generates an AI reply using only the selected model |
 
 ---
 
@@ -61,42 +62,43 @@ For the current development iteration, we are utilizing a **File-Based JSON Stor
 
 ## Entity: Conversation
 * `id` - unique conversation ID
-* `email` - owner of the conversation
+* `title` - auto-generated from first user message
 * `messages[]` - array of `{type, text, at}`
 * `pinned` - boolean
 * `updatedAt` - timestamp
+* `selectedModel` - `"phi"`, `"gemma"`, `"deepseek"`, or `null`
 
 ---
 
 ### Local Ollama Chat Integration
 
-For this iteration, the base ollama model has now been replaced by three different local ollama models. Users now recieve 3 reponses to their first chat input, where they can then pick one of the responses and continue the chat talk to the model the chosen response corrresponds to.
+For this iteration, the base ollama model has now been replaced by three different local ollama models. Users now recieve 3 responses to their first chat input, where they can then pick one of the responses and continue the chat talk to the model the chosen response corrresponds to.
 
-## Installing Required Models
+## Installing Required Local Models
 
-This project uses three local models:
+In this iteration, the previous Ollama model has been replaces with 3 specific differing local LLM models. They were chosen to get a wider range of LLM responses while still not having a demanding download size:
 
-- Phi 3.8B (Microsoft)
-- Gemma 2B (Google)
-- DeepSeek R1 1.5B (DeepSeek)
+| Model | Size |
+| :--- | :--- |
+| phi3:3.8b (Microsoft) | 2.2 GB |
+| gemma2:2b (Google) | 1.6 GB |
+| deepseek-r1:1.5b (DeepSeek) | 1.1 GB |
 
 All these models can be found and installed at https://ollama.com/search
 Alternatively, to install them all at once you may run the command:
 
 `npm run setup`
 
-This command will run a script that downloads all models necessary for the LLM.
+This command will run a script that pulls all models necessary for the LLM.
 
-## Default Environment Variables 
-
-You can override the default environment variables using an .env in the project root. If no `.env` is provided, the backend defaults to: 
-
-- `OLLAMA_BASE_URL = http://127.0.0.1:11434`
-- `OLLAMA_MODEL = llama3.2:latest`
+## Ollama Status 
 
 The frontend checks `/api/ollama-status` to determine whether Ollama is running. If Ollama is offline or unavailable, the chat UI displays a warning banner and disables message input. `/api/conversations/:id/ai-reply` also throws an error: `503 { "error": "ollama-failed" }`.
 
 ## Ollama Timeout
 
-If Ollama takes more than 30 seconds to respond, `/api/conversations/:id/ai-reply` will throw an error: `503 { "error": "ollama-failed" }`. The front end will then display a fallback message, which is still saved into conversation history:
+If any model takes more than 60 seconds to respond, `/api/conversations/:id/multi-reply` will hide the model that failed to respond, and send a fallback message to the frontend when all three models fail to respond:
+> "Sorry, all models failed to respond. Please try again."
+
+If one model has already been selected but the model timesout, `/api/conversations/:id/ai-reply` will throw an error: `503 { "error": "ollama-failed" }`. The front end will then display a fallback message, which is still saved into conversation history:
 > “Sorry, I'm having trouble responding right now. Please try again.”
