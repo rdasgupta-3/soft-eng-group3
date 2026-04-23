@@ -31,7 +31,7 @@ Given('I am logged in', async function () {
     await page.goto('http://localhost:3000/');
     await new Promise(resolve => setTimeout(resolve, 1000));
     await page.type('#email', 'testuser@test.com', { delay: 20 });
-    await page.type('#password', 'password12345', { delay: 20 });
+    await page.type('#password', 'passwo1234567', { delay: 20 });
     await new Promise(resolve => setTimeout(resolve, 800));
     await page.click('button[onclick="attemptLogin()"]');
     await new Promise(resolve => setTimeout(resolve, 1500));

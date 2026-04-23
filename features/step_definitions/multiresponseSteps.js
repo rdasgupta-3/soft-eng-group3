@@ -16,7 +16,7 @@ Before({ tags: '@needsLogin' }, async function () {
     await page.goto('http://localhost:3000/');
     await new Promise(r => setTimeout(r, 1000));
     await page.type('#email', 'testuser@test.com', { delay: 20 });
-    await page.type('#password', 'password12345', { delay: 20 });
+    await page.type('#password', 'passwo1234567', { delay: 20 });
     await page.click('button[onclick="attemptLogin()"]');
     await new Promise(r => setTimeout(r, 1500));
     await page.goto('http://localhost:3000/chat', { waitUntil: 'domcontentloaded' });
@@ -92,7 +92,6 @@ Then('I should still see responses from the other models', async function () {
 });
 
 When('one of the models fails to respond', async function () {
-    // In real conditions a model may time out naturally.
-    // This step just waits to allow any in-flight timeouts to settle.
+
     await new Promise(r => setTimeout(r, 3000));
 });

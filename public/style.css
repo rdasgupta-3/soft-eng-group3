@@ -134,7 +134,7 @@ h1 { margin-bottom: 30px; color: #333; }
 }
 
 .chat-shell {
-    width: min(1200px, 98vw);
+    width: min(1200px, calc(100vw - 220px));
     height: min(720px, calc(100vh - 40px));
     display: flex;
     flex-direction: row;
@@ -307,6 +307,19 @@ h1 { margin-bottom: 30px; color: #333; }
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 12px; 
+}
+
+.back-btn {
+    flex-shrink: 0;  
+    border: none;
+    background: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    white-space: nowrap;
 }
 
 .chat-header h1 {
@@ -319,17 +332,6 @@ h1 { margin-bottom: 30px; color: #333; }
     margin: 0; 
     color: #666;
     font-size: 0.9rem;
-}
-
-.back-btn {
-    border: none;
-    background: #007bff;
-    color: white;
-    padding: 10px 20px;  
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;     
-    white-space: nowrap;
 }
 
 .back-btn:hover {
@@ -416,6 +418,7 @@ h1 { margin-bottom: 30px; color: #333; }
     position: fixed;
     top: 20px;
     right: 20px;
+    z-index: 100;
     border: none;
     border-radius: 5px;
     padding: 10px 14px;
