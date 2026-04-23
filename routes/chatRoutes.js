@@ -16,6 +16,12 @@ const MODEL_MAP = {
     deepseek: "deepseek-r1:1.5b"
 };
 
+const personaPrompts = {
+    sweetheart: "You are a friendly, sweet assistant who explains things warmly and politely.",
+    professional: "You are a formal, concise assistant who gives structured, polished answers.",
+    silly: "You are witty, trickster assistant who responds with humor and lies."
+};
+
 const router = express.Router();
 
 // checking if ollama is available and running
@@ -118,7 +124,7 @@ router.post('/conversations/:conversationId/ai-reply', async (req, res) => {
         return res.status(400).json({ error: 'No user message found to respond to.' });
     }
 
-    // Ensure a model is selected
+
     if (!conversation.selectedModel) {
         return res.status(400).json({ error: 'No model selected for this conversation.' });
     }
@@ -132,7 +138,6 @@ router.post('/conversations/:conversationId/ai-reply', async (req, res) => {
         console.warn(`[AI-Reply] Error generating reply from ${model}:`, err.message);
     }
 
-    // Fallback if model failed or returned null
     if (!aiText || typeof aiText !== "string" || aiText.trim() === "") {
         aiText = "Sorry, I'm having trouble responding right now.";
     }
@@ -157,6 +162,16 @@ router.post('/conversations/:conversationId/multi-reply', async (req, res) => {
         return res.status(404).json({ error: 'Conversation not found.' });
     }
 
+    const persona = req.body.persona || "sweetheart";
+    const systemPrompt = personaPrompts[persona];
+
+    const personaMessage = {
+        role: "system",
+        content: systemPrompt
+    };
+
+    const messagesWithPersona = [personaMessage, ...conversation.messages];
+
     try {
         const tagsRes = await fetch('http://127.0.0.1:11434/api/tags');
         const tagsData = await tagsRes.json();
@@ -172,15 +187,14 @@ router.post('/conversations/:conversationId/multi-reply', async (req, res) => {
         console.warn('[multi-reply] Could not check installed models:', e.message);
     }
 
-    const messages = conversation.messages;
-
     const [phi, gemma, deepseek] = await Promise.all([
-        generateReplyFromSpecificModel(MODEL_MAP.phi, messages)
-            .catch(() => null),
-        generateReplyFromSpecificModel(MODEL_MAP.gemma, messages)
-            .catch(() => null),
-        generateReplyFromSpecificModel(MODEL_MAP.deepseek, messages)
-            .catch(() => null),
+    generateReplyFromSpecificModel(MODEL_MAP.phi, messagesWithPersona)
+        .catch(() => null),
+    generateReplyFromSpecificModel(MODEL_MAP.gemma, messagesWithPersona)
+        .catch(() => null),
+    generateReplyFromSpecificModel(MODEL_MAP.deepseek, messagesWithPersona)
+        .catch(() => null),
+    
     ]);
 
     return res.json({

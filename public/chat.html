@@ -676,10 +676,13 @@
        async function getMultiModelReplies(conversationId, text) {
             const typingId = addTypingBubble(getCurrentPersonaName());
 
-            const res = await fetch(`/api/conversations/${conversationId}/multi-reply`, {
+            const urlParams = new URLSearchParams(window.location.search);
+            const selectedPersona = urlParams.get("persona") || "sweetheart";
+
+            const res = await window.fetch(`/api/conversations/${conversationId}/multi-reply`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: text })
+                body: JSON.stringify({ persona: selectedPersona })
             });
 
             const data = await res.json();
@@ -688,6 +691,8 @@
             if (bubble) bubble.remove();
 
             const messagesEl = document.getElementById('messages');
+
+            if (!messagesEl) return data;
 
             const models = [
                 { key: "phi",      label: "Phi",      text: data.phi },
@@ -702,7 +707,7 @@
                 errBubble.className = 'bubble ai-bubble';
                 errBubble.textContent = "Sorry, all models failed to respond. Please try again.";
                 messagesEl.appendChild(errBubble);
-                return;
+                return data;
             }
 
             const container = document.createElement('div');
@@ -738,8 +743,10 @@
             applyFormattingToAll();
 
             for (const m of validModels) {
-                await animateIntoElement(`multi-text-${m.key}`, m.text);
+                await window.animateIntoElement(`multi-text-${m.key}`, m.text);  
             }
+
+            return data;
         }
 
         function animateIntoElement(elementId, finalText) {
@@ -815,17 +822,25 @@
             saveConversations();
         }
         
-        async function getSingleModelReply(conversationId, text) {
-             const typingId = addTypingBubble(getCurrentPersonaName());
+        async function getSingleModelReply(conversationId, text, modelOverride) {
+            const typingId = addTypingBubble(getCurrentPersonaName());
 
-                    const res = await fetch(`/api/conversations/${conversationId}/ai-reply`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ prompt: text })
-                    });
+            const res = await fetch(`/api/conversations/${conversationId}/ai-reply`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt: text, modelOverride })
+            });
 
-                    const data = await res.json();
-                    replaceTypingBubble(typingId, data.aiReply);
+            const data = await res.json();
+            replaceTypingBubble(typingId, data.aiReply);
+
+            // Return model info so tests can inspect it
+            return { aiReply: data.aiReply, model: modelOverride || data.model };
+        }
+
+        function getSelectedPersona() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get("persona") || "sweetheart";
         }
 
         function handleKey(e) { if (e.key === 'Enter') sendMessage(); }
@@ -853,6 +868,34 @@
         }
 
         initChat();
+
+       if (typeof window !== 'undefined') {
+            window.getMultiModelReplies = getMultiModelReplies;
+            window.getSingleModelReply = getSingleModelReply;
+            window.getSelectedPersona = getSelectedPersona;
+            window.addTypingBubble = addTypingBubble;
+            window.getCurrentPersonaName = getCurrentPersonaName;
+            window.animateIntoElement = animateIntoElement;
+
+            let _testSelectedModel = null;
+            window.setPreferredModel = function(modelKey) {
+                _testSelectedModel = modelKey;
+            };
+            window.getPreferredModel = function() {
+                return _testSelectedModel;
+            };
+
+            window.getResponsesFromModels = async function(prompt) {
+                const conv = getActiveConversation();
+                const id = conv?.id || "test-conv-123";
+                return await getMultiModelReplies(id, prompt);
+            };
+
+            window.generateReply = async function(text) {
+                return await getSingleModelReply("123", text, window.getPreferredModel());
+            };
+        }
+        
     </script>
 
     <button onclick="logout()" class="logout-btn">Log Out</button>
