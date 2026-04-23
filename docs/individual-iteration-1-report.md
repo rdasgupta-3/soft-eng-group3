@@ -23,7 +23,13 @@ In addition to those minimum requirements, the final project also includes and d
 4. secure password hashing instead of plaintext password storage
 5. AI personality switching in the middle of an active conversation
 
-The result is a six-page web application that preserves the group's login, sign-up, password recovery, persona selection, conversation history, and Ollama behaviors while extending the chat interface with accessible controls and multi-model comparison.
+The persona system is fully integrated in the final app rather than being a decorative leftover. Users can choose among:
+
+- **Miss Sweetheart** for warm, encouraging responses
+- **Mr. Professional** for concise, practical responses
+- **Lord Silly The Ninth** for playful, whimsical responses
+
+The result is a six-page web application that preserves the group's login, sign-up, password recovery, persona selection, conversation history, and Ollama behaviors while extending the chat interface with accessible controls, persistent persona-aware conversations, and side-by-side multi-model comparison.
 
 Verified on 2026-04-22:
 
@@ -72,9 +78,8 @@ The rubric requires at least three user stories/features. This final project imp
 | US-3 | As a user, I want to see multiple LLM responses in separate labeled sections so that I can compare outputs clearly. | 5 | Required individual feature | Yes |
 | US-4 | As a user, I want my password stored as a hash rather than plaintext so that my credentials are protected if the data file is exposed. | 3 | Additional implemented feature | Yes |
 | US-5 | As a user, I want to switch AI personalities during an existing chat so that the tone can change without starting over. | 4 | Additional implemented feature | Yes |
-| US-6 | As a user, I want each AI response to reflect the selected persona so that the interaction feels distinct and meaningful. | 4 | Additional implemented feature | Yes |
 
-Total implemented story points: **22**
+Total implemented story points: **18**
 
 ### 2.3 Feature Selection Rationale
 
@@ -89,6 +94,8 @@ The feature-selection process balanced rubric compliance, customer value, and so
 
 - `US-4` was kept because secure password handling is already present in the finished app, strengthens the quality of the submission, and aligns with good software-engineering practice.
 - `US-5` was kept because the project already includes personas as a major interaction concept, and mid-conversation switching makes that feature significantly more useful.
+
+The detailed persona-aware response behavior is documented later in the report as part of `US-5` rather than counted as a separate user story, which keeps the feature totals accurate while still reflecting the implementation fully.
 
 The final submission therefore exceeds the minimum requirement of three features while remaining realistic for an individual deadline.
 
@@ -133,6 +140,34 @@ The ten browser scenarios are:
 9. conversation history search, star, continue, and delete
 10. starred conversation persistence after logout and login
 
+### 2.7 Current User-Facing Feature Inventory
+
+To reflect the project accurately, the final application includes more than just the five headline stories. The current user-facing behavior includes the following features:
+
+| Area | Current Behavior In The Project |
+| :--- | :--- |
+| Login | email/password login with error messaging and Enter-key submission |
+| Sign-up | account creation with success/error messaging and redirect to login |
+| Password recovery | forgot-password request page plus reset-password page with dev preview reset link |
+| Persona selection | three selectable personas: Miss Sweetheart, Mr. Professional, and Lord Silly The Ninth |
+| Persona persistence | each conversation stores its current persona and restores it when reopened |
+| Mid-chat persona switching | the `Change persona` flow updates the label, URL, conversation metadata, and subsequent reply tone |
+| Accessibility toolbar | text size decrease/increase, bold text toggle, and high-contrast toggle |
+| Multi-model comparison | each prompt renders three response cards labeled `GPT`, `Gemini`, and `Claude` |
+| Provider-specific style | GPT is structured, Gemini is analytical, and Claude is supportive/reflective |
+| Response-mode badges | response cards show mode labels such as live, fallback, or demo mode |
+| Conversation history | new chat, search, pin/star, reopen, and delete conversations from the sidebar |
+| History previews | the sidebar preview includes either the latest user message or summarized grouped model responses |
+| Empty-state behavior | a new draft chat starts with an instructional empty state instead of a blank panel |
+| Ollama status handling | online warm-up, offline warning banner, disabled input when unavailable |
+| Reply animation | a persona-specific "is thinking" bubble appears before the three cards animate into view |
+| Persistence | users, sessions, reset tokens, preferences, and conversations are stored in JSON files |
+
+Two items that appear in earlier drafts or historical code should be described carefully:
+
+- the login page currently contains only the active email/password flow plus links for password recovery and account creation
+- Rutgers CAS and Google sign-in are not live features in the current app and should not be presented as implemented functionality
+
 ## 3. UI Design
 
 ### 3.1 Page Count
@@ -165,6 +200,13 @@ The only major UI additions are:
 - a compact accessibility toolbar in the chat workspace
 - three side-by-side response cards instead of a single AI reply block
 - clearer starred-conversation rendering in the history sidebar
+
+Several smaller UI details are also important to document accurately:
+
+- the chat header shows the logged-in email and the currently active persona chip
+- the workspace includes a `Change persona` link, so persona switching is part of the main flow
+- the history sidebar shows a dedicated `STARRED` section for pinned conversations
+- the forgot-password page exposes a local development preview reset link instead of requiring email integration
 
 ### 3.3 Page Interaction And Transition Model
 
@@ -205,8 +247,7 @@ The intended user flow is:
 | [ password ]                              |
 | [ Log In ] [ Create Account ]             |
 | ---------------------------------------   |
-| Forgot Password?      Forgot Email?       |
-|                                           |
+| Forgot Password?      Need an account?    |
 +-------------------------------------------+
 ```
 
@@ -277,6 +318,24 @@ The intended user flow is:
 +----------------------------------------------------------------------------------+
 ```
 
+### 3.6 Persona And Provider Presentation In The UI
+
+The persona system and multi-model system are visible parts of the interface, not just backend logic.
+
+**Personas shown to the user**
+
+- `Miss Sweetheart`: kind, empathetic, and encouraging
+- `Mr. Professional`: concise, practical, and business-like
+- `Lord Silly The Ninth`: playful, theatrical, and whimsical
+
+**Providers shown to the user**
+
+- `GPT`: structured and concise
+- `Gemini`: analytical and comparative
+- `Claude`: supportive and reflective
+
+In the chat workspace, the current persona appears in a chip beside the logged-in email. Each response group is labeled clearly and split into separate provider cards so the user can compare outputs without guessing which response came from which model.
+
 ## 4. Alignment With Iteration 1 And Iteration 2
 
 ### 4.1 Why Legacy Alignment Matters
@@ -298,6 +357,7 @@ The Iteration 1 group work focused primarily on account access and persona selec
 | account creation | preserved |
 | logout | preserved |
 | persona selection before chat | preserved |
+| three named personas | preserved as Miss Sweetheart, Mr. Professional, and Lord Silly The Ninth |
 | redirect into the chat flow after login | preserved |
 | protected access to the main chat pages | preserved and browser-tested |
 
@@ -328,6 +388,8 @@ The following features are outside the three required solo stories but remain pa
 - conversation history with search, star, continue, and delete
 - Ollama online/offline detection and warm-up
 - thinking indicator and typewriter-style animated replies
+
+The final project also extends the earlier persona design beyond the group baseline: persona is now stored as conversation metadata, restored when an old conversation is reopened, and changeable in the middle of an active chat.
 
 ## 5. Agile Development Process
 
@@ -416,6 +478,43 @@ The final project also implements:
 | Multi-LLM comparison | `routes/chatRoutes.js`, `utils/multiModelService.js`, `utils/providerCatalog.js`, `public/chat.js` | one prompt returns labeled `GPT`, `Gemini`, and `Claude` cards |
 | Password hashing | `utils/authStore.js`, `routes/authRoutes.js` | passwords are never stored in plaintext |
 | Persona switching | `public/chat.js`, `public/players.html`, `routes/chatRoutes.js`, `utils/chatStore.js` | the user can switch persona without abandoning the current conversation |
+
+### 6.4 Persona Integration Details
+
+Because you specifically asked whether the AI personas are reflected in the report, this section states their behavior explicitly.
+
+The app supports exactly three personas:
+
+| Persona Key | Display Name | Intended Tone | Where It Appears |
+| :--- | :--- | :--- | :--- |
+| `sweetheart` | Miss Sweetheart | warm, encouraging, empathetic | persona chooser, chat persona chip, generated responses |
+| `professional` | Mr. Professional | concise, practical, professional | persona chooser, chat persona chip, generated responses |
+| `silly` | Lord Silly The Ninth | playful, whimsical, slightly absurd | persona chooser, chat persona chip, generated responses |
+
+The persona choice is not only cosmetic. In the actual implementation:
+
+- the selected persona is placed in the `/chat?persona=...` URL
+- each conversation stores its persona in conversation metadata
+- reopening a saved conversation restores that persona into the active workspace
+- switching personas mid-conversation updates the visible label and changes the tone of subsequent generated responses
+
+### 6.5 Multi-Model Comparison Details
+
+The multi-model feature is also more specific than a generic "three responses" description.
+
+| Provider ID | Label In UI | Intended Response Style |
+| :--- | :--- | :--- |
+| `openai` | GPT | structured and concise |
+| `gemini` | Gemini | analytical and comparative |
+| `claude` | Claude | supportive and reflective |
+
+Each response card shows:
+
+- a provider label
+- a response-mode label
+- generated text for that provider/persona combination
+
+Depending on the runtime path, a card's mode can indicate live Ollama use, fallback generation, offline fallback, or demo/test behavior.
 
 ## 7. Testing Strategy, Test Suites, And Traceability
 
@@ -658,6 +757,8 @@ Triad.AI is a Node.js + Express web application with static frontend pages and J
 | Persistence layer | JSON files for users, sessions, reset tokens, preferences, and conversations | `data/` |
 | Test layer | Jasmine specs, Cucumber features, Puppeteer world/support files | `spec/`, `features/individual/` |
 
+At startup, the server ensures the data directory exists before handling requests. When the app is run directly through `npm start`, it also attempts an Ollama warm-up call in the background so the first live response can return faster.
+
 ### 8.2 Main Runtime Flow
 
 The main prompt-to-response flow is:
@@ -670,6 +771,58 @@ The main prompt-to-response flow is:
 6. the server generates three provider-specific responses
 7. the grouped response is stored as a `model-group` message
 8. the client renders `GPT`, `Gemini`, and `Claude` cards side by side
+
+### 8.2.1 Persona And Provider Orchestration
+
+The chat-generation path combines two dimensions of behavior:
+
+- **persona instructions**, which determine tone
+- **provider instructions**, which determine card style
+
+Persona instructions currently map to:
+
+- `Miss Sweetheart` -> warm, encouraging, empathetic
+- `Mr. Professional` -> concise, practical, professional
+- `Lord Silly The Ninth` -> playful, whimsical, slightly absurd
+
+Provider instructions currently map to:
+
+- `GPT` -> clear structure and concise organization
+- `Gemini` -> analytical comparison and tradeoff framing
+- `Claude` -> supportive explanation plus practical next steps
+
+This means the final response a user sees is shaped by both the selected persona and the selected provider card. That is why the project can truthfully claim that personas are integrated into the multi-LLM comparison experience.
+
+### 8.2.2 Conversation And Rendering Behavior
+
+Several implementation details affect what the user sees:
+
+- conversations are stored with `persona`, `title`, `pinned`, `updatedAt`, and `messages`
+- new conversation titles are derived automatically from the first user prompt
+- grouped model responses are stored as a single `model-group` message containing three provider responses
+- the history sidebar preview shows either the latest user message or summarized model-group text
+- when the current chat is empty, the interface shows an instructional empty state rather than an empty message area
+- before final cards appear, the workspace shows a persona-specific "is thinking" bubble and then animates the card text into view
+
+### 8.2.3 Server-Backed Mode And Local/Test Mode
+
+The client supports two runtime modes:
+
+- the normal **server-backed mode**, used when the app is running through Express
+- a **local/demo mode**, used when no real HTTP server API is available, which helps page-level tests run in JSDOM and preserves basic UI behavior
+
+In server-backed mode:
+
+- sessions, preferences, and conversations are loaded from REST endpoints
+- Ollama status is checked through the backend
+- input is disabled when Ollama is offline
+
+In local/demo mode:
+
+- conversations and preferences use `localStorage`
+- generated responses come from local demo text rather than live backend calls
+
+This dual-mode design is part of why the page-level Jasmine suite can test realistic chat behavior without requiring a live browser server for every page test.
 
 ### 8.3 Page Routing Table
 
@@ -882,11 +1035,11 @@ If a TA wants to manually inspect the project:
 
 1. create an account
 2. log in
-3. choose a persona
+3. choose one of the three personas: Miss Sweetheart, Mr. Professional, or Lord Silly The Ninth
 4. adjust text size with `A-` and `A+`
 5. enable `Bold` and `High Contrast`
-6. send a prompt and compare the `GPT`, `Gemini`, and `Claude` cards
-7. change persona and send another prompt
+6. send a prompt and compare the `GPT`, `Gemini`, and `Claude` cards, including their mode badges
+7. change persona and send another prompt to confirm the tone changes without losing the conversation
 8. create a new chat, star one conversation, search for it, reopen it, and delete another one
 9. log out and log back in to confirm that starred history persists
 
@@ -898,6 +1051,7 @@ This final version of **Triad.AI by Rishita Dasgupta** is tightly aligned with t
 - clear story-point estimates and feature-selection rationale
 - SMART requirement analysis for every documented feature
 - page count, transition flow, and lo-fi sketches
+- explicit documentation of the three integrated personas and the three compared providers
 - preserved alignment with the Group Iteration 1 and Iteration 2 baseline
 - organized Jasmine page and logic suites
 - organized Cucumber.js acceptance suites
