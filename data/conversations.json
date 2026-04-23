@@ -387,5 +387,62 @@
       ]
     }
   ],
-  "testuser@test.com": []
+  "testuser@test.com": [
+    {
+      "id": "conv-1776947380148-9043",
+      "title": "Test message",
+      "pinned": false,
+      "updatedAt": 1776947380161,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Test message",
+          "at": 1776947380161
+        }
+      ]
+    },
+    {
+      "id": "conv-1776947415163-8895",
+      "title": "Test message",
+      "pinned": false,
+      "updatedAt": 1776947415198,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Test message",
+          "at": 1776947415198
+        }
+      ]
+    },
+    {
+      "id": "conv-1776947447485-9861",
+      "title": "Test message",
+      "pinned": false,
+      "updatedAt": 1776947447505,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Test message",
+          "at": 1776947447505
+        }
+      ]
+    },
+    {
+      "id": "conv-1776947482521-3724",
+      "title": "Hello",
+      "pinned": false,
+      "updatedAt": 1776947482589,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Hello",
+          "at": 1776947482589
+        }
+      ]
+    }
+  ]
 }

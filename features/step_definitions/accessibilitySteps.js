@@ -58,7 +58,7 @@ Given('I increased the text size', async function () {
 Given('there is a message in the chat', async function () {
     await page.type('#userInput', 'Test message', { delay: 10 });
     await new Promise(resolve => setTimeout(resolve, 300));
-    await page.click('.input-area button');
+    await page.click('button[onclick="sendMessage()"]');
     await new Promise(resolve => setTimeout(resolve, 1000));
 });
 
@@ -83,7 +83,7 @@ When('I click {string}', async function (buttonLabel) {
 When('I send a message {string}', async function (message) {
     await page.type('#userInput', message, { delay: 20 });
     await new Promise(resolve => setTimeout(resolve, 500));
-    await page.click('.input-area button');
+    await page.click('button[onclick="sendMessage()"]');
     await new Promise(resolve => setTimeout(resolve, 1000));
 });
 
