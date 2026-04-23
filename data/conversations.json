@@ -443,6 +443,217 @@
           "at": 1776947482589
         }
       ]
+    },
+    {
+      "id": "conv-1776949696049-2443",
+      "title": "Test message",
+      "pinned": false,
+      "updatedAt": 1776949696060,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Test message",
+          "at": 1776949696060
+        }
+      ]
+    },
+    {
+      "id": "conv-1776949730288-6557",
+      "title": "Test message",
+      "pinned": false,
+      "updatedAt": 1776949730304,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Test message",
+          "at": 1776949730304
+        }
+      ]
+    },
+    {
+      "id": "conv-1776949761307-8007",
+      "title": "Test message",
+      "pinned": false,
+      "updatedAt": 1776949761320,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Test message",
+          "at": 1776949761320
+        }
+      ]
+    },
+    {
+      "id": "conv-1776949796072-1116",
+      "title": "Hello",
+      "pinned": false,
+      "updatedAt": 1776949796131,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Hello",
+          "at": 1776949796131
+        }
+      ]
+    },
+    {
+      "id": "conv-1776950084978-7495",
+      "title": "Explain kinetic energy",
+      "pinned": false,
+      "updatedAt": 1776950084983,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Explain kinetic energy",
+          "at": 1776950084983
+        }
+      ]
+    },
+    {
+      "id": "conv-1776950955575-2573",
+      "title": "Explain kinetic energy",
+      "pinned": false,
+      "updatedAt": 1776950955730,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Explain kinetic energy",
+          "at": 1776950955730
+        }
+      ]
+    },
+    {
+      "id": "conv-1776951961282-6774",
+      "title": "Test message",
+      "pinned": false,
+      "updatedAt": 1776951961295,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Test message",
+          "at": 1776951961295
+        }
+      ]
+    },
+    {
+      "id": "conv-1776951994031-899",
+      "title": "Test message",
+      "pinned": false,
+      "updatedAt": 1776951994046,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Test message",
+          "at": 1776951994046
+        }
+      ]
+    },
+    {
+      "id": "conv-1776952024605-9951",
+      "title": "Test message",
+      "pinned": false,
+      "updatedAt": 1776952024628,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Test message",
+          "at": 1776952024628
+        }
+      ]
+    },
+    {
+      "id": "conv-1776952060117-1244",
+      "title": "Hello",
+      "pinned": false,
+      "updatedAt": 1776952060146,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Hello",
+          "at": 1776952060146
+        }
+      ]
+    },
+    {
+      "id": "conv-1776952105981-9199",
+      "title": "hi",
+      "pinned": false,
+      "updatedAt": 1776952106044,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "hi",
+          "at": 1776952106044
+        }
+      ]
+    },
+    {
+      "id": "conv-1776952188881-8137",
+      "title": "Hello",
+      "pinned": false,
+      "updatedAt": 1776952273939,
+      "selectedModel": "phi",
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Hello",
+          "at": 1776952188890
+        },
+        {
+          "type": "ai-bubble",
+          "text": "Hello there! How can I help you today? If you have any questions or need information on a specific topic, feel free to ask.",
+          "at": 1776952206928
+        },
+        {
+          "type": "user-bubble",
+          "text": "Test follow-up",
+          "at": 1776952213721
+        },
+        {
+          "type": "ai-bubble",
+          "text": "Sorry, I'm having trouble responding right now.",
+          "at": 1776952273939
+        }
+      ]
+    },
+    {
+      "id": "conv-1776952241424-3850",
+      "title": "Hello",
+      "pinned": false,
+      "updatedAt": 1776952241481,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Hello",
+          "at": 1776952241481
+        }
+      ]
+    },
+    {
+      "id": "conv-1776952406241-6084",
+      "title": "Hello",
+      "pinned": false,
+      "updatedAt": 1776952406250,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Hello",
+          "at": 1776952406250
+        }
+      ]
     }
   ]
 }

@@ -25,18 +25,21 @@ Given('I am logged in', async function () {
         defaultViewport: null
     });
     page = await browser.newPage();
+    this.browser = browser;  
+    this.page = page;         
 
     await page.goto('http://localhost:3000/');
     await new Promise(resolve => setTimeout(resolve, 1000));
     await page.type('#email', 'testuser@test.com', { delay: 20 });
-    await page.type('#password', 'password12345', { delay: 20});
+    await page.type('#password', 'password12345', { delay: 20 });
     await new Promise(resolve => setTimeout(resolve, 800));
     await page.click('button[onclick="attemptLogin()"]');
     await new Promise(resolve => setTimeout(resolve, 1500));
 });
 
 Given('I am on the chat page', async function () {
-    await page.goto('http://localhost:3000/chat', { waitUntil: 'domcontentloaded' });
+    this.page = this.page || page;
+    await this.page.goto('http://localhost:3000/chat', { waitUntil: 'domcontentloaded' });
     await new Promise(resolve => setTimeout(resolve, 1200));
 });
 
