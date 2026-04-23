@@ -21,6 +21,13 @@ When('I enter the chat page', async function () {
     await new Promise(r => setTimeout(r, 500));
 });
 
+When('I click the back button', async function () {
+    await Promise.all([
+        this.page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 10000 }),
+        this.page.click('.back-btn')
+    ]);
+});
+
 Then('I should see the persona name {string} in the typing indicator', async function (expectedName) {
     await this.page.waitForSelector('#userInput', { timeout: 5000 });
     await this.page.type('#userInput', 'Hello', { delay: 20 });
@@ -32,4 +39,12 @@ Then('I should see the persona name {string} in the typing indicator', async fun
 
     const text = await this.page.$eval('.typing span', el => el.textContent.trim());
     assert(text.includes(expectedName), `Expected "${expectedName}", got "${text}"`);
+});
+
+Then('I should be on the persona selection page', async function () {
+    const url = this.page.url();
+    assert(
+        url.includes('players'),
+        `Expected to be on persona selection page, got ${url}`
+    );
 });

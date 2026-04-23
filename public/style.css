@@ -304,18 +304,36 @@ h1 { margin-bottom: 30px; color: #333; }
     padding: 14px 16px;
     border-bottom: 1px solid #e3e7eb;
     background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
 .chat-header h1 {
-    margin: 0;
+    margin: 0 0 2px 0;  
     font-size: 1.1rem;
     color: #333;
 }
 
 .chat-header p {
-    margin: 4px 0 0;
+    margin: 0; 
     color: #666;
     font-size: 0.9rem;
+}
+
+.back-btn {
+    border: none;
+    background: #007bff;
+    color: white;
+    padding: 10px 20px;  
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;     
+    white-space: nowrap;
+}
+
+.back-btn:hover {
+    background: #0069d9;
 }
 
 #chat-window {

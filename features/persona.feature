@@ -21,4 +21,10 @@ Feature: Persona-based responses
     And I enter the chat page
     Then I should see the persona name "Lord Silly The Ninth" in the typing indicator
 
-    
+    Scenario: User can navigate back to persona selection from chat
+        Given I am logged in
+        And I am on the persona selection page
+        When I choose the "sweetheart" persona
+        And I enter the chat page
+        When I click the back button
+        Then I should be on the persona selection page

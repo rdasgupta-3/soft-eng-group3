@@ -696,6 +696,161 @@
           "at": 1776952700762
         }
       ]
+    },
+    {
+      "id": "conv-1776978297090-2322",
+      "title": "Hello",
+      "pinned": false,
+      "updatedAt": 1776978297098,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Hello",
+          "at": 1776978297098
+        }
+      ]
+    },
+    {
+      "id": "conv-1776978324740-5039",
+      "title": "Hello",
+      "pinned": false,
+      "updatedAt": 1776978324748,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Hello",
+          "at": 1776978324748
+        }
+      ]
+    },
+    {
+      "id": "conv-1776978352364-7074",
+      "title": "Hello",
+      "pinned": false,
+      "updatedAt": 1776978352370,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Hello",
+          "at": 1776978352370
+        }
+      ]
+    },
+    {
+      "id": "conv-1776978401505-9262",
+      "title": "Test message",
+      "pinned": false,
+      "updatedAt": 1776978401511,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Test message",
+          "at": 1776978401511
+        }
+      ]
+    },
+    {
+      "id": "conv-1776978431589-7751",
+      "title": "Test message",
+      "pinned": false,
+      "updatedAt": 1776978431601,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Test message",
+          "at": 1776978431601
+        }
+      ]
+    },
+    {
+      "id": "conv-1776978461306-6208",
+      "title": "Test message",
+      "pinned": false,
+      "updatedAt": 1776978461312,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Test message",
+          "at": 1776978461312
+        }
+      ]
+    },
+    {
+      "id": "conv-1776978494734-5574",
+      "title": "Hello",
+      "pinned": false,
+      "updatedAt": 1776978494744,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Hello",
+          "at": 1776978494744
+        }
+      ]
+    },
+    {
+      "id": "conv-1776978521201-5172",
+      "title": "hi",
+      "pinned": false,
+      "updatedAt": 1776978521209,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "hi",
+          "at": 1776978521209
+        }
+      ]
+    },
+    {
+      "id": "conv-1776978561859-3424",
+      "title": "Hello",
+      "pinned": false,
+      "updatedAt": 1776978640894,
+      "selectedModel": "phi",
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Hello",
+          "at": 1776978561864
+        },
+        {
+          "type": "ai-bubble",
+          "text": "Hello! How can I help you today?",
+          "at": 1776978574314
+        },
+        {
+          "type": "user-bubble",
+          "text": "Test follow-up",
+          "at": 1776978580865
+        },
+        {
+          "type": "ai-bubble",
+          "text": "Sorry, I'm having trouble responding right now.",
+          "at": 1776978640894
+        }
+      ]
+    },
+    {
+      "id": "conv-1776978604588-1603",
+      "title": "Hello",
+      "pinned": false,
+      "updatedAt": 1776978604597,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Hello",
+          "at": 1776978604597
+        }
+      ]
     }
   ]
 }
