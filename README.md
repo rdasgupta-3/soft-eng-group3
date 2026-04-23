@@ -57,7 +57,9 @@ npm run test:acceptance:visible
 npm run test:acceptance:headless
 ```
 
-`npm run test:acceptance` launches a visible browser window by default so you can watch the automation. Puppeteer will prefer installed Google Chrome when available and fall back to its bundled Chromium if Chrome is not installed.
+`npm run test:acceptance` runs the full acceptance stack in headless mode for the most stable grading and verification flow.
+
+If you want to watch the browser automation live, use `npm run test:browser` or `npm run test:acceptance:visible`. Puppeteer will prefer installed Google Chrome when available and fall back to its bundled Chromium if Chrome is not installed.
 
 Run both:
 

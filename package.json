@@ -1,5 +1,5 @@
 {
-  "name": "individual-iteration-1-llm-studio",
+  "name": "rishita-dasgupta-llm-interface",
   "version": "1.0.0",
   "description": "Individual Iteration-1 project focused on accessible chat controls, three-model responses, and Iteration 2 compliant chat flows.",
   "main": "server.js",
@@ -15,9 +15,10 @@
     "test:acceptance:comparison": "cucumber-js features/individual/multi-model.feature --require features/individual/support/**/*.js --require features/individual/step_definitions/**/*.js",
     "test:acceptance:recovery": "cucumber-js features/individual/password-recovery.feature --require features/individual/support/**/*.js --require features/individual/step_definitions/**/*.js",
     "test:acceptance:history": "cucumber-js features/individual/conversation-history.feature --require features/individual/support/**/*.js --require features/individual/step_definitions/**/*.js",
-    "test:acceptance": "npm run test:acceptance:auth && npm run test:acceptance:accessibility && npm run test:acceptance:ollama && npm run test:acceptance:persona && npm run test:acceptance:comparison && npm run test:acceptance:recovery && npm run test:acceptance:history",
-    "test:acceptance:visible": "set PUPPETEER_HEADLESS=0&& set PUPPETEER_SLOWMO=120&& npm run test:acceptance",
-    "test:acceptance:headless": "set PUPPETEER_HEADLESS=1&& npm run test:acceptance",
+    "test:acceptance:all": "npm run test:acceptance:auth && npm run test:acceptance:accessibility && npm run test:acceptance:ollama && npm run test:acceptance:persona && npm run test:acceptance:comparison && npm run test:acceptance:recovery && npm run test:acceptance:history",
+    "test:acceptance": "set PUPPETEER_HEADLESS=1&& npm run test:acceptance:all",
+    "test:acceptance:visible": "set PUPPETEER_HEADLESS=0&& set PUPPETEER_SLOWMO=120&& npm run test:acceptance:all",
+    "test:acceptance:headless": "set PUPPETEER_HEADLESS=1&& npm run test:acceptance:all",
     "test:browser": "npm run test:acceptance:visible",
     "test": "npm run test:unit && npm run test:acceptance"
   },

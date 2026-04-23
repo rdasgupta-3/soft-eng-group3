@@ -498,7 +498,8 @@ Puppeteer drives the acceptance tests through:
 
 Important implementation details:
 
-- the browser opens visibly by default for demonstration and grading
+- the stable default verification path uses headless Puppeteer
+- a separate visible-browser mode is provided for demonstration
 - Puppeteer prefers installed Google Chrome when available
 - if Chrome is unavailable, Puppeteer falls back to its bundled Chromium
 - `PUPPETEER_HEADLESS=1` switches to headless mode for faster verification
@@ -506,12 +507,13 @@ Important implementation details:
 
 ### 6.8 Final Test Results
 
-Verified on 2026-04-21:
+Verified on 2026-04-22:
 
 - `npm run test:unit:pages` -> 13 specs, 0 failures
 - `npm run test:unit:logic` -> 13 specs, 0 failures
 - `npm run test:unit` -> passed
-- `npm run test:acceptance` -> 10 scenarios, 89 steps, all passed
+- `npm run test:acceptance` -> 10 scenarios, 89 steps, all passed in headless mode
+- `npm run test:acceptance:visible` -> visible-browser mode available for live demonstration
 
 ## 7. Software Architecture And Implementation
 
@@ -676,7 +678,7 @@ npm run test:unit
 
 ### 8.5 Cucumber.js And Puppeteer Instructions
 
-Run all acceptance suites:
+Run the stable full acceptance suite:
 
 ```bash
 npm run test:acceptance
@@ -712,8 +714,8 @@ npm run test:acceptance:comparison
 2. run `npm start`
 3. manually confirm the login page loads at `http://localhost:3000`
 4. run `npm run test:unit`
-5. run `npm run test:acceptance:visible` to watch the browser automation
-6. optionally run `npm run test:acceptance:headless` for a faster verification pass
+5. run `npm run test:acceptance` for the stable full browser-test pass
+6. run `npm run test:acceptance:visible` if you want to watch the browser automation live
 
 ### 8.7 Manual Demo Flow
 

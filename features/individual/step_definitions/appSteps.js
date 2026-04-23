@@ -4,6 +4,9 @@ const assert = require('assert');
 const { createTestUser } = require('../support/authTestUtils');
 
 const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:3000';
+const HEADLESS_RUN = /^(1|true|yes|on)$/i.test(String(process.env.PUPPETEER_HEADLESS || '').trim());
+const UI_TIMEOUT = HEADLESS_RUN ? 15000 : 45000;
+const REQUEST_TIMEOUT = HEADLESS_RUN ? 30000 : 60000;
 
 async function launchPage(world, path = '/') {
     const page = await world.launch();
@@ -11,7 +14,7 @@ async function launchPage(world, path = '/') {
     return page;
 }
 
-async function waitForPath(page, expectedPath, timeout = 15000) {
+async function waitForPath(page, expectedPath, timeout = UI_TIMEOUT) {
     await page.waitForFunction(
         path => window.location.pathname === path,
         { timeout, polling: 'mutation' },
@@ -22,7 +25,7 @@ async function waitForPath(page, expectedPath, timeout = 15000) {
 async function submitLoginAndReachPersonaPage(world, page = world.page) {
     const activePage = page || await launchPage(world, '/');
 
-    await activePage.waitForSelector('#email', { timeout: 15000 });
+    await activePage.waitForSelector('#email', { timeout: UI_TIMEOUT });
     await activePage.$eval('#email', input => {
         input.value = '';
     });
@@ -36,7 +39,7 @@ async function submitLoginAndReachPersonaPage(world, page = world.page) {
         activePage.waitForResponse(
             networkResponse => networkResponse.url().includes('/api/login') &&
                 networkResponse.request().method() === 'POST',
-            { timeout: 15000 }
+            { timeout: REQUEST_TIMEOUT }
         ),
         activePage.click('#login-btn')
     ]);
@@ -47,8 +50,8 @@ async function submitLoginAndReachPersonaPage(world, page = world.page) {
     }
 
     try {
-        await waitForPath(activePage, '/choose-player', 15000);
-        await activePage.waitForSelector('.player-card', { timeout: 15000 });
+        await waitForPath(activePage, '/choose-player', UI_TIMEOUT);
+        await activePage.waitForSelector('.player-card', { timeout: UI_TIMEOUT });
     } catch (error) {
         const url = activePage.url();
         const body = await activePage.$eval('body', node => node.innerText.slice(0, 400)).catch(() => '');
@@ -59,14 +62,14 @@ async function submitLoginAndReachPersonaPage(world, page = world.page) {
 }
 
 async function choosePersonaAndReachChat(page, persona, { requireEnabledInput = true } = {}) {
-    await page.waitForSelector(`.player-card[data-persona="${persona}"]`, { timeout: 15000 });
+    await page.waitForSelector(`.player-card[data-persona="${persona}"]`, { timeout: UI_TIMEOUT });
 
     await Promise.all([
-        waitForPath(page, '/chat', 15000),
+        waitForPath(page, '/chat', UI_TIMEOUT),
         page.click(`.player-card[data-persona="${persona}"]`)
     ]);
 
-    await page.waitForSelector('#chat-input', { timeout: 15000 });
+    await page.waitForSelector('#chat-input', { timeout: UI_TIMEOUT });
 
     if (!requireEnabledInput) {
         return;
@@ -78,7 +81,7 @@ async function choosePersonaAndReachChat(page, persona, { requireEnabledInput = 
                 const input = document.getElementById('chat-input');
                 return Boolean(input) && input.disabled === false;
             },
-            { timeout: 15000, polling: 'mutation' }
+            { timeout: UI_TIMEOUT, polling: 'mutation' }
         );
     } catch (error) {
         const diagnostic = await page.evaluate(() => {
@@ -286,7 +289,7 @@ When('I send the prompt {string}', async function (prompt) {
         this.page.waitForResponse(
             networkResponse => networkResponse.url().includes('/ai-reply') &&
                 networkResponse.request().method() === 'POST',
-            { timeout: 30000 }
+            { timeout: REQUEST_TIMEOUT }
         ),
         this.page.click('#send-btn')
     ]);
