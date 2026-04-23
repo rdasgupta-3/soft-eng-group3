@@ -70,16 +70,22 @@ For the current development iteration, we are utilizing a **File-Based JSON Stor
 
 ### Local Ollama Chat Integration
 
-This project can generate AI chat replies from a local Ollama instance (no API key required).
+For this iteration, the base ollama model has now been replaced by three different local ollama models. Users now recieve 3 reponses to their first chat input, where they can then pick one of the responses and continue the chat talk to the model the chosen response corrresponds to.
 
-## Setup
-1. Install Ollama from the official site: https://ollama.com
-2. Install a model (default used by this project):
-	- `llama3.2:latest`
-3. Pull the model
-	- `ollama pull llama3.2:latest`
-4. Start Ollama (default local server):
-	- `ollama serve`
+## Installing Required Models
+
+This project uses three local models:
+
+- Phi 3.8B (Microsoft)
+- Gemma 2B (Google)
+- DeepSeek R1 1.5B (DeepSeek)
+
+All these models can be found and installed at https://ollama.com/search
+Alternatively, to install them all at once you may run the command:
+
+`npm run setup`
+
+This command will run a script that downloads all models necessary for the LLM.
 
 ## Default Environment Variables 
 
@@ -89,10 +95,6 @@ You can override the default environment variables using an .env in the project 
 - `OLLAMA_MODEL = llama3.2:latest`
 
 The frontend checks `/api/ollama-status` to determine whether Ollama is running. If Ollama is offline or unavailable, the chat UI displays a warning banner and disables message input. `/api/conversations/:id/ai-reply` also throws an error: `503 { "error": "ollama-failed" }`.
-
-## Ollama Warm-Up Behavior
-
-To reduce slow first responses, the backend performs **two warm-ups**. The first is an automatic warm-up on server start, performed in `server.js` after a short delay. The second is a Frontend-triggered warmup, which calls `/api/warmup` to perform a warmup when ollama is detected by `/api/ollama-status`.
 
 ## Ollama Timeout
 

@@ -87,9 +87,6 @@
 
             }
 
-            if(isOnline){
-                fetch('/api/warmup');
-            }
         }
 
         window.addEventListener('DOMContentLoaded', initOllamaStatus);
@@ -644,72 +641,186 @@
 
         async function sendMessage() {
             const isOnline = await ollamaStatus();
-
-            if(!isOnline){
-                await addMessage("ai-bubble", "Sorry, I can't respond right now :( ");
+            if (!isOnline) {
+                await addMessage("ai-bubble", "Sorry, I can't respond right now :(");
                 return;
             }
 
             const input = document.getElementById('userInput');
             const text = input.value.trim();
-            if (!text) {
-                return;
-            }
+            if (!text) return;
 
-            await addMessage('user-bubble', text);
             input.value = '';
 
-            const personaName = getCurrentPersonaName();
-            const typingId = addTypingBubble(personaName);
+            await addMessage('user-bubble', text);
 
             if (useServerApi) {
-                const current = getActiveConversation();
-                if (!current) {
-                    return;
+                const current = getActiveConversation(); 
+                if (!current) return;
+
+                if (!current.selectedModel) {
+                    await getMultiModelReplies(current.id, text);
+                } else {
+                    await getSingleModelReply(current.id, text);
                 }
-
-                const response = await fetch(`/api/conversations/${current.id}/ai-reply`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-
-                if(response.status === 503){
-                    await addMessage("ai-bubble","Sorry, I'm having trouble responding right now. Please try again.");
-                    replaceTypingBubble(typingId,"Sorry, I'm having trouble responding right now. Please try again.");
-                    return;
-                }
-
-                if (response.status === 401) {
-                    window.location.href = '/';
-                    return;
-                }
-
-                await syncConversationsFromServer();
-
-                const typingBubble = document.getElementById(typingId);
-                if(typingBubble){
-                    typingBubble.remove();
-                }
-
-                renderMessages(true);
-
-                const updated = getActiveConversation();
-                const last = updated.messages[updated.messages.length - 1];
-
-                const finalBubble = document.createElement('div');
-                finalBubble.className = `bubble ai-bubble`;
-                finalBubble.id = `ai-${Date.now()}`;
-                document.getElementById('messages').appendChild(finalBubble);
-                replaceTypingBubble(finalBubble.id, last.text);
-
                 return;
             }
 
-            // Placeholder local reply so the UI still works without backend integration.
+            const typingId = addTypingBubble('AI');
             setTimeout(() => {
-                replaceTypingBubble(typingId, 'Thanks for your message. A real AI backend can be connected next.');
+                replaceTypingBubble(typingId, 'No backend connected.');
             }, 450);
         }
+
+    
+       async function getMultiModelReplies(conversationId, text) {
+            const typingId = addTypingBubble("Models");
+
+            const res = await fetch(`/api/conversations/${conversationId}/multi-reply`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt: text })
+            });
+
+            const data = await res.json();
+
+            const bubble = document.getElementById(typingId);
+            if (bubble) bubble.remove();
+
+            const messagesEl = document.getElementById('messages');
+
+            const models = [
+                { key: "phi",      label: "Phi",      text: data.phi },
+                { key: "gemma",    label: "Gemma",    text: data.gemma },
+                { key: "deepseek", label: "DeepSeek", text: data.deepseek }
+            ];
+
+            const validModels = models.filter(m => m.text && !m.text.includes('failed to respond'));
+
+            if (!validModels.length) {
+                const errBubble = document.createElement('div');
+                errBubble.className = 'bubble ai-bubble';
+                errBubble.textContent = "Sorry, all models failed to respond. Please try again.";
+                messagesEl.appendChild(errBubble);
+                return;
+            }
+
+            const container = document.createElement('div');
+            container.className = 'multi-model-container';
+            container.id = 'multi-model-container';
+
+            validModels.forEach(m => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'bubble ai-bubble multi-bubble';
+                wrapper.id = `multi-bubble-${m.key}`;
+
+                const label = document.createElement('div');
+                label.className = 'multi-model-label';
+                label.textContent = m.label;
+
+                const textDiv = document.createElement('div');
+                textDiv.className = 'multi-model-text';
+                textDiv.id = `multi-text-${m.key}`;
+
+                const btn = document.createElement('button');
+                btn.className = 'multi-model-select-btn';
+                btn.id = `multi-btn-${m.key}`;
+                btn.textContent = `Use ${m.label}`;
+                btn.onclick = () => selectModel(conversationId, m.key, m.text);
+
+                wrapper.appendChild(label);
+                wrapper.appendChild(textDiv);
+                wrapper.appendChild(btn);
+                container.appendChild(wrapper);
+            });
+
+            messagesEl.appendChild(container);
+            applyFormattingToAll();
+
+            for (const m of validModels) {
+                await animateIntoElement(`multi-text-${m.key}`, m.text);
+            }
+        }
+
+        function animateIntoElement(elementId, finalText) {
+            return new Promise(resolve => {
+                const el = document.getElementById(elementId);
+                if (!el) { resolve(); return; }
+
+                el.innerHTML = '';
+                const html = parseFormattedText(finalText);
+                const temp = document.createElement('div');
+                temp.innerHTML = html;
+
+                const nodes = Array.from(temp.childNodes);
+                let index = 0;
+
+                function typeNode() {
+                    if (index >= nodes.length) { resolve(); return; }
+
+                    const node = nodes[index];
+                    if (node.nodeType === Node.TEXT_NODE) {
+                        const span = document.createElement('span');
+                        el.appendChild(span);
+                        const text = node.textContent;
+                        let i = 0;
+
+                        function typeChar() {
+                            if (i < text.length) {
+                                span.textContent += text[i];
+                                i++;
+                                document.getElementById('chat-window').scrollTop = 
+                                    document.getElementById('chat-window').scrollHeight;
+                                setTimeout(typeChar, 18);
+                            } else {
+                                index++;
+                                typeNode();
+                            }
+                        }
+                        typeChar();
+                    } else {
+                        el.appendChild(node.cloneNode(true));
+                        index++;
+                        setTimeout(typeNode, 18);
+                    }
+                }
+                typeNode();
+            });
+        }
+
+        async function selectModel(conversationId, modelKey, chosenText) {
+
+            const btn = document.getElementById(`multi-btn-${modelKey}`);
+            if (btn) btn.disabled = true;
+
+            await fetch(`/api/conversations/${conversationId}/select-model`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ modelKey })
+            });
+
+            const conv = getActiveConversation();
+            if (conv) conv.selectedModel = modelKey;
+
+            const container = document.getElementById('multi-model-container');
+            if (container) container.remove();
+
+            await addMessage('ai-bubble', chosenText);
+            saveConversations();
+        }
+
+                async function getSingleModelReply(conversationId, text) {
+                    const typingId = addTypingBubble("AI");
+
+                    const res = await fetch(`/api/conversations/${conversationId}/ai-reply`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ prompt: text })
+                    });
+
+                    const data = await res.json();
+                    replaceTypingBubble(typingId, data.aiReply);
+                }
 
         function handleKey(e) { if (e.key === 'Enter') sendMessage(); }
 

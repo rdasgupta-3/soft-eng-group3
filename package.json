@@ -7,7 +7,8 @@
     "test": "cucumber-js features/**/*.feature --require features/step_definitions/**/*.js",
     "test:unit": "jasmine",
     "test:all": "npm run test:unit && npm run test",
-    "start": "node server.js"
+    "start": "node server.js",
+    "setup": "node setup-models.js"
   },
   "keywords": [],
   "author": "",

@@ -1,5 +1,12 @@
 const OLLAMA_BASE_URL = process.env.OLLAMA_BASE_URL || 'http://127.0.0.1:11434';
-const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.2:latest';
+// const OLLAMA_MODEL = process.env.OLLAMA_MODEL || 'llama3.2:latest';   NO LONGER NEEDED
+
+
+const MODEL_MAP = {
+    phi: "phi3:3.8b",
+    gemma: "gemma2:2b",
+    deepseek: "deepseek-r1:1.5b"
+};
 
 function toOllamaMessages(conversationMessages) {
     const recent = (conversationMessages || []).slice(-16);
@@ -13,6 +20,7 @@ function toOllamaMessages(conversationMessages) {
     });
 }
 
+/*
 async function generateReplyFromOllama(conversationMessages) {
     const payload = {
         model: OLLAMA_MODEL,
@@ -53,6 +61,45 @@ async function generateReplyFromOllama(conversationMessages) {
     }
 }
 
-module.exports = {
-    generateReplyFromOllama
-};
+*/
+
+async function generateReplyFromSpecificModel(model, messages) {
+    const lastUserMessage = [...messages]
+        .reverse()
+        .find(m => m.type === "user-bubble");
+
+    const prompt = lastUserMessage?.text || "Hello";
+
+    const payload = { model, prompt, stream: false };
+
+    // Use a Promise.race so the timeout actually works in Node
+    const fetchPromise = fetch(`${OLLAMA_BASE_URL}/api/generate`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+    });
+
+    const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error(`Timeout: ${model} took too long`)), 60000)
+    );
+
+    try {
+        const response = await Promise.race([fetchPromise, timeoutPromise]);
+
+        if (!response.ok) {
+            const errText = await response.text();
+            console.warn(`[LLM] ${model} HTTP ${response.status}:`, errText);
+            return null;
+        }
+
+        const data = await response.json();
+        console.log(`[LLM] ${model} responded:`, data.response?.slice(0, 60));
+        return data.response?.trim() || null;
+
+    } catch (error) {
+        console.warn(`[LLM] Error from model ${model}:`, error.message);
+        return null;
+    }
+}
+
+module.exports = { generateReplyFromSpecificModel };

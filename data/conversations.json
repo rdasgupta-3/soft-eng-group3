@@ -175,60 +175,117 @@
       ]
     },
     {
-      "id": "conv-1775662807584-750",
-      "title": "hi!!",
+      "id": "conv-1776909510319-7210",
+      "title": "helloooo",
       "pinned": false,
-      "updatedAt": 1775663025904,
+      "updatedAt": 1776909510346,
+      "selectedModel": null,
       "messages": [
         {
           "type": "user-bubble",
-          "text": "hi!!",
-          "at": 1775662807595
-        },
+          "text": "helloooo",
+          "at": 1776909510346
+        }
+      ]
+    },
+    {
+      "id": "conv-1776910138141-3109",
+      "title": "heyo",
+      "pinned": false,
+      "updatedAt": 1776910896952,
+      "selectedModel": null,
+      "messages": [
         {
-          "type": "ai-bubble",
-          "text": "Hello! It's nice to meet you. Is there something I can help you with or would you like to chat?",
-          "at": 1775662810459
+          "type": "user-bubble",
+          "text": "heyo",
+          "at": 1776910138157
         },
         {
           "type": "user-bubble",
-          "text": "hazbin hotel",
-          "at": 1775662816979
-        },
-        {
-          "type": "ai-bubble",
-          "text": "Hazbin Hotel is a popular web series created by Vivienne \"VivziePop\" Medrano. The show is set in an alternate version of Hell, where demons and other supernatural creatures reside.\n\nThe story follows Charlie Magne, the daughter of Lucifer, as she opens a rehabilitation center for demons who want to change their ways and become better versions of themselves. Alongside her friends, including Alastor (aka Alistair), Xaphania, and more, they work together to help these demons overcome their flaws and find redemption.\n\nHazbin Hotel has gained a significant following for its unique blend of dark humor, pop culture references, and positive themes like self-improvement and acceptance. What do you think about Hazbin Hotel? Do you have a favorite character or episode?",
-          "at": 1775662834383
+          "text": "can you tell me what kinetic energy is",
+          "at": 1776910701539
         },
         {
           "type": "user-bubble",
-          "text": "woah",
-          "at": 1775662866913
+          "text": "what are some other types of energy",
+          "at": 1776910896952
+        }
+      ]
+    },
+    {
+      "id": "conv-1776911413870-6287",
+      "title": "hi!",
+      "pinned": false,
+      "updatedAt": 1776911467601,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "hi!",
+          "at": 1776911413890
         },
         {
           "type": "ai-bubble",
-          "text": "Right?! Hazbin Hotel is definitely one of the most interesting and unique web series out there. VivziePop's creativity and attention to detail really shine through in the show.\n\nOne of the things that sets Hazbin Hotel apart from other anime-style web series is its focus on complex, nuanced characters and relationships. The show doesn't shy away from exploring darker themes like trauma, mental health, and personal struggle, but it also offers a message of hope and redemption.\n\nAnd let's not forget the lovable and quirky cast of characters! From Charlie's sarcastic wit to Xaphania's sassiness, every character in Hazbin Hotel has their own unique personality and charm. Who's your favorite character?",
-          "at": 1775662882727
+          "text": "Hello! How can I help you today?",
+          "at": 1776911454400
         },
         {
           "type": "user-bubble",
-          "text": "my favorite is angeldust",
-          "at": 1775662925686
+          "text": "can you explain what is kinetic energy",
+          "at": 1776911467601
+        }
+      ]
+    },
+    {
+      "id": "conv-1776912008084-4786",
+      "title": "hellooo",
+      "pinned": false,
+      "updatedAt": 1776912052632,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "hellooo",
+          "at": 1776912008099
         },
         {
           "type": "ai-bubble",
-          "text": "Angeldust is an amazing character! She's so sweet and gentle, but also has a deep well of emotional pain and trauma that makes her really relatable. Her backstory and struggles with PTSD are especially compelling.\n\nI think one of the things that makes Angeldust so lovable is her vulnerability. Despite being surrounded by demons who are often dark and scary, she's able to find moments of tenderness and kindness. She's also super intelligent and resourceful, which makes her a valuable member of Charlie's team at Hazbin Hotel.\n\nVivziePop does an amazing job of portraying Angeldust's emotional depth in the show. The way she conveys Angeldust's feelings through facial expressions, body language, and voice acting is really impressive. Have you noticed how Angeldust's interactions with Charlie are especially sweet?",
-          "at": 1775662944982
+          "text": "Hello! How can I help you today?",
+          "at": 1776912041250
         },
         {
           "type": "user-bubble",
-          "text": "wow!! have you heard of husk",
-          "at": 1775662995855
+          "text": "can you explain kinetic energy",
+          "at": 1776912052632
+        }
+      ]
+    },
+    {
+      "id": "conv-1776912124169-7404",
+      "title": "heyo",
+      "pinned": false,
+      "updatedAt": 1776912320469,
+      "selectedModel": null,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "heyo",
+          "at": 1776912124211
         },
         {
           "type": "ai-bubble",
-          "text": "Sorry, I'm having trouble responding right now. Please try again.",
-          "at": 1775663025904
+          "text": "Hello there! How can I help you today?",
+          "at": 1776912196165
+        },
+        {
+          "type": "user-bubble",
+          "text": "what color is the sky",
+          "at": 1776912213516
+        },
+        {
+          "type": "ai-bubble",
+          "text": "The sky's color can vary depending on several factors, including:\n\n1. **Time of Day**: As the sun rises and sets, the sky changes from a more orange or yellow hue (sunrise) to shades of gray (sunset).\n\n2. **Season**: During summer, the sky is often a mixture of red and orange hues due to sunlight filtering through layers of clouds.\n\n3. **Topography**: The Earth's surface can reflect different colors of light in various ways. Areas with steep terrain tend to appear more vibrant or colored, while smoother areas may seem more neutral.\n\n4. **Cloud Cover**: Clear skies are typically associated with a white or light-colored sky (mist), while cloudy skies are often gray or colorless.\n\n5. **Humidity and Composition**: The amount of water vapor in the air and the composition of particles can also influence how the sky appears, sometimes making it appear more like its own color or mixtures of different colors.\n\nIn many parts of the world, especially towards the poles, dark skies are common during winter months, while lighter shades may be seen throughout the year.",
+          "at": 1776912320469
         }
       ]
     }

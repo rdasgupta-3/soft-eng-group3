@@ -20,6 +20,7 @@ function buildConversation() {
         title: 'New Conversation',
         pinned: false,
         updatedAt: now,
+        selectedModel: null,
         messages: []
     };
 }

@@ -8,7 +8,13 @@ const {
     addMessage
 } = require('../utils/chatStore');
 const { getSessionFromRequest } = require('../utils/sessionUtils');
-const { generateReplyFromOllama } = require('../utils/ollamaClient');
+const { generateReplyFromSpecificModel } = require('../utils/ollamaClient');
+
+const MODEL_MAP = {
+    phi: "phi3:3.8b",
+    gemma: "gemma2:2b",
+    deepseek: "deepseek-r1:1.5b"
+};
 
 const router = express.Router();
 
@@ -24,7 +30,7 @@ router.get('/ollama-status', async(req,res) =>{
     }
 });
 
-// warm up ollama when frontent detects its online, trying to help with initial reply speed 
+/* warm up ollama when frontent detects its online, trying to help with initial reply speed 
 router.get('/warmup', async(req,res) =>{
     try {
         await generateReplyFromOllama([{ type: "user-bubble", text: "hello" }]);
@@ -33,6 +39,8 @@ router.get('/warmup', async(req,res) =>{
         return res.json({warmed: false});
     }
 });
+
+*/
 
 function requireAuth(req, res, next) {
     const session = getSessionFromRequest(req);
@@ -102,18 +110,32 @@ router.post('/conversations/:conversationId/ai-reply', async (req, res) => {
         return res.status(404).json({ error: 'Conversation not found.' });
     }
 
-    const latestUserMessage = [...conversation.messages].reverse().find(msg => msg.type === 'user-bubble');
+    const latestUserMessage = [...conversation.messages]
+        .reverse()
+        .find(msg => msg.type === 'user-bubble');
+
     if (!latestUserMessage) {
         return res.status(400).json({ error: 'No user message found to respond to.' });
     }
 
-    let aiText;
-    try{
-        aiText = await generateReplyFromOllama(conversation.messages);
-    }catch(err){
-        return res.status(503).json({error: 'ollama-failed'});
+    // Ensure a model is selected
+    if (!conversation.selectedModel) {
+        return res.status(400).json({ error: 'No model selected for this conversation.' });
     }
 
+    const model = MODEL_MAP[conversation.selectedModel];
+    let aiText = null;
+
+    try {
+        aiText = await generateReplyFromSpecificModel(model, conversation.messages);
+    } catch (err) {
+        console.warn(`[AI-Reply] Error generating reply from ${model}:`, err.message);
+    }
+
+    // Fallback if model failed or returned null
+    if (!aiText || typeof aiText !== "string" || aiText.trim() === "") {
+        aiText = "Sorry, I'm having trouble responding right now.";
+    }
 
     const result = addMessage(req.session.email, conversationId, 'ai-bubble', aiText);
 
@@ -121,7 +143,71 @@ router.post('/conversations/:conversationId/ai-reply', async (req, res) => {
         return res.status(500).json({ error: 'Failed to save AI reply.' });
     }
 
-    return res.status(201).json({ conversation: result.conversation, aiReply: aiText });
+    return res.status(201).json({
+        conversation: result.conversation,
+        aiReply: aiText
+    });
+});
+
+router.post('/conversations/:conversationId/multi-reply', async (req, res) => {
+    const { conversationId } = req.params;
+    const conversation = getConversation(req.session.email, conversationId);
+
+    if (!conversation) {
+        return res.status(404).json({ error: 'Conversation not found.' });
+    }
+
+    try {
+        const tagsRes = await fetch('http://127.0.0.1:11434/api/tags');
+        const tagsData = await tagsRes.json();
+        const installedModels = (tagsData.models || []).map(m => m.name);
+        console.log('[multi-reply] Installed models:', installedModels);
+
+        const requiredModels = Object.values(MODEL_MAP);
+        const missing = requiredModels.filter(m => !installedModels.includes(m));
+        if (missing.length) {
+            console.warn('[multi-reply] Missing models:', missing);
+        }
+    } catch (e) {
+        console.warn('[multi-reply] Could not check installed models:', e.message);
+    }
+
+    const messages = conversation.messages;
+
+    const [phi, gemma, deepseek] = await Promise.all([
+        generateReplyFromSpecificModel(MODEL_MAP.phi, messages)
+            .catch(() => null),
+        generateReplyFromSpecificModel(MODEL_MAP.gemma, messages)
+            .catch(() => null),
+        generateReplyFromSpecificModel(MODEL_MAP.deepseek, messages)
+            .catch(() => null),
+    ]);
+
+    return res.json({
+        phi: phi || "Phi failed to respond.",
+        gemma: gemma || "Gemma failed to respond.",
+        deepseek: deepseek || "DeepSeek failed to respond."
+    });
+});
+
+router.post('/conversations/:conversationId/select-model', (req,res) => {
+    const { conversationId } = req.params;
+    const { modelKey} = req.body;
+
+    if(!MODEL_MAP[modelKey]){
+        return res.status(400).json({error: 'Invalid model key'});
+    }
+
+    const conversation = getConversation(req.session.email, conversationId)
+
+    if(!conversation){
+        return res.status(404).json({error: 'Conversation not found.'});
+    }
+
+    conversation.selectedModel = modelKey;
+    updateConversation(req.session.email, conversationId, conversation);
+
+    return res.json({ok: true});
 });
 
 module.exports = router;
