@@ -83,4 +83,3 @@ npm test
 - [features/individual/multi-model.feature]
 - [features/individual/persona-switching.feature]
 - [features/individual/conversation-history.feature]
-- [docs/individual-iteration-1-report.md]
