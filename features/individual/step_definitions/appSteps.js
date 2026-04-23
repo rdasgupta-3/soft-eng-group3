@@ -11,71 +11,164 @@ async function launchPage(world, path = '/') {
     return page;
 }
 
-async function loginThroughUi(world, persona) {
-    const page = await launchPage(world, '/');
-    await page.waitForSelector('#email');
-    await page.type('#email', world.credentials.email);
-    await page.type('#password', world.credentials.password);
-    await Promise.allSettled([
-        page.waitForNavigation({ waitUntil: 'load', timeout: 15000 }),
-        page.click('#login-btn')
+async function waitForPath(page, expectedPath, timeout = 15000) {
+    await page.waitForFunction(
+        path => window.location.pathname === path,
+        { timeout, polling: 'mutation' },
+        expectedPath
+    );
+}
+
+async function submitLoginAndReachPersonaPage(world, page = world.page) {
+    const activePage = page || await launchPage(world, '/');
+
+    await activePage.waitForSelector('#email', { timeout: 15000 });
+    await activePage.$eval('#email', input => {
+        input.value = '';
+    });
+    await activePage.$eval('#password', input => {
+        input.value = '';
+    });
+    await activePage.type('#email', world.credentials.email);
+    await activePage.type('#password', world.credentials.password);
+
+    const [response] = await Promise.all([
+        activePage.waitForResponse(
+            networkResponse => networkResponse.url().includes('/api/login') &&
+                networkResponse.request().method() === 'POST',
+            { timeout: 15000 }
+        ),
+        activePage.click('#login-btn')
     ]);
 
-    try {
-        await page.waitForSelector(`.player-card[data-persona="${persona}"]`, { timeout: 15000 });
-    } catch (error) {
-        const url = page.url();
-        const message = await page.$eval('#error-message', node => node.textContent.trim()).catch(() => '');
-        const body = await page.$eval('body', node => node.innerText.slice(0, 400)).catch(() => '');
-        throw new Error(`Failed to reach persona selection. URL=${url} Error="${message}" Body="${body}"`);
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok()) {
+        throw new Error(`Login request failed with ${response.status()}: ${payload.error || 'Unknown error.'}`);
     }
 
-    await Promise.allSettled([
-        page.waitForNavigation({ waitUntil: 'load', timeout: 15000 }),
+    try {
+        await waitForPath(activePage, '/choose-player', 15000);
+        await activePage.waitForSelector('.player-card', { timeout: 15000 });
+    } catch (error) {
+        const url = activePage.url();
+        const body = await activePage.$eval('body', node => node.innerText.slice(0, 400)).catch(() => '');
+        throw new Error(`Failed to reach persona selection after login. URL=${url} Body="${body}"`);
+    }
+
+    return activePage;
+}
+
+async function choosePersonaAndReachChat(page, persona, { requireEnabledInput = true } = {}) {
+    await page.waitForSelector(`.player-card[data-persona="${persona}"]`, { timeout: 15000 });
+
+    await Promise.all([
+        waitForPath(page, '/chat', 15000),
         page.click(`.player-card[data-persona="${persona}"]`)
     ]);
 
     await page.waitForSelector('#chat-input', { timeout: 15000 });
-    await page.waitForFunction(() => !document.getElementById('chat-input').disabled);
+
+    if (!requireEnabledInput) {
+        return;
+    }
+
+    try {
+        await page.waitForFunction(
+            () => {
+                const input = document.getElementById('chat-input');
+                return Boolean(input) && input.disabled === false;
+            },
+            { timeout: 15000, polling: 'mutation' }
+        );
+    } catch (error) {
+        const diagnostic = await page.evaluate(() => {
+            const status = document.getElementById('workspace-status');
+            const warning = document.getElementById('ollama-warning');
+            const input = document.getElementById('chat-input');
+
+            return {
+                statusText: status ? status.textContent.trim() : '',
+                warningVisible: Boolean(warning) && getComputedStyle(warning).display !== 'none',
+                inputDisabled: Boolean(input) && input.disabled
+            };
+        }).catch(() => ({ statusText: '', warningVisible: false, inputDisabled: true }));
+
+        throw new Error(
+            `Reached chat page, but the prompt input never became ready. ` +
+            `Disabled=${diagnostic.inputDisabled} WarningVisible=${diagnostic.warningVisible} ` +
+            `Status="${diagnostic.statusText}"`
+        );
+    }
+}
+
+async function loginThroughUi(world, persona) {
+    const page = await launchPage(world, '/');
+    await submitLoginAndReachPersonaPage(world, page);
+    await choosePersonaAndReachChat(page, persona);
 }
 
 async function loginToPersonaSelection(world) {
     const page = await launchPage(world, '/');
-    await page.waitForSelector('#email');
-    await page.type('#email', world.credentials.email);
-    await page.type('#password', world.credentials.password);
-    await Promise.allSettled([
-        page.waitForNavigation({ waitUntil: 'load', timeout: 15000 }),
-        page.click('#login-btn')
-    ]);
-
-    await page.waitForSelector('.player-card', { timeout: 15000 });
-    return page;
+    return submitLoginAndReachPersonaPage(world, page);
 }
 
 async function waitForLatestResponseGroup(page) {
-    await page.waitForFunction(() => {
-        const status = document.getElementById('workspace-status');
-        if (!status || !status.textContent.includes('Three responses generated successfully.')) {
-            return false;
-        }
+    try {
+        await page.waitForFunction(() => {
+            const groups = document.querySelectorAll('.response-group');
+            if (!groups.length) {
+                return false;
+            }
 
-        const groups = document.querySelectorAll('.response-group');
-        if (!groups.length) {
-            return false;
-        }
+            const latest = groups[groups.length - 1];
+            const cards = latest.querySelectorAll('.response-card');
+            const sendButton = document.getElementById('send-btn');
+            if (cards.length !== 3) {
+                return false;
+            }
 
-        const latest = groups[groups.length - 1];
-        const cards = latest.querySelectorAll('.response-card');
-        if (cards.length !== 3) {
-            return false;
-        }
+            if (!sendButton || sendButton.disabled || sendButton.textContent.trim() !== 'Send') {
+                return false;
+            }
 
-        return [...cards].every(card => {
-            const text = card.querySelector('.response-text');
-            return text && text.textContent.trim().length > 20;
-        });
-    }, { timeout: 45000 });
+            return [...cards].every(card => {
+                const text = card.querySelector('.response-text');
+                return text && text.textContent.trim().length > 20;
+            });
+        }, { timeout: 45000, polling: 'mutation' });
+    } catch (error) {
+        const diagnostic = await page.evaluate(() => {
+            const status = document.getElementById('workspace-status');
+            const warning = document.getElementById('ollama-warning');
+            const groups = [...document.querySelectorAll('.response-group')];
+            const latest = groups[groups.length - 1];
+
+            return {
+                url: window.location.href,
+                statusText: status ? status.textContent.trim() : '',
+                warningVisible: Boolean(warning) && getComputedStyle(warning).display !== 'none',
+                sendButtonDisabled: Boolean(document.getElementById('send-btn')) && document.getElementById('send-btn').disabled,
+                sendButtonText: document.getElementById('send-btn') ? document.getElementById('send-btn').textContent.trim() : '',
+                responseCardCount: latest ? latest.querySelectorAll('.response-card').length : 0,
+                responseTexts: latest
+                    ? [...latest.querySelectorAll('.response-text')].map(node => node.textContent.trim())
+                    : []
+            };
+        }).catch(() => ({
+            url: page.url(),
+            statusText: '',
+            warningVisible: false,
+            responseCardCount: 0,
+            responseTexts: []
+        }));
+
+        throw new Error(
+            `Timed out waiting for the latest response group. URL=${diagnostic.url} ` +
+            `Cards=${diagnostic.responseCardCount} WarningVisible=${diagnostic.warningVisible} ` +
+            `SendDisabled=${diagnostic.sendButtonDisabled} SendText="${diagnostic.sendButtonText}" ` +
+            `Status="${diagnostic.statusText}" Texts="${diagnostic.responseTexts.join(' | ')}"`
+        );
+    }
 }
 
 async function registerRequestInterceptor(page, matcher, resolver) {
@@ -189,7 +282,21 @@ When('I decrease the text size {int} time', async function (count) {
 When('I send the prompt {string}', async function (prompt) {
     await this.page.click('#chat-input');
     await this.page.type('#chat-input', prompt);
-    await this.page.click('#send-btn');
+    const [response] = await Promise.all([
+        this.page.waitForResponse(
+            networkResponse => networkResponse.url().includes('/ai-reply') &&
+                networkResponse.request().method() === 'POST',
+            { timeout: 30000 }
+        ),
+        this.page.click('#send-btn')
+    ]);
+
+    const payload = await response.json().catch(() => ({}));
+    assert(
+        response.ok(),
+        `Expected AI reply request to succeed, received ${response.status()} ${payload.error || ''}`.trim()
+    );
+
     await waitForLatestResponseGroup(this.page);
 });
 
@@ -284,23 +391,11 @@ When('I create a solo iteration account through the signup form', async function
 });
 
 When('I log in with the newly created account', async function () {
-    await this.page.waitForSelector('#email', { timeout: 15000 });
-    await this.page.type('#email', this.credentials.email);
-    await this.page.type('#password', this.credentials.password);
-    await Promise.allSettled([
-        this.page.waitForNavigation({ waitUntil: 'load', timeout: 15000 }),
-        this.page.click('#login-btn')
-    ]);
+    await submitLoginAndReachPersonaPage(this, this.page);
 });
 
 When('I choose the {string} persona from the selection page', async function (persona) {
-    await this.page.waitForSelector(`.player-card[data-persona="${persona}"]`, { timeout: 15000 });
-    await Promise.allSettled([
-        this.page.waitForNavigation({ waitUntil: 'load', timeout: 15000 }),
-        this.page.click(`.player-card[data-persona="${persona}"]`)
-    ]);
-
-    await this.page.waitForSelector('#chat-input', { timeout: 15000 });
+    await choosePersonaAndReachChat(this.page, persona, { requireEnabledInput: false });
 });
 
 When('I open the change persona page', async function () {
@@ -313,13 +408,7 @@ When('I open the change persona page', async function () {
 });
 
 When('I choose the {string} persona', async function (persona) {
-    await Promise.allSettled([
-        this.page.waitForNavigation({ waitUntil: 'load', timeout: 15000 }),
-        this.page.click(`.player-card[data-persona="${persona}"]`)
-    ]);
-
-    await this.page.waitForSelector('#chat-input', { timeout: 15000 });
-    await this.page.waitForFunction(() => !document.getElementById('chat-input').disabled);
+    await choosePersonaAndReachChat(this.page, persona);
 });
 
 When('I create a new chat', async function () {
@@ -373,15 +462,7 @@ When('I log out from the chat workspace', async function () {
 });
 
 When('I log back in with my existing account', async function () {
-    await this.page.waitForSelector('#email', { timeout: 15000 });
-    await this.page.type('#email', this.credentials.email);
-    await this.page.type('#password', this.credentials.password);
-    await Promise.allSettled([
-        this.page.waitForNavigation({ waitUntil: 'load', timeout: 15000 }),
-        this.page.click('#login-btn')
-    ]);
-
-    await this.page.waitForSelector('.player-card', { timeout: 15000 });
+    await submitLoginAndReachPersonaPage(this, this.page);
 });
 
 When('I track Ollama warmup requests', async function () {
@@ -526,7 +607,12 @@ Then('the chat workspace should be ready for prompts', async function () {
 });
 
 Then('a warmup request should have been made', async function () {
-    await this.wait(250);
+    const deadline = Date.now() + 5000;
+
+    while (Date.now() < deadline && Number(this.ollamaWarmupCount || 0) < 1) {
+        await this.wait(100);
+    }
+
     assert(
         Number(this.ollamaWarmupCount) > 0,
         `Expected at least one warmup request, received ${this.ollamaWarmupCount || 0}`
@@ -635,10 +721,7 @@ Then('I should be on the chat workspace', async function () {
 
 Then('I should be able to log in with my new password', async function () {
     const page = await launchPage(this, '/');
-    await page.type('#email', this.credentials.email);
-    await page.type('#password', this.credentials.password);
-    await page.click('#login-btn');
-    await page.waitForSelector('.player-card');
+    await submitLoginAndReachPersonaPage(this, page);
     assert(await page.$('.player-card') !== null, 'Expected persona selection page after login.');
 });
 

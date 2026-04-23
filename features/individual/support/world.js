@@ -29,7 +29,7 @@ function getSlowMo() {
 
 async function launchBrowser() {
     const headless = parseBoolean(process.env.PUPPETEER_HEADLESS, false);
-    const preferChrome = parseBoolean(process.env.PUPPETEER_PREFER_CHROME, true);
+    const preferChrome = !headless && parseBoolean(process.env.PUPPETEER_PREFER_CHROME, true);
     const baseOptions = {
         headless: headless ? 'new' : false,
         slowMo: headless ? 0 : getSlowMo(),
@@ -72,7 +72,25 @@ class BrowserWorld {
 
     async close() {
         if (this.browser) {
-            await this.browser.close();
+            const browser = this.browser;
+            const browserProcess = browser.process();
+
+            try {
+                if (this.page && !this.page.isClosed()) {
+                    await this.page.close().catch(() => {});
+                }
+
+                await Promise.race([
+                    browser.close(),
+                    new Promise((_, reject) => {
+                        setTimeout(() => reject(new Error('browser-close-timeout')), 5000);
+                    })
+                ]);
+            } catch (error) {
+                if (browserProcess && !browserProcess.killed) {
+                    browserProcess.kill();
+                }
+            }
         }
 
         this.browser = null;
