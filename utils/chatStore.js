@@ -119,7 +119,17 @@ function addMessage(email, conversationId, type, text, metadata = {}) {
         modelId: typeof metadata.modelId === 'string' ? metadata.modelId : null,
         modelName: typeof metadata.modelName === 'string' ? metadata.modelName : null,
         provider: typeof metadata.provider === 'string' ? metadata.provider : null,
-        status: typeof metadata.status === 'string' ? metadata.status : 'ok'
+        status: typeof metadata.status === 'string' ? metadata.status : 'ok',
+        personaId: typeof metadata.personaId === 'string' ? metadata.personaId : null,
+        personaName: typeof metadata.personaName === 'string' ? metadata.personaName : null,
+        personaAvatar: typeof metadata.personaAvatar === 'string' ? metadata.personaAvatar : null,
+        authorName: typeof metadata.authorName === 'string' ? metadata.authorName : null,
+        authorAvatar: typeof metadata.authorAvatar === 'string' ? metadata.authorAvatar : null,
+        techniques: Array.isArray(metadata.techniques) ? metadata.techniques : [],
+        toolCalls: Array.isArray(metadata.toolCalls) ? metadata.toolCalls : [],
+        retrievedContext: Array.isArray(metadata.retrievedContext) ? metadata.retrievedContext : [],
+        inContextExamples: Array.isArray(metadata.inContextExamples) ? metadata.inContextExamples : [],
+        reasoningSummary: Array.isArray(metadata.reasoningSummary) ? metadata.reasoningSummary : []
     });
 
     if (conv.title === 'New Conversation' && validType === 'user-bubble') {

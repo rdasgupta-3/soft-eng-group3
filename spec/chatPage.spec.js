@@ -44,15 +44,14 @@ describe('chat.html', () => {
         expect(stored.length).toBe(1);
     });
 
-    it('renders one latest-response card per selected model', async () => {
+    it('renders selected model pills without the latest-response panel', async () => {
         const win = loadPage('chat.html', 'http://localhost/chat?models=ollama-llama3.2-1b,anthropic-claude-3-5-haiku');
         await new Promise(resolve => setTimeout(resolve, 0));
-        const cards = win.document.querySelectorAll('.response-card');
         const selectedPills = win.document.querySelectorAll('#selected-models .selected-model-pill');
 
-        expect(cards.length).toBe(2);
+        expect(win.document.querySelector('.latest-responses-wrap')).toBeNull();
         expect(selectedPills.length).toBe(2);
-        expect(cards[0].textContent).toContain('Local Llama 3.2 1B');
-        expect(cards[1].textContent).toContain('Claude 3.5 Haiku');
+        expect(selectedPills[0].textContent).toContain('Local Llama 3.2 1B');
+        expect(selectedPills[1].textContent).toContain('Claude 3.5 Haiku');
     });
 });

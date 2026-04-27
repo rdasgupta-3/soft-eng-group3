@@ -1,0 +1,42 @@
+{
+  "student@example.com": [
+    {
+      "id": "conv-1776987963873-1184",
+      "title": "How do I study testing?",
+      "persona": "professional",
+      "pinned": false,
+      "updatedAt": 1776987963875,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "How do I study testing?",
+          "at": 1776987963874
+        },
+        {
+          "type": "model-group",
+          "responses": [
+            {
+              "providerId": "openai",
+              "providerLabel": "GPT",
+              "mode": "demo-mode",
+              "text": "Use a checklist."
+            },
+            {
+              "providerId": "gemini",
+              "providerLabel": "Gemini",
+              "mode": "demo-mode",
+              "text": "Compare strategies."
+            },
+            {
+              "providerId": "claude",
+              "providerLabel": "Claude",
+              "mode": "demo-mode",
+              "text": "Start with one habit."
+            }
+          ],
+          "at": 1776987963875
+        }
+      ]
+    }
+  ]
+}

@@ -265,6 +265,41 @@ h1 {
     outline-offset: 3px;
 }
 
+.selected-player-card {
+    outline: 3px solid #1f6fca;
+    outline-offset: 3px;
+}
+
+.picker-section {
+    margin-top: 24px;
+}
+
+.picker-section .section-title-row span {
+    font-size: 0.9rem;
+    color: #5f6c7a;
+}
+
+.model-choice-card {
+    position: relative;
+    width: 210px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    text-align: center;
+    padding-top: 22px;
+}
+
+.model-choice-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.16);
+}
+
 .chat-page {
     height: 100vh;
     margin: 0;
@@ -351,11 +386,103 @@ h1 {
 }
 
 #conversation-list {
+    flex: 1;
     overflow-y: auto;
     padding: 10px;
     display: flex;
     flex-direction: column;
     gap: 8px;
+}
+
+.account-panel {
+    border-top: 1px solid #e3e7eb;
+    padding: 12px;
+    background: #ffffff;
+}
+
+.account-preview {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.account-avatar,
+.message-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    color: #ffffff;
+    background: #526274;
+}
+
+.account-avatar img,
+.message-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.default-avatar {
+    background: #526274;
+}
+
+.account-display {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #27394b;
+}
+
+#edit-account-btn {
+    border: none;
+    background: transparent;
+    color: #174a83;
+    padding: 3px 0 0;
+    cursor: pointer;
+    font-size: 0.78rem;
+}
+
+.profile-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-top: 10px;
+}
+
+.profile-editor label {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #526274;
+}
+
+.profile-editor input[type="text"] {
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    padding: 7px 8px;
+}
+
+.profile-editor input[type="file"] {
+    font-size: 0.78rem;
+}
+
+.profile-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.profile-actions button {
+    border: none;
+    border-radius: 4px;
+    padding: 6px 9px;
+    cursor: pointer;
+    background: #edf4ff;
+    color: #174a83;
+    font-weight: 700;
 }
 
 .history-item {
@@ -501,10 +628,20 @@ h1 {
     background: #f7faff;
 }
 
-.latest-responses-wrap {
-    padding: 14px 16px;
+.persona-switcher {
+    display: flex;
+    justify-content: space-between;
+    gap: 14px;
+    align-items: center;
+    padding: 12px 16px;
     border-bottom: 1px solid #e3e7eb;
-    background: #ffffff;
+    background: #fffafc;
+}
+
+.current-persona-name {
+    font-size: 1rem;
+    font-weight: 800;
+    color: #26384a;
 }
 
 .section-title-row {
@@ -521,51 +658,6 @@ h1 {
     color: #243444;
 }
 
-#latest-response-caption {
-    font-size: 0.86rem;
-    color: #6b7785;
-}
-
-.latest-responses-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 12px;
-}
-
-.response-card {
-    min-height: 160px;
-    padding: 14px;
-    border-radius: 14px;
-    background: linear-gradient(180deg, #f9fbff 0%, #eef4fb 100%);
-    border: 1px solid #dce6f2;
-}
-
-.response-card h3 {
-    margin: 0 0 6px;
-    font-size: 1rem;
-    color: #223547;
-}
-
-.response-card-meta {
-    margin: 0 0 12px;
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    color: #5f6f81;
-}
-
-.response-card-body {
-    margin: 0;
-    font-size: 0.92rem;
-    line-height: 1.5;
-    color: #314355;
-}
-
-.response-card-error {
-    background: linear-gradient(180deg, #fff7f7 0%, #fff0f0 100%);
-    border-color: #f0cfd3;
-}
-
 #chat-window {
     flex: 1;
     overflow-y: auto;
@@ -576,11 +668,62 @@ h1 {
 #messages {
     display: flex;
     flex-direction: column;
+    gap: 14px;
+}
+
+.message-row {
+    display: flex;
     gap: 10px;
+    align-items: flex-start;
+}
+
+.user-message-row {
+    justify-content: flex-end;
+}
+
+.ai-message-row {
+    justify-content: flex-start;
+}
+
+.message-stack {
+    max-width: 74%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.user-message-stack {
+    align-items: flex-end;
+}
+
+.message-meta,
+.ai-response-header {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #5f6c7a;
+}
+
+.user-message-meta {
+    text-align: right;
+}
+
+.persona-avatar {
+    border: 2px solid #ffffff;
+    box-shadow: 0 0 0 1px #d9e1ea;
+}
+
+.user-avatar {
+    background: #0b74de;
+}
+
+.ai-response-group {
+    max-width: 78%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
 }
 
 .bubble {
-    max-width: 74%;
     padding: 10px 12px;
     border-radius: 14px;
     line-height: 1.45;
@@ -589,14 +732,12 @@ h1 {
 }
 
 .user-bubble {
-    align-self: flex-end;
     border-bottom-right-radius: 4px;
     background: #007bff;
     color: #ffffff;
 }
 
 .ai-bubble {
-    align-self: flex-start;
     border-bottom-left-radius: 4px;
     background: #ffffff;
     color: #333;
@@ -610,6 +751,44 @@ h1 {
     text-transform: uppercase;
     letter-spacing: 0.03em;
     color: #526274;
+}
+
+.model-response-card {
+    max-width: 100%;
+}
+
+.typing-bubble {
+    max-width: 78%;
+    padding: 10px 12px;
+    border-radius: 14px;
+    border-bottom-left-radius: 4px;
+    border: 1px solid #dde2e7;
+    color: #4f5f70;
+    background: #f7f9fc;
+}
+
+.typing-text {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 1px;
+    font-style: italic;
+}
+
+.typing-dots {
+    display: inline-block;
+    min-width: 18px;
+    overflow: hidden;
+    vertical-align: bottom;
+    animation: typing-dots 1.2s steps(4, end) infinite;
+}
+
+@keyframes typing-dots {
+    0% {
+        width: 0;
+    }
+    100% {
+        width: 18px;
+    }
 }
 
 .input-area {

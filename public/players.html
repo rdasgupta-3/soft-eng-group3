@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Select AI Models - LLM Project</title>
+    <title>Choose Assistant - LLM Project</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="model-picker-page">
     <div class="model-picker-shell">
         <header class="model-picker-header">
             <div>
-                <p class="eyebrow">Iteration 3 Dev Team</p>
-                <h1>Select Up To Three LLMs</h1>
+                <p class="eyebrow">Iteration 3 Practical Assistant</p>
+                <h1>Choose A Personality And Backend LLMs</h1>
                 <p class="model-picker-copy">
-                    Choose a local model, public models, or a mix of both. Your next chat will send the same prompt to every selected backend.
+                    Pick the assistant style, then choose up to three backend models. Local Ollama models and public GPT, Gemini, and Claude slots are all available.
                 </p>
             </div>
             <button type="button" onclick="logout()" class="logout-btn picker-logout-btn">Log Out</button>
@@ -30,48 +30,89 @@
             </div>
         </section>
 
-        <div class="player-grid model-grid">
-            <button class="player-card model-card frame-professional" type="button" data-model-id="ollama-llama3.2-1b" onclick="toggleModelSelection('ollama-llama3.2-1b')">
-                <div class="model-avatar" aria-hidden="true">OL</div>
-                <div class="player-name">Local Llama 3.2 1B</div>
-                <p class="player-description">Runs locally with Ollama so the app still works without an external API.</p>
-                <span class="model-badge">LOCAL</span>
-            </button>
+        <section class="picker-section">
+            <div class="section-title-row">
+                <h2>Personalities</h2>
+                <span>Click a personality to start chatting immediately.</span>
+            </div>
+            <div class="player-grid">
+                <button class="player-card frame-professional" type="button" data-persona-id="professional" onclick="selectPersonaAndContinue('professional')">
+                    <img class="player-image" src="images/image_6.png" alt="Mr. Professional">
+                    <div class="player-name">Mr. Professional</div>
+                    <p class="player-description">Serious, precise answers for practical questions and open prompts.</p>
+                </button>
 
-            <button class="player-card model-card frame-sweetheart" type="button" data-model-id="openai-gpt-4o-mini" onclick="toggleModelSelection('openai-gpt-4o-mini')">
-                <div class="model-avatar" aria-hidden="true">GP</div>
-                <div class="player-name">GPT-4o Mini</div>
-                <p class="player-description">Public model slot for OpenAI-backed responses and side-by-side comparisons.</p>
-                <span class="model-badge">PUBLIC</span>
-            </button>
+                <button class="player-card frame-sweetheart" type="button" data-persona-id="sweetheart" onclick="selectPersonaAndContinue('sweetheart')">
+                    <img class="player-image" src="images/image_4.png" alt="Miss Sweetheart">
+                    <div class="player-name">Miss Sweetheart</div>
+                    <p class="player-description">Warm, encouraging answers that still preserve the requested facts.</p>
+                </button>
 
-            <button class="player-card model-card frame-silly" type="button" data-model-id="google-gemini-2.0-flash" onclick="toggleModelSelection('google-gemini-2.0-flash')">
-                <div class="model-avatar" aria-hidden="true">GE</div>
-                <div class="player-name">Gemini 2.0 Flash</div>
-                <p class="player-description">Public Google model slot for fast response comparisons in the same chat turn.</p>
-                <span class="model-badge">PUBLIC</span>
-            </button>
+                <button class="player-card frame-silly" type="button" data-persona-id="silly" onclick="selectPersonaAndContinue('silly')">
+                    <img class="player-image" src="images/image_5.png" alt="Lord Silly the Ninth">
+                    <div class="player-name">Lord Silly the Ninth</div>
+                    <p class="player-description">Playful, theatrical answers with useful facts underneath the nonsense.</p>
+                </button>
+            </div>
+        </section>
 
-            <button class="player-card model-card frame-professional" type="button" data-model-id="anthropic-claude-3-5-haiku" onclick="toggleModelSelection('anthropic-claude-3-5-haiku')">
-                <div class="model-avatar" aria-hidden="true">CL</div>
-                <div class="player-name">Claude 3.5 Haiku</div>
-                <p class="player-description">Public Anthropic model slot with graceful error handling if server credentials are missing.</p>
-                <span class="model-badge">PUBLIC</span>
-            </button>
+        <section class="picker-section">
+            <div class="section-title-row">
+                <h2>Backend Models</h2>
+                <span>Use these before continuing, or change them later from chat.</span>
+            </div>
+            <div class="player-grid model-grid">
+                <button class="model-choice-card frame-professional" type="button" data-model-id="ollama-llama3.2-1b" onclick="toggleModelSelection('ollama-llama3.2-1b')">
+                    <div class="model-avatar" aria-hidden="true">OL</div>
+                    <div class="player-name">Local Llama 3.2 1B</div>
+                    <p class="player-description">Runs locally through Ollama.</p>
+                    <span class="model-badge">LOCAL</span>
+                </button>
 
-            <button class="player-card model-card frame-sweetheart" type="button" data-model-id="ollama-qwen2.5-1.5b" onclick="toggleModelSelection('ollama-qwen2.5-1.5b')">
-                <div class="model-avatar" aria-hidden="true">QW</div>
-                <div class="player-name">Local Qwen 2.5 1.5B</div>
-                <p class="player-description">Optional second local model for quick offline comparisons without leaving the app.</p>
-                <span class="model-badge">LOCAL</span>
-            </button>
-        </div>
+                <button class="model-choice-card frame-sweetheart" type="button" data-model-id="openai-gpt-4o-mini" onclick="toggleModelSelection('openai-gpt-4o-mini')">
+                    <div class="model-avatar" aria-hidden="true">GP</div>
+                    <div class="player-name">GPT-4o Mini</div>
+                    <p class="player-description">Public OpenAI model slot.</p>
+                    <span class="model-badge">PUBLIC</span>
+                </button>
+
+                <button class="model-choice-card frame-silly" type="button" data-model-id="google-gemini-2.0-flash" onclick="toggleModelSelection('google-gemini-2.0-flash')">
+                    <div class="model-avatar" aria-hidden="true">GE</div>
+                    <div class="player-name">Gemini 2.0 Flash</div>
+                    <p class="player-description">Public Google model slot.</p>
+                    <span class="model-badge">PUBLIC</span>
+                </button>
+
+                <button class="model-choice-card frame-professional" type="button" data-model-id="anthropic-claude-3-5-haiku" onclick="toggleModelSelection('anthropic-claude-3-5-haiku')">
+                    <div class="model-avatar" aria-hidden="true">CL</div>
+                    <div class="player-name">Claude 3.5 Haiku</div>
+                    <p class="player-description">Public Anthropic model slot.</p>
+                    <span class="model-badge">PUBLIC</span>
+                </button>
+
+                <button class="model-choice-card frame-sweetheart" type="button" data-model-id="ollama-qwen2.5-1.5b" onclick="toggleModelSelection('ollama-qwen2.5-1.5b')">
+                    <div class="model-avatar" aria-hidden="true">QW</div>
+                    <div class="player-name">Local Qwen 2.5 1.5B</div>
+                    <p class="player-description">Second small local Ollama option.</p>
+                    <span class="model-badge">LOCAL</span>
+                </button>
+            </div>
+        </section>
     </div>
 
     <script>
         const SELECTED_MODELS_KEY = 'llmSelectedModelIds';
+        const SELECTED_PERSONA_KEY = 'llmSelectedPersonaId';
         const DEFAULT_MODEL_IDS = ['ollama-llama3.2-1b', 'openai-gpt-4o-mini', 'google-gemini-2.0-flash'];
+        const VALID_PERSONAS = ['professional', 'sweetheart', 'silly'];
         let selectedModelIds = [];
+        let selectedPersonaId = 'professional';
+
+        function parsePersonaFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const persona = params.get('persona');
+            return VALID_PERSONAS.includes(persona) ? persona : '';
+        }
 
         function loadSelectedModelIds() {
             try {
@@ -87,8 +128,14 @@
             selectedModelIds = [...DEFAULT_MODEL_IDS];
         }
 
-        function saveSelectedModelIds() {
+        function loadSelectedPersona() {
+            const saved = localStorage.getItem(SELECTED_PERSONA_KEY);
+            selectedPersonaId = parsePersonaFromUrl() || (VALID_PERSONAS.includes(saved) ? saved : 'professional');
+        }
+
+        function saveSelections() {
             localStorage.setItem(SELECTED_MODELS_KEY, JSON.stringify(selectedModelIds));
+            localStorage.setItem(SELECTED_PERSONA_KEY, selectedPersonaId);
         }
 
         function renderSelectedState() {
@@ -97,10 +144,13 @@
             const continueButton = document.getElementById('continue-to-chat');
 
             pillList.innerHTML = '';
-            document.querySelectorAll('.model-card').forEach(card => {
+            document.querySelectorAll('.model-choice-card').forEach(card => {
                 const isSelected = selectedModelIds.includes(card.dataset.modelId);
                 card.classList.toggle('selected-model-card', isSelected);
                 card.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+            });
+            document.querySelectorAll('.player-card').forEach(card => {
+                card.classList.toggle('selected-player-card', card.dataset.personaId === selectedPersonaId);
             });
 
             selectedModelIds.forEach(modelId => {
@@ -128,7 +178,7 @@
         function toggleModelSelection(modelId) {
             if (selectedModelIds.includes(modelId)) {
                 selectedModelIds = selectedModelIds.filter(id => id !== modelId);
-                saveSelectedModelIds();
+                saveSelections();
                 renderSelectedState();
                 return;
             }
@@ -139,8 +189,14 @@
             }
 
             selectedModelIds.push(modelId);
-            saveSelectedModelIds();
+            saveSelections();
             renderSelectedState();
+        }
+
+        function selectPersonaAndContinue(personaId) {
+            selectedPersonaId = VALID_PERSONAS.includes(personaId) ? personaId : 'professional';
+            saveSelections();
+            continueToChat();
         }
 
         function continueToChat() {
@@ -149,8 +205,9 @@
                 return;
             }
 
-            saveSelectedModelIds();
+            saveSelections();
             const search = new URLSearchParams();
+            search.set('persona', selectedPersonaId);
             search.set('models', selectedModelIds.join(','));
             window.location.href = `/chat?${search.toString()}`;
         }
@@ -168,7 +225,8 @@
         }
 
         loadSelectedModelIds();
-        saveSelectedModelIds();
+        loadSelectedPersona();
+        saveSelections();
         renderSelectedState();
     </script>
 </body>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chat - LLM</title>
+    <title>Triad.ai</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="chat-page">
@@ -17,19 +17,47 @@
                 <input type="text" id="history-search" placeholder="Search chats..." oninput="updateHistorySearch(this.value)">
             </div>
             <div id="conversation-list"></div>
+            <section class="account-panel" aria-label="User account settings">
+                <div class="account-preview">
+                    <div id="account-avatar" class="account-avatar default-avatar" aria-hidden="true">U</div>
+                    <div>
+                        <div id="account-display" class="account-display">User</div>
+                        <button id="edit-account-btn" type="button" onclick="toggleProfileEditor()">Customize account</button>
+                    </div>
+                </div>
+                <div id="profile-editor" class="profile-editor" hidden>
+                    <label for="profile-name">Display name</label>
+                    <input id="profile-name" type="text" placeholder="Display name">
+                    <label for="profile-picture">Profile picture</label>
+                    <input id="profile-picture" type="file" accept="image/*" onchange="handleProfilePicture(event)">
+                    <div class="profile-actions">
+                        <button type="button" onclick="saveUserProfile()">Save</button>
+                        <button type="button" onclick="resetUserProfile()">Reset</button>
+                    </div>
+                </div>
+            </section>
         </aside>
 
         <section class="chat-main">
             <header class="chat-header compare-chat-header">
                 <div>
-                    <h1>Multi-LLM Comparison Chat</h1>
-                    <p>One prompt, multiple backend responses, with model switching preserved across conversations.</p>
+                    <h1>Triad.ai</h1>
+                    <p>Switch personalities and backend models while asking equations, date/time, and weather questions.</p>
                 </div>
                 <div class="chat-header-actions">
+                    <button id="switch-persona-btn" type="button" class="secondary-action-btn" onclick="switchPersona()">Switch Personality</button>
                     <button id="switch-models-btn" type="button" class="secondary-action-btn" onclick="switchModelPicker()">Choose Models</button>
                     <button onclick="logout()" class="logout-btn inline-logout-btn">Log Out</button>
                 </div>
             </header>
+
+            <section class="persona-switcher" aria-label="Current AI personality">
+                <div>
+                    <p class="selection-label">Current personality</p>
+                    <div id="current-persona-name" class="current-persona-name">Mr. Professional</div>
+                </div>
+                <div id="persona-tone" class="selection-hint">Equation solving with a serious, professional tone.</div>
+            </section>
 
             <section class="selected-models-bar">
                 <div>
@@ -37,14 +65,6 @@
                     <div id="selected-models" class="selected-model-pill-list"></div>
                 </div>
                 <div id="selection-status" class="selection-hint"></div>
-            </section>
-
-            <section class="latest-responses-wrap">
-                <div class="section-title-row">
-                    <h2>Latest Model Responses</h2>
-                    <span id="latest-response-caption">Send a prompt to compare model output.</span>
-                </div>
-                <div id="latest-responses" class="latest-responses-grid"></div>
             </section>
 
             <div id="chat-window">
@@ -62,6 +82,8 @@
         const STORAGE_KEY = 'llmChatConversations';
         const ACTIVE_KEY = 'llmActiveConversationId';
         const SELECTED_MODELS_KEY = 'llmSelectedModelIds';
+        const SELECTED_PERSONA_KEY = 'llmSelectedPersonaId';
+        const USER_PROFILE_KEY = 'triadUserProfile';
         const useServerApi = (
             typeof window.fetch === 'function' &&
             window.location.protocol.startsWith('http') &&
@@ -76,12 +98,21 @@
             { id: 'ollama-qwen2.5-1.5b', name: 'Local Qwen 2.5 1.5B', access: 'local', provider: 'ollama' }
         ];
         const fallbackDefaultIds = ['ollama-llama3.2-1b', 'openai-gpt-4o-mini', 'google-gemini-2.0-flash'];
+        const personaCatalog = [
+            { id: 'professional', name: 'Mr. Professional', tone: 'Serious, precise answers with a professional tone.', avatar: 'images/image_6.png' },
+            { id: 'sweetheart', name: 'Miss Sweetheart', tone: 'Warm, encouraging answers with exact practical details.', avatar: 'images/image_4.png' },
+            { id: 'silly', name: 'Lord Silly the Ninth', tone: 'Useful answers with a ridiculous royal tone.', avatar: 'images/image_5.png' }
+        ];
 
         let conversations = [];
         let activeConversationId = null;
         let historySearchQuery = '';
         let selectedModelIds = [];
         let modelCatalog = [...fallbackCatalog];
+        let selectedPersonaId = 'professional';
+        let typingIndicatorVisible = false;
+        let currentUserEmail = 'User';
+        let userProfile = { displayName: '', avatar: '' };
 
         function uniqueIds(ids) {
             return [...new Set((ids || []).filter(id => typeof id === 'string'))];
@@ -106,6 +137,151 @@
             }
 
             return raw.split(',').map(value => value.trim()).filter(Boolean);
+        }
+
+        function parsePersonaFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const persona = params.get('persona');
+            return personaCatalog.some(entry => entry.id === persona) ? persona : '';
+        }
+
+        function loadSelectedPersona() {
+            const incoming = parsePersonaFromUrl();
+            const saved = localStorage.getItem(SELECTED_PERSONA_KEY);
+            selectedPersonaId = incoming || (personaCatalog.some(entry => entry.id === saved) ? saved : 'professional');
+            localStorage.setItem(SELECTED_PERSONA_KEY, selectedPersonaId);
+        }
+
+        function getSelectedPersona() {
+            return personaCatalog.find(persona => persona.id === selectedPersonaId) || personaCatalog[0];
+        }
+
+        function loadUserProfile() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(USER_PROFILE_KEY) || '{}');
+                userProfile = {
+                    displayName: typeof saved.displayName === 'string' ? saved.displayName : '',
+                    avatar: typeof saved.avatar === 'string' ? saved.avatar : ''
+                };
+            } catch (error) {
+                userProfile = { displayName: '', avatar: '' };
+            }
+        }
+
+        async function loadCurrentUser() {
+            if (!useServerApi) {
+                currentUserEmail = 'User';
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/me');
+                if (response.ok) {
+                    const payload = await response.json();
+                    currentUserEmail = payload.email || 'User';
+                }
+            } catch (error) {
+                currentUserEmail = 'User';
+            }
+        }
+
+        function currentUserName() {
+            return userProfile.displayName.trim() || currentUserEmail;
+        }
+
+        function defaultInitial(name) {
+            return (name || 'U').trim().charAt(0).toUpperCase() || 'U';
+        }
+
+        function createAvatar(src, name, className = '') {
+            const avatar = document.createElement('div');
+            avatar.className = `message-avatar ${className}`.trim();
+            if (src) {
+                const img = document.createElement('img');
+                img.src = src;
+                img.alt = name;
+                avatar.appendChild(img);
+                return avatar;
+            }
+
+            avatar.classList.add('default-avatar');
+            avatar.textContent = defaultInitial(name);
+            return avatar;
+        }
+
+        function renderAccountPanel() {
+            const name = currentUserName();
+            const avatar = document.getElementById('account-avatar');
+            const display = document.getElementById('account-display');
+            const input = document.getElementById('profile-name');
+
+            avatar.innerHTML = '';
+            avatar.textContent = '';
+            if (userProfile.avatar) {
+                const img = document.createElement('img');
+                img.src = userProfile.avatar;
+                img.alt = name;
+                avatar.appendChild(img);
+                avatar.classList.remove('default-avatar');
+            } else {
+                avatar.classList.add('default-avatar');
+                avatar.textContent = defaultInitial(name);
+            }
+
+            display.textContent = name;
+            input.value = userProfile.displayName;
+        }
+
+        function toggleProfileEditor() {
+            const editor = document.getElementById('profile-editor');
+            editor.hidden = !editor.hidden;
+        }
+
+        function handleProfilePicture(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) {
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                userProfile.avatar = reader.result;
+                renderAccountPanel();
+                renderMessages();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function saveUserProfile() {
+            userProfile.displayName = document.getElementById('profile-name').value.trim();
+            localStorage.setItem(USER_PROFILE_KEY, JSON.stringify(userProfile));
+            document.getElementById('profile-editor').hidden = true;
+            renderAccountPanel();
+            renderMessages();
+        }
+
+        function resetUserProfile() {
+            userProfile = { displayName: '', avatar: '' };
+            localStorage.removeItem(USER_PROFILE_KEY);
+            document.getElementById('profile-picture').value = '';
+            renderAccountPanel();
+            renderMessages();
+        }
+
+        function formatMessageTime(timestamp) {
+            if (!timestamp) {
+                return 'just now';
+            }
+
+            const elapsedMs = Date.now() - timestamp;
+            if (elapsedMs < 60 * 1000) {
+                return 'just now';
+            }
+
+            return new Date(timestamp).toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit'
+            });
         }
 
         function loadSelectedModels() {
@@ -210,7 +386,6 @@
             renderConversationList();
             renderMessages();
             renderSelectedModels();
-            renderLatestResponses();
         }
 
         function getActiveConversation() {
@@ -375,6 +550,22 @@
             status.textContent = `${effectiveModelIds.length} active model${effectiveModelIds.length === 1 ? '' : 's'} in this conversation.`;
         }
 
+        function renderSelectedPersona() {
+            const persona = getSelectedPersona();
+            document.getElementById('current-persona-name').textContent = persona.name;
+            document.getElementById('persona-tone').textContent = persona.tone;
+        }
+
+        function showTypingIndicator() {
+            typingIndicatorVisible = true;
+            renderMessages();
+        }
+
+        function hideTypingIndicator() {
+            typingIndicatorVisible = false;
+            renderMessages();
+        }
+
         function renderMessages() {
             const msgContainer = document.getElementById('messages');
             const current = getActiveConversation();
@@ -384,76 +575,113 @@
                 return;
             }
 
-            current.messages.forEach(msg => {
+            function appendUserMessage(msg) {
+                const name = msg.authorName || currentUserName();
+                const avatarSrc = msg.authorAvatar || userProfile.avatar;
+                const row = document.createElement('div');
+                row.className = 'message-row user-message-row';
+
+                const bubbleWrap = document.createElement('div');
+                bubbleWrap.className = 'message-stack user-message-stack';
+
+                const meta = document.createElement('div');
+                meta.className = 'message-meta user-message-meta';
+                meta.textContent = `${name} | ${formatMessageTime(msg.at)}`;
+
                 const bubble = document.createElement('div');
-                bubble.className = `bubble ${msg.type}`;
-                if (msg.modelId) {
-                    bubble.dataset.modelId = msg.modelId;
-                }
+                bubble.className = 'bubble user-bubble';
+                bubble.textContent = msg.text;
 
-                if (msg.type === 'ai-bubble' && msg.modelName) {
-                    const label = document.createElement('div');
-                    label.className = 'model-reply-label';
-                    label.textContent = `${msg.modelName}${msg.status === 'error' ? ' | handled error' : ''}`;
-                    bubble.appendChild(label);
-                }
-
-                const content = document.createElement('div');
-                content.textContent = msg.text;
-                bubble.appendChild(content);
-                msgContainer.appendChild(bubble);
-            });
-
-            msgContainer.scrollTop = msgContainer.scrollHeight;
-            renderLatestResponses();
-        }
-
-        function renderLatestResponses() {
-            const current = getActiveConversation();
-            const grid = document.getElementById('latest-responses');
-            const caption = document.getElementById('latest-response-caption');
-            grid.innerHTML = '';
-
-            if (!current) {
-                caption.textContent = 'Send a prompt to compare model output.';
-                return;
+                bubbleWrap.appendChild(meta);
+                bubbleWrap.appendChild(bubble);
+                row.appendChild(bubbleWrap);
+                row.appendChild(createAvatar(avatarSrc, name, 'user-avatar'));
+                msgContainer.appendChild(row);
             }
 
-            const activeIds = normalizeSelectedModelIds(current.selectedModelIds || selectedModelIds);
-            const latestReplies = activeIds.map(modelId => {
-                const reply = [...current.messages].reverse().find(msg => msg.type === 'ai-bubble' && msg.modelId === modelId);
-                return {
-                    modelId,
-                    modelName: modelNameFor(modelId),
-                    text: reply ? reply.text : 'No response yet.',
-                    status: reply ? reply.status : 'idle'
-                };
-            });
+            function appendAiGroup(group) {
+                const first = group[0];
+                const persona = personaCatalog.find(entry => entry.id === first.personaId) || getSelectedPersona();
+                const personaName = first.personaName || persona.name;
+                const personaAvatar = first.personaAvatar || persona.avatar;
+                const row = document.createElement('div');
+                row.className = 'message-row ai-message-row';
 
-            latestReplies.forEach(reply => {
-                const card = document.createElement('article');
-                card.className = `response-card ${reply.status === 'error' ? 'response-card-error' : ''}`;
+                row.appendChild(createAvatar(personaAvatar, personaName, 'persona-avatar'));
 
-                const heading = document.createElement('h3');
-                heading.textContent = reply.modelName;
+                const groupEl = document.createElement('section');
+                groupEl.className = 'ai-response-group';
 
-                const meta = document.createElement('p');
-                meta.className = 'response-card-meta';
-                meta.textContent = reply.status === 'idle' ? 'Waiting for a prompt' : (reply.status === 'error' ? 'Handled provider issue' : 'Latest response');
+                const header = document.createElement('div');
+                header.className = 'ai-response-header';
+                header.textContent = `${personaName} responded | ${formatMessageTime(first.at)}`;
+                groupEl.appendChild(header);
 
-                const body = document.createElement('p');
-                body.className = 'response-card-body';
-                body.textContent = reply.text;
+                group.forEach(msg => {
+                    const bubble = document.createElement('div');
+                    bubble.className = 'bubble ai-bubble model-response-card';
+                    if (msg.modelId) {
+                        bubble.dataset.modelId = msg.modelId;
+                    }
 
-                card.appendChild(heading);
-                card.appendChild(meta);
-                card.appendChild(body);
-                grid.appendChild(card);
-            });
+                    if (msg.modelName) {
+                        const label = document.createElement('div');
+                        label.className = 'model-reply-label';
+                        label.textContent = `${msg.modelName}${msg.status === 'error' ? ' | handled error' : ''}`;
+                        bubble.appendChild(label);
+                    }
 
-            caption.textContent = latestReplies.some(reply => reply.status !== 'idle')
-                ? 'Each card shows the most recent reply for the selected models.'
-                : 'Send a prompt to compare model output.';
+                    const content = document.createElement('div');
+                    content.textContent = msg.text;
+                    bubble.appendChild(content);
+                    groupEl.appendChild(bubble);
+                });
+
+                row.appendChild(groupEl);
+                msgContainer.appendChild(row);
+            }
+
+            for (let index = 0; index < current.messages.length; index += 1) {
+                const msg = current.messages[index];
+                if (msg.type === 'user-bubble') {
+                    appendUserMessage(msg);
+                    continue;
+                }
+
+                const group = [];
+                while (index < current.messages.length && current.messages[index].type === 'ai-bubble') {
+                    group.push(current.messages[index]);
+                    index += 1;
+                }
+                index -= 1;
+                appendAiGroup(group);
+            }
+
+            if (typingIndicatorVisible) {
+                const persona = getSelectedPersona();
+                const row = document.createElement('div');
+                row.className = 'message-row ai-message-row';
+                row.appendChild(createAvatar(persona.avatar, persona.name, 'persona-avatar'));
+
+                const bubble = document.createElement('div');
+                bubble.className = 'typing-bubble';
+
+                const content = document.createElement('div');
+                content.className = 'typing-text';
+                content.textContent = `${persona.name} is thinking`;
+
+                const dots = document.createElement('span');
+                dots.className = 'typing-dots';
+                dots.setAttribute('aria-hidden', 'true');
+                dots.textContent = '...';
+
+                content.appendChild(dots);
+                bubble.appendChild(content);
+                row.appendChild(bubble);
+                msgContainer.appendChild(row);
+            }
+
+            msgContainer.scrollTop = msgContainer.scrollHeight;
         }
 
         function switchConversation(conversationId) {
@@ -466,7 +694,15 @@
 
         function switchModelPicker() {
             localStorage.setItem(SELECTED_MODELS_KEY, JSON.stringify(selectedModelIds));
-            window.location.href = '/choose-player';
+            localStorage.setItem(SELECTED_PERSONA_KEY, selectedPersonaId);
+            window.location.href = `/choose-player?persona=${encodeURIComponent(selectedPersonaId)}`;
+        }
+
+        function switchPersona() {
+            const currentIndex = personaCatalog.findIndex(persona => persona.id === selectedPersonaId);
+            selectedPersonaId = personaCatalog[(currentIndex + 1) % personaCatalog.length].id;
+            localStorage.setItem(SELECTED_PERSONA_KEY, selectedPersonaId);
+            renderSelectedPersona();
         }
 
         function createNewConversation() {
@@ -638,7 +874,17 @@
                 modelId: metadata.modelId || null,
                 modelName: metadata.modelName || null,
                 provider: metadata.provider || null,
-                status: metadata.status || 'ok'
+                status: metadata.status || 'ok',
+                personaId: metadata.personaId || null,
+                personaName: metadata.personaName || null,
+                personaAvatar: metadata.personaAvatar || null,
+                authorName: metadata.authorName || null,
+                authorAvatar: metadata.authorAvatar || null,
+                techniques: Array.isArray(metadata.techniques) ? metadata.techniques : [],
+                toolCalls: Array.isArray(metadata.toolCalls) ? metadata.toolCalls : [],
+                retrievedContext: Array.isArray(metadata.retrievedContext) ? metadata.retrievedContext : [],
+                inContextExamples: Array.isArray(metadata.inContextExamples) ? metadata.inContextExamples : [],
+                reasoningSummary: Array.isArray(metadata.reasoningSummary) ? metadata.reasoningSummary : []
             });
 
             if (current.title === 'New Conversation' && type === 'user-bubble') {
@@ -660,28 +906,50 @@
                 return;
             }
 
-            await addMessage('user-bubble', text);
+            await addMessage('user-bubble', text, {
+                authorName: currentUserName(),
+                authorAvatar: userProfile.avatar
+            });
             input.value = '';
+            showTypingIndicator();
 
             if (useServerApi) {
                 const current = getActiveConversation();
                 if (!current) {
+                    hideTypingIndicator();
                     return;
                 }
 
-                const response = await fetch(`/api/conversations/${current.id}/ai-reply`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ selectedModelIds })
-                });
+                try {
+                    const response = await fetch(`/api/conversations/${current.id}/ai-reply`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ selectedModelIds, personaId: selectedPersonaId })
+                    });
 
-                if (response.status === 401) {
-                    window.location.href = '/';
-                    return;
+                    if (response.status === 401) {
+                        window.location.href = '/';
+                        return;
+                    }
+
+                    if (!response.ok) {
+                        const payload = await response.json().catch(() => ({}));
+                        throw new Error(payload.error || 'The assistant could not generate a response.');
+                    }
+
+                    await syncConversationsFromServer();
+                } catch (error) {
+                    await addMessage('ai-bubble', `${getSelectedPersona().name} could not complete that request: ${error.message}`, {
+                        modelName: getSelectedPersona().name,
+                        personaId: getSelectedPersona().id,
+                        personaName: getSelectedPersona().name,
+                        personaAvatar: getSelectedPersona().avatar,
+                        status: 'error'
+                    });
+                } finally {
+                    hideTypingIndicator();
                 }
-
-                await syncConversationsFromServer();
-                return;
+                    return;
             }
 
             setTimeout(() => {
@@ -690,9 +958,13 @@
                         modelId,
                         modelName: modelNameFor(modelId),
                         provider: (modelCatalog.find(model => model.id === modelId) || {}).provider || 'unknown',
+                        personaId: getSelectedPersona().id,
+                        personaName: getSelectedPersona().name,
+                        personaAvatar: getSelectedPersona().avatar,
                         status: 'ok'
                     });
                 });
+                hideTypingIndicator();
             }, 450);
         }
 
@@ -715,6 +987,10 @@
         }
 
         async function initChat() {
+            loadUserProfile();
+            await loadCurrentUser();
+            renderAccountPanel();
+            loadSelectedPersona();
             loadSelectedModels();
 
             try {
@@ -731,12 +1007,14 @@
                     renderConversationList();
                     renderMessages();
                     renderSelectedModels();
+                    renderSelectedPersona();
                 } catch (error) {
                     console.error(error);
                     ensureDraftConversation();
                     renderConversationList();
                     renderMessages();
                     renderSelectedModels();
+                    renderSelectedPersona();
                 }
                 return;
             }
@@ -750,6 +1028,7 @@
             renderConversationList();
             renderMessages();
             renderSelectedModels();
+            renderSelectedPersona();
         }
 
         initChat();
