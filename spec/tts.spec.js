@@ -13,6 +13,8 @@ function makeSpeechWindow(voices) {
         SpeechSynthesisUtterance,
         speechSynthesis: {
             cancel: jasmine.createSpy('cancel'),
+            pause: jasmine.createSpy('pause'),
+            resume: jasmine.createSpy('resume'),
             speak: jasmine.createSpy('speak'),
             getVoices: () => voices || [
                 { name: 'English Test Voice', lang: 'en-US' },
@@ -23,6 +25,10 @@ function makeSpeechWindow(voices) {
 }
 
 describe('Personality-aware TTS helper', () => {
+    afterEach(() => {
+        tts.stopSpeaking(makeSpeechWindow());
+    });
+
     it('returns different settings for each persona', () => {
         const professional = tts.getTtsSettingsForPersona('professional');
         const sweetheart = tts.getTtsSettingsForPersona('sweetheart');
@@ -70,6 +76,19 @@ describe('Personality-aware TTS helper', () => {
         expect(tts.selectVoiceForPersona('sweetheart', voices)).toEqual(voices[1]);
     });
 
+    it('avoids duplicate voices when distinct English voices are available', () => {
+        const voices = [
+            { name: 'Daniel', lang: 'en-GB', voiceURI: 'voice-daniel' },
+            { name: 'Samantha', lang: 'en-US', voiceURI: 'voice-samantha' },
+            { name: 'Neutral English', lang: 'en-US', voiceURI: 'voice-neutral' }
+        ];
+        const professionalVoice = tts.selectVoiceForPersona('professional', voices, []);
+        const sweetheartVoice = tts.selectVoiceForPersona('sweetheart', voices, [professionalVoice]);
+        const sillyVoice = tts.selectVoiceForPersona('silly', voices, [professionalVoice, sweetheartVoice]);
+
+        expect(new Set([professionalVoice.voiceURI, sweetheartVoice.voiceURI, sillyVoice.voiceURI]).size).toBe(3);
+    });
+
     it('creates an utterance with the requested text', () => {
         const win = makeSpeechWindow();
         const result = tts.speakText('Read this response only.', 'professional', win);
@@ -98,10 +117,40 @@ describe('Personality-aware TTS helper', () => {
         expect(win.speechSynthesis.speak).toHaveBeenCalledTimes(2);
     });
 
+    it('pauses and resumes without restarting the utterance', () => {
+        const win = makeSpeechWindow();
+        tts.speakText('First sentence. Second sentence.', 'professional', win, { messageId: 'm1' });
+        const speakCalls = win.speechSynthesis.speak.calls.count();
+
+        tts.pauseSpeaking(win);
+        expect(tts.getState().isPaused).toBeTrue();
+        expect(win.speechSynthesis.pause).toHaveBeenCalled();
+
+        tts.resumeSpeaking(win);
+        expect(tts.getState().isPaused).toBeFalse();
+        expect(win.speechSynthesis.resume).toHaveBeenCalled();
+        expect(win.speechSynthesis.speak.calls.count()).toBe(speakCalls);
+    });
+
     it('stopSpeaking calls speechSynthesis.cancel', () => {
         const win = makeSpeechWindow();
+        tts.speakText('Reset this.', 'professional', win, { messageId: 'm1' });
         tts.stopSpeaking(win);
 
+        expect(win.speechSynthesis.cancel).toHaveBeenCalled();
+        expect(tts.getState().isSpeaking).toBeFalse();
+    });
+
+    it('scrubbing updates the chunk index and restarts from the selected chunk', () => {
+        const win = makeSpeechWindow();
+        tts.speakText('Alpha one. Beta two. Gamma three.', 'silly', win, { messageId: 'm1' });
+
+        tts.seekToChunk(1, win);
+        const state = tts.getState();
+        const latestUtterance = win.speechSynthesis.speak.calls.mostRecent().args[0];
+
+        expect(state.currentChunkIndex).toBe(1);
+        expect(latestUtterance.text).toBe('Beta two.');
         expect(win.speechSynthesis.cancel).toHaveBeenCalled();
     });
 

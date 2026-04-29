@@ -7,31 +7,34 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
+    <div class="logo-container">
+        <img src="images/logo.png" alt="Logo">
+    </div>
+    <div class="container login-container">
         <h1>Welcome</h1>
         
         <div id="error-message" style="color: #d32f2f; font-size: 0.9em; margin-bottom: 10px; display: none; background: #ffebee; padding: 8px; border-radius: 4px;"></div>
 
-        <input type="email" id="email" placeholder="Email" required>
-        <input type="password" id="password" placeholder="Password" required>
+        <input type="email" id="email" placeholder="Email" class="login-input" required>
+        <input type="password" id="password" placeholder="Password" class="login-input" required>
         
         <div style="display: flex; gap: 10px; margin-top: 10px;">
-            <button onclick="attemptLogin()" style="flex: 1; background-color: #007bff; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">Log In</button>
-            <button onclick="location.href='/signup'" style="flex: 1; background-color: #28a745; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer;">Create Account</button>
+            <button onclick="attemptLogin()" class="login-button">Log In</button>
+            <button onclick="location.href='/signup'" class="login-button secondary">Create Account</button>
         </div>
         
         <hr style="margin: 20px 0;">
 
-        <button onclick="alert('Rutgers CAS Login is coming soon!')" style="width: 100%; background-color: #cc0033; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; margin-bottom: 15px; font-weight: bold;">
+        <button onclick="alert('Rutgers CAS Login is coming soon!')" class="login-button full-width cas">
             Log in with Rutgers NetID (CAS) (Coming Soon)
         </button>
 
-        <button onclick="alert('Google Sign-In is coming soon!')" style="width: 100%; background-color: #4285F4; color: white; border: none; padding: 10px; border-radius: 4px; cursor: pointer; margin-bottom: 15px; font-weight: bold;">
+        <button onclick="alert('Google Sign-In is coming soon!')" class="login-button full-width google">
             Sign in with Google (Coming Soon)
         </button>
         
-        <div class="links" style="margin-top: 20px; display: flex; justify-content: space-between; font-size: 0.9em;">
-            <a href="/forgot-password" style="color: #007bff; text-decoration: none;">Forgot Password?</a>
+        <div class="login-links">
+            <a href="/forgot-password">Forgot Password?</a>
             <!-- <a href="#" style="color: #007bff; text-decoration: none;">Forgot Email?</a> -->
         </div>
     </div>

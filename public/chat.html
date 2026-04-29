@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="chat-page">
+    <div class="logo-container">
+        <img src="images/logo.png" alt="Logo">
+    </div>
     <div class="chat-shell compare-chat-shell">
         <aside class="chat-history-panel">
             <div class="history-header">
@@ -110,13 +113,28 @@
         let activeConversationId = null;
         let historySearchQuery = '';
         let selectedModelIds = [];
+        let currentPersonaId = 'professional';
+
+        // Apply persona theme on load
+        function applyPersonaTheme(personaId) {
+            currentPersonaId = personaId;
+            document.body.classList.remove('persona-sweetheart', 'persona-silly', 'persona-professional');
+            document.body.classList.add(`persona-${personaId}`);
+        }
         let modelCatalog = [...fallbackCatalog];
         let selectedPersonaId = 'professional';
         let typingIndicatorVisible = false;
         let currentUserEmail = 'User';
         let userProfile = { displayName: '', avatar: '' };
         let ttsSupported = false;
-        let ttsSpeaking = false;
+        let ttsState = {
+            isSpeaking: false,
+            isPaused: false,
+            activeMessageId: null,
+            activePersonaId: null,
+            currentChunkIndex: 0,
+            totalChunks: 0
+        };
 
         function uniqueIds(ids) {
             return [...new Set((ids || []).filter(id => typeof id === 'string'))];
@@ -154,6 +172,7 @@
             const saved = localStorage.getItem(SELECTED_PERSONA_KEY);
             selectedPersonaId = incoming || (personaCatalog.some(entry => entry.id === saved) ? saved : 'professional');
             localStorage.setItem(SELECTED_PERSONA_KEY, selectedPersonaId);
+            applyPersonaTheme(selectedPersonaId);
         }
 
         function getSelectedPersona() {
@@ -297,23 +316,31 @@
             const tts = window.TriadTts;
             ttsSupported = Boolean(tts && tts.isSupported(window));
 
-            if (tts && typeof tts.onSpeakingChange === 'function') {
-                tts.onSpeakingChange(isSpeaking => {
-                    ttsSpeaking = isSpeaking;
+            if (tts && typeof tts.onStateChange === 'function') {
+                tts.onStateChange(nextState => {
+                    ttsState = nextState;
                     renderMessages();
                 });
             }
         }
 
-        function speakAssistantMessage(text, personaId) {
+        function messageTtsId(msg) {
+            return [
+                msg.at || 'pending',
+                msg.modelId || msg.modelName || 'assistant',
+                (msg.text || '').slice(0, 32)
+            ].join('|');
+        }
+
+        function toggleAssistantSpeech(text, personaId, messageId) {
             const tts = window.TriadTts;
             if (!tts || !ttsSupported) {
                 return;
             }
 
-            const result = tts.speakText(text, personaId || selectedPersonaId, window);
+            const result = tts.togglePlayback(text, personaId || selectedPersonaId, messageId, window);
             ttsSupported = Boolean(result && result.supported);
-            ttsSpeaking = ttsSupported;
+            ttsState = tts.getState ? tts.getState() : ttsState;
             renderMessages();
         }
 
@@ -322,7 +349,25 @@
             if (tts && typeof tts.stopSpeaking === 'function') {
                 tts.stopSpeaking(window);
             }
-            ttsSpeaking = false;
+            ttsState = tts && tts.getState ? tts.getState() : {
+                isSpeaking: false,
+                isPaused: false,
+                activeMessageId: null,
+                activePersonaId: null,
+                currentChunkIndex: 0,
+                totalChunks: 0
+            };
+            renderMessages();
+        }
+
+        function seekAssistantSpeech(chunkIndex) {
+            const tts = window.TriadTts;
+            if (!tts || !ttsSupported) {
+                return;
+            }
+
+            tts.seekToChunk(chunkIndex, window);
+            ttsState = tts.getState ? tts.getState() : ttsState;
             renderMessages();
         }
 
@@ -601,6 +646,7 @@
                 avatar.innerHTML = '';
                 avatar.appendChild(createAvatar(persona.avatar, persona.name, 'persona-avatar'));
             }
+            applyPersonaTheme(persona.id);
         }
 
         function showTypingIndicator() {
@@ -665,6 +711,10 @@
                 groupEl.appendChild(header);
 
                 group.forEach(msg => {
+                    const messageId = messageTtsId(msg);
+                    const isActiveTts = ttsState.activeMessageId === messageId && ttsState.isSpeaking;
+                    const chunkTotal = isActiveTts ? Math.max(1, ttsState.totalChunks || 1) : Math.max(1, (window.TriadTts && window.TriadTts.splitTextIntoChunks ? window.TriadTts.splitTextIntoChunks(msg.text).length : 1));
+                    const chunkIndex = isActiveTts ? ttsState.currentChunkIndex : 0;
                     const bubble = document.createElement('div');
                     bubble.className = 'bubble ai-bubble model-response-card';
                     if (msg.modelId) {
@@ -683,26 +733,42 @@
                     bubble.appendChild(content);
 
                     const controls = document.createElement('div');
-                    controls.className = 'tts-controls';
+                    controls.className = 'tts-player';
 
-                    const readButton = document.createElement('button');
-                    readButton.type = 'button';
-                    readButton.className = 'tts-read-btn';
-                    readButton.textContent = 'Read Aloud';
-                    readButton.disabled = !ttsSupported;
-                    readButton.setAttribute('aria-label', `Read ${msg.modelName || personaName} response aloud`);
-                    readButton.onclick = () => speakAssistantMessage(msg.text, msg.personaId || persona.id);
-                    controls.appendChild(readButton);
+                    const toggleButton = document.createElement('button');
+                    toggleButton.type = 'button';
+                    toggleButton.className = 'tts-toggle-btn';
+                    toggleButton.textContent = isActiveTts && !ttsState.isPaused ? 'Pause' : (isActiveTts ? 'Resume' : 'Play');
+                    toggleButton.disabled = !ttsSupported;
+                    toggleButton.setAttribute('aria-label', `${toggleButton.textContent} ${msg.modelName || personaName} response audio`);
+                    toggleButton.onclick = () => toggleAssistantSpeech(msg.text, msg.personaId || persona.id, messageId);
+                    controls.appendChild(toggleButton);
 
-                    if (ttsSpeaking) {
+                    if (isActiveTts) {
                         const stopButton = document.createElement('button');
                         stopButton.type = 'button';
                         stopButton.className = 'tts-stop-btn';
-                        stopButton.textContent = 'Stop Reading';
-                        stopButton.setAttribute('aria-label', 'Stop reading aloud');
+                        stopButton.textContent = 'Reset';
+                        stopButton.setAttribute('aria-label', 'Stop and reset response audio');
                         stopButton.onclick = stopAssistantSpeech;
                         controls.appendChild(stopButton);
                     }
+
+                    const scrubber = document.createElement('input');
+                    scrubber.type = 'range';
+                    scrubber.className = 'tts-scrubber';
+                    scrubber.min = '0';
+                    scrubber.max = String(Math.max(0, chunkTotal - 1));
+                    scrubber.value = String(chunkIndex);
+                    scrubber.disabled = !ttsSupported || !isActiveTts || chunkTotal <= 1;
+                    scrubber.setAttribute('aria-label', 'Audio progress by sentence');
+                    scrubber.oninput = event => seekAssistantSpeech(Number(event.target.value));
+                    controls.appendChild(scrubber);
+
+                    const progress = document.createElement('span');
+                    progress.className = 'tts-progress';
+                    progress.textContent = isActiveTts ? `${chunkIndex + 1}/${chunkTotal}` : `0/${chunkTotal}`;
+                    controls.appendChild(progress);
 
                     if (!ttsSupported) {
                         const unsupported = document.createElement('span');

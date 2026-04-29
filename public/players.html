@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="model-picker-page">
+    <div class="logo-container">
+        <img src="images/logo.png" alt="Logo">
+    </div>
     <div class="model-picker-shell">
         <header class="model-picker-header">
             <div>
@@ -31,10 +34,8 @@
         </section>
 
         <section class="picker-section">
-            <div class="section-title-row">
-                <h2>Personalities</h2>
-                <span>Click a personality to start chatting immediately.</span>
-            </div>
+            <h2>Personalities</h2>
+            <p class="section-description">Click a personality to start chatting immediately.</p>
             <div class="player-grid">
                 <button class="player-card frame-professional" type="button" data-persona-id="professional" onclick="selectPersonaAndContinue('professional')">
                     <img class="player-image" src="images/image_6.png" alt="Mr. Professional">
@@ -57,10 +58,8 @@
         </section>
 
         <section class="picker-section">
-            <div class="section-title-row">
-                <h2>Backend Models</h2>
-                <span>Use these before continuing, or change them later from chat.</span>
-            </div>
+            <h2>Backend Models</h2>
+            <p class="section-description">Use these before continuing, or change them later from chat.</p>
             <div class="player-grid model-grid">
                 <button class="model-choice-card frame-professional" type="button" data-model-id="ollama-llama3.2-1b" onclick="toggleModelSelection('ollama-llama3.2-1b')">
                     <div class="model-avatar" aria-hidden="true">OL</div>

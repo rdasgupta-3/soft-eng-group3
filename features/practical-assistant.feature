@@ -25,4 +25,4 @@ Feature: Practical personality assistant
     And I open the practical assistant as "sweetheart"
     When I ask "What is artificial intelligence?"
     And the assistant responds
-    Then I should see a Read Aloud button for the assistant response
+    Then I should see a TTS audio player for the assistant response
