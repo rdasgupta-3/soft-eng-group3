@@ -1,15 +1,14 @@
-# Triad.ai - Iteration 3 Practical Personality Assistant
+Triad.ai - Iteration 3 
 
-Triad.ai is a Node.js + Express chatbot application for Iteration 3. The app supports account login, personality selection, up to three selected backend LLMs, conversation history, and practical AI queries backed by deterministic tools.
+Triad.ai supports account login, personality selection, up to three selected backend LLMs, conversation history, and practical AI queries backed by deterministic tools.
 
-Current practical assistant capabilities:
-
+Current capabilities:
 - Select backend LLMs from local Ollama models and public model slots for GPT, Gemini, and Claude.
 - Choose an AI personality: Mr. Professional, Miss Sweetheart, or Lord Silly the Ninth.
 - Ask math, date/time, weather, or general questions.
 - Use API-backed tools for factual math, date/time, and weather answers.
 - Apply personality as tone only; the selected personality should not change the factual content.
-- Render three model responses from the same shared factual tool result.
+- Generate three model responses from the same shared factual tool result.
 - Customize the user's display name and profile picture in the chat UI.
 
 ---
@@ -18,7 +17,7 @@ Current practical assistant capabilities:
 
 ### REST API Routing Table
 
-Below is the current routing table for our Express.js backend, separating our frontend views from our backend data endpoints.
+Below is the current routing table for the Express.js backend, separating our frontend views from our backend data endpoints.
 
 | Method | Endpoint | Purpose |
 | :--- | :--- | :--- |
@@ -44,13 +43,11 @@ Below is the current routing table for our Express.js backend, separating our fr
 
 ### Database Design
 
-
-
-For the current development iteration, the application uses lightweight JSON-backed stores for local development and testing rather than a production database. This keeps the project easy to run while preserving persistent users, sessions, and conversation history during local QA.
+For the current development iteration, the application uses lightweight JSON-backed stores for local development and testing rather than a production database. This keeps the project easy to run while preserving persistent users, sessions, and conversation history during local QA, as there is no requirement to encrypt information at the time of submission.
 
 **Entity: User**
 * `email` (String) - acts as the unique identifier/username.
-* `password` (String) - currently stored as plaintext for QA testing (Note: Password hashing via bcrypt will be implemented in future iterations).
+* `password` (String) - currently stored as plaintext for QA testing
 
 **Entity: Conversation**
 * `id` (String) - unique conversation identifier.
@@ -65,14 +62,12 @@ For the current development iteration, the application uses lightweight JSON-bac
 The main assistant implementation lives in `utils/practicalAssistant.js`; model orchestration lives in `utils/llmService.js`; available models are defined in `utils/modelCatalog.js`.
 
 The backend combines four required AI techniques:
-
 - **Tool calling:** `TOOL_REGISTRY` dispatches math, date/time, and weather requests to API-backed tools.
 - **Retrieval-augmented generation:** `retrieveContext` scores local guidance entries and includes relevant context in metadata and prompts.
 - **In-context learning:** `selectInContextExamples` selects few-shot examples by intent and personality.
 - **Chain-of-thought planning summary:** `buildReasoningPlan` stores a concise audit summary without exposing hidden chain-of-thought to users.
 
 External factual sources:
-
 - Math: math.js API at `https://api.mathjs.org/v4/`
 - Date/time: TimeAPI at `https://timeapi.io/api/Time/current/zone`
 - Weather: Open-Meteo geocoding and forecast APIs
@@ -145,13 +140,9 @@ Unit tests:
 npm run test:unit
 ```
 
-Acceptance tests:
-
-```bash
-npm test
 ```
 
-The main Iteration 3 unit coverage is in `spec/practicalAssistant.spec.js`. Cucumber coverage for the practical assistant is in `features/practical-assistant.feature`.
+The main Iteration 3 unit coverage is in `spec/practicalAssistant.spec.js`.
 
 ---
 
@@ -174,9 +165,3 @@ Open:
 ```text
 http://localhost:3000
 ```
-
----
-
-### Pupeteer Demo: 
-
-https://youtu.be/_1y57lcVm14
