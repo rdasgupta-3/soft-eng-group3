@@ -22448,5 +22448,607 @@
         }
       ]
     }
+  ],
+  "danielle.y1000@gmail.com": [
+    {
+      "id": "conv-1777486335282-2611",
+      "title": "yoo",
+      "pinned": false,
+      "updatedAt": 1777488070001,
+      "selectedModelIds": [
+        "ollama-llama3.2-1b",
+        "openai-gpt-4o-mini",
+        "google-gemini-2.0-flash"
+      ],
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "yoo",
+          "at": 1777486335315,
+          "modelId": null,
+          "modelName": null,
+          "provider": null,
+          "status": "ok",
+          "personaId": null,
+          "personaName": null,
+          "personaAvatar": null,
+          "authorName": "danielle.y1000@gmail.com",
+          "authorAvatar": "",
+          "techniques": [],
+          "toolCalls": [],
+          "retrievedContext": [],
+          "inContextExamples": [],
+          "reasoningSummary": []
+        },
+        {
+          "type": "ai-bubble",
+          "text": "I could not reach local Ollama model \"llama3.2:1b\" right now. Please make sure Ollama is running, then try again.",
+          "at": 1777486335468,
+          "modelId": "ollama-llama3.2-1b",
+          "modelName": "Local Llama 3.2 1B",
+          "provider": "ollama",
+          "status": "ok",
+          "personaId": "sweetheart",
+          "personaName": "Miss Sweetheart",
+          "personaAvatar": "images/sweetheart.png",
+          "authorName": null,
+          "authorAvatar": null,
+          "techniques": [
+            "retrieval-augmented generation",
+            "in-context learning",
+            "chain-of-thought planning"
+          ],
+          "toolCalls": [],
+          "retrievedContext": [
+            {
+              "id": "persona-policy",
+              "text": "Always apply the selected personality after the API result is known, so tone changes without changing the underlying facts.",
+              "topics": [
+                "professional",
+                "sweetheart",
+                "silly",
+                "personality",
+                "tone"
+              ],
+              "score": 2
+            }
+          ],
+          "inContextExamples": [
+            {
+              "id": "general-professional-example",
+              "intent": "general",
+              "persona": "professional",
+              "user": "What can you help me with?",
+              "assistant": "I can help with equations, date and time questions, weather questions, and selected backend model comparisons."
+            },
+            {
+              "id": "time-sweetheart-example",
+              "intent": "time",
+              "persona": "sweetheart",
+              "user": "What day is it right now?",
+              "assistant": "Of course, sweetheart. TimeAPI says it is Saturday, April 25, 2026 at 6:30 PM EDT."
+            }
+          ],
+          "reasoningSummary": [
+            "Classified the user request as general.",
+            "Retrieved guidance: persona-policy.",
+            "Selected in-context examples: general-professional-example, time-sweetheart-example.",
+            "No deterministic API tool matched; use the selected backend model."
+          ]
+        },
+        {
+          "type": "ai-bubble",
+          "text": "Sure thing, dear. Yoo involves a central idea, related parts, and practical consequences. Its parts interact to produce an outcome, and that outcome is what makes the topic useful in real situations. A direct explanation focuses on what it is, how it behaves, and what changes because of it.",
+          "at": 1777486335495,
+          "modelId": "openai-gpt-4o-mini",
+          "modelName": "GPT-4o Mini",
+          "provider": "openai",
+          "status": "ok",
+          "personaId": "sweetheart",
+          "personaName": "Miss Sweetheart",
+          "personaAvatar": "images/sweetheart.png",
+          "authorName": null,
+          "authorAvatar": null,
+          "techniques": [
+            "retrieval-augmented generation",
+            "in-context learning",
+            "chain-of-thought planning"
+          ],
+          "toolCalls": [],
+          "retrievedContext": [
+            {
+              "id": "persona-policy",
+              "text": "Always apply the selected personality after the API result is known, so tone changes without changing the underlying facts.",
+              "topics": [
+                "professional",
+                "sweetheart",
+                "silly",
+                "personality",
+                "tone"
+              ],
+              "score": 2
+            }
+          ],
+          "inContextExamples": [
+            {
+              "id": "general-professional-example",
+              "intent": "general",
+              "persona": "professional",
+              "user": "What can you help me with?",
+              "assistant": "I can help with equations, date and time questions, weather questions, and selected backend model comparisons."
+            },
+            {
+              "id": "time-sweetheart-example",
+              "intent": "time",
+              "persona": "sweetheart",
+              "user": "What day is it right now?",
+              "assistant": "Of course, sweetheart. TimeAPI says it is Saturday, April 25, 2026 at 6:30 PM EDT."
+            }
+          ],
+          "reasoningSummary": [
+            "Classified the user request as general.",
+            "Retrieved guidance: persona-policy.",
+            "Selected in-context examples: general-professional-example, time-sweetheart-example.",
+            "No deterministic API tool matched; use the selected backend model."
+          ]
+        },
+        {
+          "type": "ai-bubble",
+          "text": "Of course, sweetheart. Yoo involves a central idea, related parts, and practical consequences. Its parts interact to produce an outcome, and that outcome is what makes the topic useful in real situations. A direct explanation focuses on what it is, how it behaves, and what changes because of it.",
+          "at": 1777486335519,
+          "modelId": "google-gemini-2.0-flash",
+          "modelName": "Gemini 2.0 Flash",
+          "provider": "google",
+          "status": "ok",
+          "personaId": "sweetheart",
+          "personaName": "Miss Sweetheart",
+          "personaAvatar": "images/sweetheart.png",
+          "authorName": null,
+          "authorAvatar": null,
+          "techniques": [
+            "retrieval-augmented generation",
+            "in-context learning",
+            "chain-of-thought planning"
+          ],
+          "toolCalls": [],
+          "retrievedContext": [
+            {
+              "id": "persona-policy",
+              "text": "Always apply the selected personality after the API result is known, so tone changes without changing the underlying facts.",
+              "topics": [
+                "professional",
+                "sweetheart",
+                "silly",
+                "personality",
+                "tone"
+              ],
+              "score": 2
+            }
+          ],
+          "inContextExamples": [
+            {
+              "id": "general-professional-example",
+              "intent": "general",
+              "persona": "professional",
+              "user": "What can you help me with?",
+              "assistant": "I can help with equations, date and time questions, weather questions, and selected backend model comparisons."
+            },
+            {
+              "id": "time-sweetheart-example",
+              "intent": "time",
+              "persona": "sweetheart",
+              "user": "What day is it right now?",
+              "assistant": "Of course, sweetheart. TimeAPI says it is Saturday, April 25, 2026 at 6:30 PM EDT."
+            }
+          ],
+          "reasoningSummary": [
+            "Classified the user request as general.",
+            "Retrieved guidance: persona-policy.",
+            "Selected in-context examples: general-professional-example, time-sweetheart-example.",
+            "No deterministic API tool matched; use the selected backend model."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "conv-1777488207928-1832",
+      "title": "yoo",
+      "pinned": false,
+      "updatedAt": 1777488208152,
+      "selectedModelIds": [
+        "ollama-llama3.2-1b",
+        "openai-gpt-4o-mini",
+        "google-gemini-2.0-flash"
+      ],
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "yoo",
+          "at": 1777488207966,
+          "modelId": null,
+          "modelName": null,
+          "provider": null,
+          "status": "ok",
+          "personaId": null,
+          "personaName": null,
+          "personaAvatar": null,
+          "authorName": "danielle.y1000@gmail.com",
+          "authorAvatar": "",
+          "techniques": [],
+          "toolCalls": [],
+          "retrievedContext": [],
+          "inContextExamples": [],
+          "reasoningSummary": []
+        },
+        {
+          "type": "ai-bubble",
+          "text": "I could not reach local Ollama model \"llama3.2:1b\" right now. Please make sure Ollama is running, then try again.",
+          "at": 1777488208094,
+          "modelId": "ollama-llama3.2-1b",
+          "modelName": "Local Llama 3.2 1B",
+          "provider": "ollama",
+          "status": "ok",
+          "personaId": "sweetheart",
+          "personaName": "Miss Sweetheart",
+          "personaAvatar": "images/sweetheart.png",
+          "authorName": null,
+          "authorAvatar": null,
+          "techniques": [
+            "retrieval-augmented generation",
+            "in-context learning",
+            "chain-of-thought planning"
+          ],
+          "toolCalls": [],
+          "retrievedContext": [
+            {
+              "id": "persona-policy",
+              "text": "Always apply the selected personality after the API result is known, so tone changes without changing the underlying facts.",
+              "topics": [
+                "professional",
+                "sweetheart",
+                "silly",
+                "personality",
+                "tone"
+              ],
+              "score": 2
+            }
+          ],
+          "inContextExamples": [
+            {
+              "id": "general-professional-example",
+              "intent": "general",
+              "persona": "professional",
+              "user": "What can you help me with?",
+              "assistant": "I can help with equations, date and time questions, weather questions, and selected backend model comparisons."
+            },
+            {
+              "id": "time-sweetheart-example",
+              "intent": "time",
+              "persona": "sweetheart",
+              "user": "What day is it right now?",
+              "assistant": "Of course, sweetheart. TimeAPI says it is Saturday, April 25, 2026 at 6:30 PM EDT."
+            }
+          ],
+          "reasoningSummary": [
+            "Classified the user request as general.",
+            "Retrieved guidance: persona-policy.",
+            "Selected in-context examples: general-professional-example, time-sweetheart-example.",
+            "No deterministic API tool matched; use the selected backend model."
+          ]
+        },
+        {
+          "type": "ai-bubble",
+          "text": "Sure thing, dear. Yoo involves a central idea, related parts, and practical consequences. Its parts interact to produce an outcome, and that outcome is what makes the topic useful in real situations. A direct explanation focuses on what it is, how it behaves, and what changes because of it.",
+          "at": 1777488208122,
+          "modelId": "openai-gpt-4o-mini",
+          "modelName": "GPT-4o Mini",
+          "provider": "openai",
+          "status": "ok",
+          "personaId": "sweetheart",
+          "personaName": "Miss Sweetheart",
+          "personaAvatar": "images/sweetheart.png",
+          "authorName": null,
+          "authorAvatar": null,
+          "techniques": [
+            "retrieval-augmented generation",
+            "in-context learning",
+            "chain-of-thought planning"
+          ],
+          "toolCalls": [],
+          "retrievedContext": [
+            {
+              "id": "persona-policy",
+              "text": "Always apply the selected personality after the API result is known, so tone changes without changing the underlying facts.",
+              "topics": [
+                "professional",
+                "sweetheart",
+                "silly",
+                "personality",
+                "tone"
+              ],
+              "score": 2
+            }
+          ],
+          "inContextExamples": [
+            {
+              "id": "general-professional-example",
+              "intent": "general",
+              "persona": "professional",
+              "user": "What can you help me with?",
+              "assistant": "I can help with equations, date and time questions, weather questions, and selected backend model comparisons."
+            },
+            {
+              "id": "time-sweetheart-example",
+              "intent": "time",
+              "persona": "sweetheart",
+              "user": "What day is it right now?",
+              "assistant": "Of course, sweetheart. TimeAPI says it is Saturday, April 25, 2026 at 6:30 PM EDT."
+            }
+          ],
+          "reasoningSummary": [
+            "Classified the user request as general.",
+            "Retrieved guidance: persona-policy.",
+            "Selected in-context examples: general-professional-example, time-sweetheart-example.",
+            "No deterministic API tool matched; use the selected backend model."
+          ]
+        },
+        {
+          "type": "ai-bubble",
+          "text": "Of course, sweetheart. Yoo involves a central idea, related parts, and practical consequences. Its parts interact to produce an outcome, and that outcome is what makes the topic useful in real situations. A direct explanation focuses on what it is, how it behaves, and what changes because of it.",
+          "at": 1777488208152,
+          "modelId": "google-gemini-2.0-flash",
+          "modelName": "Gemini 2.0 Flash",
+          "provider": "google",
+          "status": "ok",
+          "personaId": "sweetheart",
+          "personaName": "Miss Sweetheart",
+          "personaAvatar": "images/sweetheart.png",
+          "authorName": null,
+          "authorAvatar": null,
+          "techniques": [
+            "retrieval-augmented generation",
+            "in-context learning",
+            "chain-of-thought planning"
+          ],
+          "toolCalls": [],
+          "retrievedContext": [
+            {
+              "id": "persona-policy",
+              "text": "Always apply the selected personality after the API result is known, so tone changes without changing the underlying facts.",
+              "topics": [
+                "professional",
+                "sweetheart",
+                "silly",
+                "personality",
+                "tone"
+              ],
+              "score": 2
+            }
+          ],
+          "inContextExamples": [
+            {
+              "id": "general-professional-example",
+              "intent": "general",
+              "persona": "professional",
+              "user": "What can you help me with?",
+              "assistant": "I can help with equations, date and time questions, weather questions, and selected backend model comparisons."
+            },
+            {
+              "id": "time-sweetheart-example",
+              "intent": "time",
+              "persona": "sweetheart",
+              "user": "What day is it right now?",
+              "assistant": "Of course, sweetheart. TimeAPI says it is Saturday, April 25, 2026 at 6:30 PM EDT."
+            }
+          ],
+          "reasoningSummary": [
+            "Classified the user request as general.",
+            "Retrieved guidance: persona-policy.",
+            "Selected in-context examples: general-professional-example, time-sweetheart-example.",
+            "No deterministic API tool matched; use the selected backend model."
+          ]
+        }
+      ]
+    },
+    {
+      "id": "conv-1777488252766-4093",
+      "title": "yoo",
+      "pinned": false,
+      "updatedAt": 1777488252957,
+      "selectedModelIds": [
+        "ollama-llama3.2-1b",
+        "openai-gpt-4o-mini",
+        "google-gemini-2.0-flash"
+      ],
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "yoo",
+          "at": 1777488252807,
+          "modelId": null,
+          "modelName": null,
+          "provider": null,
+          "status": "ok",
+          "personaId": null,
+          "personaName": null,
+          "personaAvatar": null,
+          "authorName": "danielle.y1000@gmail.com",
+          "authorAvatar": "",
+          "techniques": [],
+          "toolCalls": [],
+          "retrievedContext": [],
+          "inContextExamples": [],
+          "reasoningSummary": []
+        },
+        {
+          "type": "ai-bubble",
+          "text": "I could not reach local Ollama model \"llama3.2:1b\" right now. Please make sure Ollama is running, then try again.",
+          "at": 1777488252892,
+          "modelId": "ollama-llama3.2-1b",
+          "modelName": "Local Llama 3.2 1B",
+          "provider": "ollama",
+          "status": "ok",
+          "personaId": "silly",
+          "personaName": "Lord Silly the Ninth",
+          "personaAvatar": "images/silly.jpg",
+          "authorName": null,
+          "authorAvatar": null,
+          "techniques": [
+            "retrieval-augmented generation",
+            "in-context learning",
+            "chain-of-thought planning"
+          ],
+          "toolCalls": [],
+          "retrievedContext": [
+            {
+              "id": "persona-policy",
+              "text": "Always apply the selected personality after the API result is known, so tone changes without changing the underlying facts.",
+              "topics": [
+                "professional",
+                "sweetheart",
+                "silly",
+                "personality",
+                "tone"
+              ],
+              "score": 2
+            }
+          ],
+          "inContextExamples": [
+            {
+              "id": "general-professional-example",
+              "intent": "general",
+              "persona": "professional",
+              "user": "What can you help me with?",
+              "assistant": "I can help with equations, date and time questions, weather questions, and selected backend model comparisons."
+            },
+            {
+              "id": "weather-silly-example",
+              "intent": "weather",
+              "persona": "silly",
+              "user": "How is the weather looking for Boston?",
+              "assistant": "My official prediction for Boston: 54 F and partly cloudy, with a tiny chance of dramatic sky behavior."
+            }
+          ],
+          "reasoningSummary": [
+            "Classified the user request as general.",
+            "Retrieved guidance: persona-policy.",
+            "Selected in-context examples: general-professional-example, weather-silly-example.",
+            "No deterministic API tool matched; use the selected backend model."
+          ]
+        },
+        {
+          "type": "ai-bubble",
+          "text": "Hear ye: Yoo involves a central idea, related parts, and practical consequences. Its parts interact to produce an outcome, and that outcome is what makes the topic useful in real situations. A direct explanation focuses on what it is, how it behaves, and what changes because of it. The explanation has left the castle in reasonably tidy shoes.",
+          "at": 1777488252925,
+          "modelId": "openai-gpt-4o-mini",
+          "modelName": "GPT-4o Mini",
+          "provider": "openai",
+          "status": "ok",
+          "personaId": "silly",
+          "personaName": "Lord Silly the Ninth",
+          "personaAvatar": "images/silly.jpg",
+          "authorName": null,
+          "authorAvatar": null,
+          "techniques": [
+            "retrieval-augmented generation",
+            "in-context learning",
+            "chain-of-thought planning"
+          ],
+          "toolCalls": [],
+          "retrievedContext": [
+            {
+              "id": "persona-policy",
+              "text": "Always apply the selected personality after the API result is known, so tone changes without changing the underlying facts.",
+              "topics": [
+                "professional",
+                "sweetheart",
+                "silly",
+                "personality",
+                "tone"
+              ],
+              "score": 2
+            }
+          ],
+          "inContextExamples": [
+            {
+              "id": "general-professional-example",
+              "intent": "general",
+              "persona": "professional",
+              "user": "What can you help me with?",
+              "assistant": "I can help with equations, date and time questions, weather questions, and selected backend model comparisons."
+            },
+            {
+              "id": "weather-silly-example",
+              "intent": "weather",
+              "persona": "silly",
+              "user": "How is the weather looking for Boston?",
+              "assistant": "My official prediction for Boston: 54 F and partly cloudy, with a tiny chance of dramatic sky behavior."
+            }
+          ],
+          "reasoningSummary": [
+            "Classified the user request as general.",
+            "Retrieved guidance: persona-policy.",
+            "Selected in-context examples: general-professional-example, weather-silly-example.",
+            "No deterministic API tool matched; use the selected backend model."
+          ]
+        },
+        {
+          "type": "ai-bubble",
+          "text": "Royal answer incoming: Yoo involves a central idea, related parts, and practical consequences. Its parts interact to produce an outcome, and that outcome is what makes the topic useful in real situations. A direct explanation focuses on what it is, how it behaves, and what changes because of it. Consider it stamped with a tiny ceremonial seal of usefulness.",
+          "at": 1777488252957,
+          "modelId": "google-gemini-2.0-flash",
+          "modelName": "Gemini 2.0 Flash",
+          "provider": "google",
+          "status": "ok",
+          "personaId": "silly",
+          "personaName": "Lord Silly the Ninth",
+          "personaAvatar": "images/silly.jpg",
+          "authorName": null,
+          "authorAvatar": null,
+          "techniques": [
+            "retrieval-augmented generation",
+            "in-context learning",
+            "chain-of-thought planning"
+          ],
+          "toolCalls": [],
+          "retrievedContext": [
+            {
+              "id": "persona-policy",
+              "text": "Always apply the selected personality after the API result is known, so tone changes without changing the underlying facts.",
+              "topics": [
+                "professional",
+                "sweetheart",
+                "silly",
+                "personality",
+                "tone"
+              ],
+              "score": 2
+            }
+          ],
+          "inContextExamples": [
+            {
+              "id": "general-professional-example",
+              "intent": "general",
+              "persona": "professional",
+              "user": "What can you help me with?",
+              "assistant": "I can help with equations, date and time questions, weather questions, and selected backend model comparisons."
+            },
+            {
+              "id": "weather-silly-example",
+              "intent": "weather",
+              "persona": "silly",
+              "user": "How is the weather looking for Boston?",
+              "assistant": "My official prediction for Boston: 54 F and partly cloudy, with a tiny chance of dramatic sky behavior."
+            }
+          ],
+          "reasoningSummary": [
+            "Classified the user request as general.",
+            "Retrieved guidance: persona-policy.",
+            "Selected in-context examples: general-professional-example, weather-silly-example.",
+            "No deterministic API tool matched; use the selected backend model."
+          ]
+        }
+      ]
+    }
   ]
 }

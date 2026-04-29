@@ -7,6 +7,9 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="chat-page">
+    <div class="logo-container">
+        <img src="images/logo.png" alt="Logo">
+    </div>
     <div class="chat-shell compare-chat-shell">
         <aside class="chat-history-panel">
             <div class="history-header">
@@ -108,6 +111,14 @@
         let activeConversationId = null;
         let historySearchQuery = '';
         let selectedModelIds = [];
+        let currentPersonaId = 'professional';
+
+        // Apply persona theme on load
+        function applyPersonaTheme(personaId) {
+            currentPersonaId = personaId;
+            document.body.classList.remove('persona-sweetheart', 'persona-silly', 'persona-professional');
+            document.body.classList.add(`persona-${personaId}`);
+        }
         let modelCatalog = [...fallbackCatalog];
         let selectedPersonaId = 'professional';
         let typingIndicatorVisible = false;
@@ -150,6 +161,7 @@
             const saved = localStorage.getItem(SELECTED_PERSONA_KEY);
             selectedPersonaId = incoming || (personaCatalog.some(entry => entry.id === saved) ? saved : 'professional');
             localStorage.setItem(SELECTED_PERSONA_KEY, selectedPersonaId);
+            applyPersonaTheme(selectedPersonaId);
         }
 
         function getSelectedPersona() {
@@ -554,6 +566,7 @@
             const persona = getSelectedPersona();
             document.getElementById('current-persona-name').textContent = persona.name;
             document.getElementById('persona-tone').textContent = persona.tone;
+            applyPersonaTheme(persona.id);
         }
 
         function showTypingIndicator() {
