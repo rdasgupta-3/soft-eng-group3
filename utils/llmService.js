@@ -1,6 +1,7 @@
 const { generateReplyFromOllama } = require('./ollamaClient');
 const { getDefaultModelIds, getModelById, sanitizeSelectedModelIds } = require('./modelCatalog');
-const { answerWithTools, buildSystemPrompt, getPersona } = require('./practicalAssistant');
+const { answerWithTools, buildSystemPrompt, getPersona, handleGeneralQuery } = require('./practicalAssistant');
+const { isLowQualityResponse } = require('./responseQuality');
 
 function getConfiguredModelIds(modelIds = []) {
     const configured = sanitizeSelectedModelIds(modelIds);
@@ -174,9 +175,12 @@ function formatFactSummary(intent, result) {
     }
 
     if (intent === 'weather') {
+        const confidence = result.confidence || { level: 'HIGH', reasons: [] };
         return {
             location: result.location || 'the selected location',
-            weatherText: `${formatNumber(result.temperature)} ${formatUnit(result.temperatureUnit)}, ${result.condition}, wind ${formatNumber(result.windSpeed)} ${formatUnit(result.windSpeedUnit)}, humidity ${formatNumber(result.humidity)}%`
+            weatherText: `${formatNumber(result.temperature)} ${formatUnit(result.temperatureUnit)}, ${result.condition}, wind ${formatNumber(result.windSpeed)} ${formatUnit(result.windSpeedUnit)}, humidity ${formatNumber(result.humidity)}%`,
+            confidence,
+            reconstruction: result.reconstruction || null
         };
     }
 
@@ -227,22 +231,29 @@ function fallbackByPersona(persona, model, intent, facts) {
     }
 
     if (intent === 'weather') {
+        const uncertaintyNote = facts.confidence && facts.confidence.level === 'MEDIUM'
+            ? ` Confidence is medium because ${facts.confidence.reasons.join(' ')}`
+            : '';
+        const trendNote = facts.confidence && facts.confidence.level === 'LOW' && facts.reconstruction
+            ? ` Exact certainty is not supported, so the reconstructed trend says: ${facts.reconstruction.trendSummary}`
+            : '';
         if (persona.id === 'sweetheart') {
-            if (provider === 'google') return `For ${facts.location}, sweetheart, it is ${facts.weatherText}.`;
-            if (provider === 'openai') return `Sure thing, dear. In ${facts.location}, it is ${facts.weatherText}.`;
-            if (provider === 'anthropic') return `Of course. For ${facts.location}, conditions are ${facts.weatherText}. Hope you stay comfy.`;
-            return `For ${facts.location}, it is ${facts.weatherText}.`;
+            if (provider === 'google') return `For ${facts.location}, sweetheart, it is ${facts.weatherText}.${trendNote || uncertaintyNote}`;
+            if (provider === 'openai') return `Sure thing, dear. In ${facts.location}, it is ${facts.weatherText}.${trendNote || uncertaintyNote}`;
+            if (provider === 'anthropic') return `Of course. For ${facts.location}, conditions are ${facts.weatherText}. Hope you stay comfy.${trendNote || uncertaintyNote}`;
+            return `For ${facts.location}, it is ${facts.weatherText}.${trendNote || uncertaintyNote}`;
         }
         if (persona.id === 'silly') {
-            if (provider === 'google') return `Royal weather bulletin for ${facts.location}: ${facts.weatherText}. Tiny dramatic sky behavior remains possible.`;
-            if (provider === 'openai') return `The sky council reports ${facts.weatherText} in ${facts.location}. Umbrella confidence: cautiously theatrical.`;
-            if (provider === 'anthropic') return `By Lord Silly's forecast scroll, ${facts.location} has ${facts.weatherText}. Proceed with noble weather awareness.`;
-            return `My official prediction for ${facts.location}: ${facts.weatherText}.`;
+            const sillyTrend = trendNote ? ` The royal trend scroll says: ${facts.reconstruction.trendSummary}` : uncertaintyNote;
+            if (provider === 'google') return `Royal weather bulletin for ${facts.location}: ${facts.weatherText}. Tiny dramatic sky behavior remains possible.${sillyTrend}`;
+            if (provider === 'openai') return `The sky council reports ${facts.weatherText} in ${facts.location}. Umbrella confidence: cautiously theatrical.${sillyTrend}`;
+            if (provider === 'anthropic') return `By Lord Silly's forecast scroll, ${facts.location} has ${facts.weatherText}. Proceed with noble weather awareness.${sillyTrend}`;
+            return `My official prediction for ${facts.location}: ${facts.weatherText}.${sillyTrend}`;
         }
-        if (provider === 'google') return `${facts.location}: ${facts.weatherText}.`;
-        if (provider === 'openai') return `Current weather in ${facts.location}: ${facts.weatherText}.`;
-        if (provider === 'anthropic') return `For ${facts.location}, the current conditions are ${facts.weatherText}.`;
-        return `Current weather for ${facts.location}: ${facts.weatherText}.`;
+        if (provider === 'google') return `${facts.location}: ${facts.weatherText}.${trendNote || uncertaintyNote}`;
+        if (provider === 'openai') return `Current weather in ${facts.location}: ${facts.weatherText}.${trendNote || uncertaintyNote}`;
+        if (provider === 'anthropic') return `For ${facts.location}, the current conditions are ${facts.weatherText}.${trendNote || uncertaintyNote}`;
+        return `Current weather for ${facts.location}: ${facts.weatherText}.${trendNote || uncertaintyNote}`;
     }
 
     return null;
@@ -282,7 +293,7 @@ function extractNamedCharacters(userText) {
 function extractStorySubject(userText) {
     const match = (userText || '').match(/\b(?:story|tale|fairy tale|bedtime story|narrative)\b(?:\s+about)?\s+(.+?)(?:\s+named\b|[.!?]|$)/i);
     if (!match || !match[1].trim()) {
-        return 'the requested characters';
+        return 'a curious traveler';
     }
     return match[1].trim().replace(/^(about|of)\s+/i, '');
 }
@@ -359,24 +370,64 @@ function fallbackGeneralReply(model, personaId, userText) {
         return fallbackStory(model, persona, userText);
     }
 
+    const answerCore = buildLocalGeneralAnswer(userText);
+
     if (persona.id === 'sweetheart') {
-        if (provider === 'google') return `Of course, sweetheart. I can help with that: ${userText}`;
-        if (provider === 'openai') return `Sure thing, dear. Here is a warm, simple response to your request: ${userText}`;
-        if (provider === 'anthropic') return `Absolutely. I hear what you are asking, and I would answer gently and clearly: ${userText}`;
-        return `Of course, sweetheart. I can help with that.`;
+        if (provider === 'google') return `Of course, sweetheart. ${answerCore}`;
+        if (provider === 'openai') return `Sure thing, dear. ${answerCore}`;
+        if (provider === 'anthropic') return `Absolutely. ${answerCore} I hope that makes it feel a little clearer.`;
+        return `Of course, sweetheart. ${answerCore}`;
     }
 
     if (persona.id === 'silly') {
-        if (provider === 'google') return `Royal response incoming: ${userText}. I shall answer with maximum useful nonsense and minimum confusion.`;
-        if (provider === 'openai') return `Hear ye, hear ye. Your request, "${userText}", has entered the court of Silly and will be treated with cheerful seriousness.`;
-        if (provider === 'anthropic') return `By decree of Lord Silly, I shall address "${userText}" with dignity, whimsy, and only a modest amount of imaginary trumpet fanfare.`;
-        return `By royal decree, I can help with that request.`;
+        if (provider === 'google') return `Royal answer incoming: ${answerCore} Consider it stamped with a tiny ceremonial seal of usefulness.`;
+        if (provider === 'openai') return `Hear ye: ${answerCore} The explanation has left the castle in reasonably tidy shoes.`;
+        if (provider === 'anthropic') return `By decree of Lord Silly, ${answerCore} No unnecessary trumpet paperwork required.`;
+        return `By royal decree, ${answerCore}`;
     }
 
-    if (provider === 'google') return `Direct answer: I can respond to "${userText}" with a concise, practical reply.`;
-    if (provider === 'openai') return `Here is a clear response to your prompt: ${userText}`;
-    if (provider === 'anthropic') return `I can help with that. I would approach "${userText}" carefully, clearly, and with enough context to be useful.`;
-    return `I can help with that request.`;
+    if (provider === 'google') return answerCore;
+    if (provider === 'openai') return `In practical terms, ${answerCore}`;
+    if (provider === 'anthropic') return answerCore;
+    return answerCore;
+}
+
+function normalizeQuestionTopic(userText) {
+    return (userText || '')
+        .replace(/[?!]+$/g, '')
+        .replace(/^(can you|could you|please|would you)\s+/i, '')
+        .replace(/^(explain|tell me about|what is|what are|how does|how do|how)\s+/i, '')
+        .trim();
+}
+
+function buildLocalGeneralAnswer(userText) {
+    const topic = normalizeQuestionTopic(userText) || 'that topic';
+    const readableTopic = topic.charAt(0).toUpperCase() + topic.slice(1);
+
+    return [
+        `${readableTopic} involves a central idea, related parts, and practical consequences.`,
+        'Its parts interact to produce an outcome, and that outcome is what makes the topic useful in real situations.',
+        'A direct explanation focuses on what it is, how it behaves, and what changes because of it.'
+    ].join(' ');
+}
+
+async function callProviderModel(model, messages, systemPrompt) {
+    if (model.provider === 'ollama') {
+        return generateReplyFromOllama(messages, {
+            runtimeModel: model.runtimeModel,
+            systemPrompt
+        });
+    }
+    if (model.provider === 'openai') {
+        return callOpenAI(model, messages, systemPrompt);
+    }
+    if (model.provider === 'google') {
+        return callGemini(model, messages, systemPrompt);
+    }
+    if (model.provider === 'anthropic') {
+        return callClaude(model, messages, systemPrompt);
+    }
+    return '';
 }
 
 async function formatToolAnswerWithModel(model, userText, personaId, toolAnswer) {
@@ -436,21 +487,16 @@ async function formatToolAnswerWithModel(model, userText, personaId, toolAnswer)
 
 async function generateModelReply(model, messages, personaId) {
     const userText = latestUserText(messages);
-    const systemPrompt = buildSystemPrompt(personaId, userText);
+    const generalPrompt = handleGeneralQuery({ message: userText, personality: personaId });
+    const systemPrompt = generalPrompt.systemPrompt;
+    const promptMessages = [{ type: 'user-bubble', text: generalPrompt.userPrompt }];
 
     try {
-        let text = '';
-        if (model.provider === 'ollama') {
-            text = await generateReplyFromOllama(messages, {
-                runtimeModel: model.runtimeModel,
-                systemPrompt
-            });
-        } else if (model.provider === 'openai') {
-            text = await callOpenAI(model, messages, systemPrompt);
-        } else if (model.provider === 'google') {
-            text = await callGemini(model, messages, systemPrompt);
-        } else if (model.provider === 'anthropic') {
-            text = await callClaude(model, messages, systemPrompt);
+        let text = await callProviderModel(model, promptMessages, systemPrompt);
+
+        if (text && isLowQualityResponse(userText, text)) {
+            const strictMessages = [{ type: 'user-bubble', text: generalPrompt.strictUserPrompt }];
+            text = await callProviderModel(model, strictMessages, systemPrompt);
         }
 
         if (!text) {
@@ -469,7 +515,10 @@ async function generateModelReply(model, messages, personaId) {
                     'in-context learning',
                     'chain-of-thought planning'
                 ],
-                toolCalls: []
+                toolCalls: [],
+                retrievedContext: generalPrompt.metadata.retrievedContext,
+                inContextExamples: generalPrompt.metadata.inContextExamples,
+                reasoningSummary: generalPrompt.metadata.reasoningSummary
             }
         };
     } catch (error) {
@@ -486,6 +535,9 @@ async function generateModelReply(model, messages, personaId) {
                     'chain-of-thought planning'
                 ],
                 toolCalls: [],
+                retrievedContext: generalPrompt.metadata.retrievedContext,
+                inContextExamples: generalPrompt.metadata.inContextExamples,
+                reasoningSummary: generalPrompt.metadata.reasoningSummary,
                 providerFallback: error.message
             }
         };

@@ -1,3 +1,8 @@
+const { evaluateWeatherConfidence } = require('./confidenceEvaluator');
+const { resolveKnownTimezone } = require('./locationResolver');
+const { extractLocationFromMessage } = require('./queryParser');
+const { reconstructTemperatureTrend } = require('./weatherSignalReconstruction');
+
 const DEFAULT_TIMEZONE = process.env.DEFAULT_TIMEZONE || 'America/New_York';
 const DEFAULT_LOCATION = process.env.DEFAULT_LOCATION || 'New York';
 const WEATHER_CODE_LABELS = {
@@ -95,7 +100,7 @@ const IN_CONTEXT_EXAMPLES = [
     },
     {
         id: 'general-professional-example',
-        intent: 'chat',
+        intent: 'general',
         persona: 'professional',
         user: 'What can you help me with?',
         assistant: 'I can help with equations, date and time questions, weather questions, and selected backend model comparisons.'
@@ -143,7 +148,7 @@ function classifyIntent(text) {
     ) {
         return 'math';
     }
-    return 'chat';
+    return 'general';
 }
 
 function selectInContextExamples(intent, personaId, limit = 2) {
@@ -151,7 +156,7 @@ function selectInContextExamples(intent, personaId, limit = 2) {
         let score = 0;
         if (example.intent === intent) score += 3;
         if (example.persona === personaId) score += 2;
-        if (example.intent === 'chat') score += 1;
+        if (example.intent === 'general') score += 1;
         return { ...example, score };
     })
         .sort((a, b) => b.score - a.score)
@@ -170,6 +175,7 @@ function buildReasoningPlan({ intent, retrievedContext, examples }) {
         math: 'solveEquation',
         time: 'getCurrentDateTime',
         weather: 'getCurrentWeather',
+        general: 'providerModel',
         chat: 'providerModel'
     }[intent];
 
@@ -333,12 +339,6 @@ async function solveDerivative(text, options = {}) {
     };
 }
 
-function extractLocation(text) {
-    const cleaned = (text || '').replace(/[?!.,]+$/g, '').trim();
-    const match = cleaned.match(/\b(?:in|for|at)\s+([a-zA-Z .'-]+)$/);
-    return match ? match[1].trim() : '';
-}
-
 async function geocodeLocation(location, options = {}) {
     const locationQuery = location || DEFAULT_LOCATION;
     const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(locationQuery)}&count=1&language=en&format=json`;
@@ -362,13 +362,14 @@ function displayLocation(place) {
 }
 
 async function getCurrentWeather(messageText, options = {}) {
-    const requestedLocation = extractLocation(messageText);
+    const requestedLocation = extractLocationFromMessage(messageText, 'weather');
     const place = await geocodeLocation(requestedLocation, options);
     const url = [
         'https://api.open-meteo.com/v1/forecast',
         `?latitude=${encodeURIComponent(place.latitude)}`,
         `&longitude=${encodeURIComponent(place.longitude)}`,
         '&current=temperature_2m,relative_humidity_2m,precipitation,weather_code,wind_speed_10m',
+        '&hourly=temperature_2m,precipitation_probability,weather_code',
         '&temperature_unit=fahrenheit',
         '&wind_speed_unit=mph',
         '&timezone=auto'
@@ -377,8 +378,18 @@ async function getCurrentWeather(messageText, options = {}) {
     const current = data.current || {};
     const units = data.current_units || {};
     const condition = WEATHER_CODE_LABELS[current.weather_code] || 'weather conditions';
-
-    return {
+    const hourly = data.hourly || {};
+    const hourlySamples = (hourly.time || []).map((time, index) => ({
+        time,
+        temperature: Array.isArray(hourly.temperature_2m) ? hourly.temperature_2m[index] : null,
+        precipitationProbability: Array.isArray(hourly.precipitation_probability) ? hourly.precipitation_probability[index] : null,
+        weatherCode: Array.isArray(hourly.weather_code) ? hourly.weather_code[index] : null
+    })).filter(sample => sample.time && Number.isFinite(Number(sample.temperature)));
+    const forecastData = {
+        hourlySamples,
+        timezone: data.timezone || place.timezone
+    };
+    const baseResult = {
         location: displayLocation(place),
         temperature: current.temperature_2m,
         temperatureUnit: units.temperature_2m || 'F',
@@ -388,14 +399,43 @@ async function getCurrentWeather(messageText, options = {}) {
         precipitation: current.precipitation,
         condition,
         timezone: data.timezone || place.timezone,
-        apiProvider: 'open-meteo'
+        apiProvider: 'open-meteo',
+        forecastData
+    };
+    const confidence = evaluateWeatherConfidence({
+        userMessage: messageText,
+        toolResult: baseResult,
+        forecastData
+    });
+    const shouldReconstruct = (confidence.level === 'LOW' || confidence.level === 'MEDIUM') && hourlySamples.length > 0;
+    const reconstruction = shouldReconstruct
+        ? reconstructTemperatureTrend(hourlySamples)
+        : null;
+
+    return {
+        ...baseResult,
+        confidence,
+        reconstruction
     };
 }
 
 async function getCurrentDateTime(messageText, options = {}) {
-    const requestedLocation = extractLocation(messageText);
-    const place = requestedLocation ? await geocodeLocation(requestedLocation, options) : null;
-    const timezone = place ? place.timezone : (options.timezone || DEFAULT_TIMEZONE);
+    const requestedLocation = extractLocationFromMessage(messageText, 'time');
+    const knownTimezone = requestedLocation ? resolveKnownTimezone(requestedLocation) : null;
+    let place = null;
+    let timezone = knownTimezone ? knownTimezone.timezone : (options.timezone || DEFAULT_TIMEZONE);
+    let resolutionNote = knownTimezone ? 'Resolved timezone from known-location mapping.' : '';
+
+    if (requestedLocation && !knownTimezone) {
+        try {
+            place = await geocodeLocation(requestedLocation, options);
+            timezone = place.timezone || timezone;
+            resolutionNote = 'Resolved timezone from geocoding.';
+        } catch (error) {
+            resolutionNote = `Could not resolve "${requestedLocation}" through geocoding; used ${timezone}.`;
+        }
+    }
+
     const url = `https://timeapi.io/api/Time/current/zone?timeZone=${encodeURIComponent(timezone)}`;
     const data = await requestJson(url, options);
     if (!data || !data.dateTime) {
@@ -414,7 +454,9 @@ async function getCurrentDateTime(messageText, options = {}) {
         timezone: data.timeZone || timezone,
         abbreviation: data.dstActive ? 'DST active' : 'standard time',
         utcOffset: '',
-        location: place ? displayLocation(place) : timezone,
+        location: place ? displayLocation(place) : (knownTimezone ? knownTimezone.displayName : timezone),
+        requestedLocation,
+        resolutionNote,
         apiProvider: 'timeapi'
     };
 }
@@ -524,13 +566,23 @@ function formatByPersona(personaId, intent, payload) {
 
     if (intent === 'weather') {
         const weatherText = `${formatNumber(payload.temperature)} ${formatUnit(payload.temperatureUnit)}, ${payload.condition}, wind ${formatNumber(payload.windSpeed)} ${formatUnit(payload.windSpeedUnit)}, humidity ${formatNumber(payload.humidity)}%`;
+        const confidence = payload.confidence || { level: 'HIGH', reasons: [] };
+        const uncertaintyNote = confidence.level === 'MEDIUM'
+            ? ` Forecast confidence is medium: ${confidence.reasons.join(' ')}`
+            : '';
+        const reconstructionNote = confidence.level === 'LOW' && payload.reconstruction
+            ? ` Because that request is too precise for exact certainty, I reconstructed the general temperature trend instead. ${payload.reconstruction.trendSummary}`
+            : '';
         if (persona.id === 'silly') {
-            return `My official prediction for ${payload.location}: ${weatherText}, with a tiny chance of dramatic sky behavior.`;
+            if (reconstructionNote) return `Royal weather caution for ${payload.location}: ${weatherText}. The crystal barometer refuses exact certainty, so behold the trend: ${payload.reconstruction.trendSummary}`;
+            return `My official prediction for ${payload.location}: ${weatherText}, with a tiny chance of dramatic sky behavior.${uncertaintyNote}`;
         }
         if (persona.id === 'sweetheart') {
-            return `For ${payload.location}, the weather API says ${weatherText}. Hope that helps, sweetheart.`;
+            if (reconstructionNote) return `For ${payload.location}, the weather API says ${weatherText}. I cannot promise that exact moment, sweetheart, so here is the gentler trend: ${payload.reconstruction.trendSummary}`;
+            return `For ${payload.location}, the weather API says ${weatherText}. Hope that helps, sweetheart.${uncertaintyNote}`;
         }
-        return `Current weather for ${payload.location}: ${weatherText}.`;
+        if (reconstructionNote) return `Current weather for ${payload.location}: ${weatherText}. Exact timing confidence is low, so I used a reconstructed temperature trend: ${payload.reconstruction.trendSummary}`;
+        return `Current weather for ${payload.location}: ${weatherText}.${uncertaintyNote}`;
     }
 
     return null;
@@ -599,7 +651,17 @@ async function answerWithTools(messageText, personaId, options = {}) {
                 ],
                 retrievedContext: pipeline.retrievedContext,
                 inContextExamples: pipeline.examples,
-                reasoningSummary: pipeline.reasoningPlan,
+                reasoningSummary: [
+                    ...pipeline.reasoningPlan,
+                    ...(pipeline.intent === 'weather' && toolResult.confidence
+                        ? [
+                            `Weather confidence was ${toolResult.confidence.level}: ${toolResult.confidence.reasons.join(' ')}`
+                        ]
+                        : []),
+                    ...(pipeline.intent === 'weather' && toolResult.confidence && toolResult.confidence.level === 'LOW'
+                        ? ['Weather confidence was LOW, so the assistant invoked the weather signal reconstruction module.']
+                        : [])
+                ],
                 toolCalls: [{
                     name: toolName,
                     apiProvider: tool.apiProvider,
@@ -635,6 +697,64 @@ function buildSystemPrompt(personaId, messageText) {
     ].filter(Boolean).join('\n\n');
 }
 
+function buildGeneralQueryPrompt(personaId, messageText) {
+    const pipeline = buildAssistantPipeline(messageText, personaId);
+    const personaInstruction = {
+        professional: 'Use a formal, precise, and technical tone.',
+        sweetheart: 'Use a warm, kind, and gentle tone.',
+        silly: 'Use a playful and whimsical tone.'
+    }[pipeline.persona.id] || 'Use a clear, helpful tone.';
+    const examples = pipeline.examples
+        .map(example => `User: ${example.user}\nAssistant: ${example.assistant}`)
+        .join('\n\n');
+    const retrieved = pipeline.retrievedContext
+        .map(entry => `- ${entry.id}: ${entry.text}`)
+        .join('\n');
+
+    return {
+        systemPrompt: [
+            'SYSTEM:',
+            'You are a knowledgeable assistant.',
+            'Answer the user\'s question directly and clearly.',
+            'Provide concrete information.',
+            'Do not describe how to approach the question.',
+            '- Do NOT describe how to approach the question.',
+            '- Do NOT give meta explanations.',
+            '- Do NOT restate the question.',
+            '- Personality changes tone only, not reasoning or content.',
+            '',
+            'PERSONALITY:',
+            personaInstruction,
+            '',
+            retrieved ? `RETRIEVED CONTEXT:\n${retrieved}` : 'RETRIEVED CONTEXT: no direct match.',
+            examples ? `Few-shot examples:\n${examples}` : '',
+            `Audit summary:\n- ${pipeline.reasoningPlan.join('\n- ')}`
+        ].filter(Boolean).join('\n\n'),
+        userPrompt: [
+            'USER:',
+            messageText
+        ].join('\n'),
+        strictUserPrompt: [
+            'USER:',
+            messageText,
+            '',
+            'Answer the question directly with specific details.',
+            'Do not repeat the question.',
+            'Do not give general advice.',
+            'Provide concrete information.'
+        ].join('\n'),
+        metadata: {
+            retrievedContext: pipeline.retrievedContext,
+            inContextExamples: pipeline.examples,
+            reasoningSummary: pipeline.reasoningPlan
+        }
+    };
+}
+
+function handleGeneralQuery({ message, personality } = {}) {
+    return buildGeneralQueryPrompt(personality || 'professional', message || '');
+}
+
 function buildFallbackReply(messageText, personaId) {
     const pipeline = buildAssistantPipeline(messageText, personaId);
     const contextText = pipeline.retrievedContext.length
@@ -649,12 +769,14 @@ module.exports = {
     answerWithTools,
     buildAssistantPipeline,
     buildFallbackReply,
+    buildGeneralQueryPrompt,
     buildSystemPrompt,
     classifyIntent,
     evaluateMathExpression,
     getCurrentDateTime,
     getCurrentWeather,
     getPersona,
+    handleGeneralQuery,
     retrieveContext,
     selectInContextExamples,
     solveDerivative,

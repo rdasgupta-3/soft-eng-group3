@@ -26,6 +26,22 @@ When('I ask a weather question in the current conversation', async function () {
   await sendPracticalMessage(this, 'How is the weather looking for Boston?');
 });
 
+Given('I selected a backend model', async function () {
+  const page = await this.launch();
+  const selectedModels = await page.evaluate(() => {
+    try {
+      return JSON.parse(localStorage.getItem('llmSelectedModelIds') || '[]');
+    } catch (error) {
+      return [];
+    }
+  });
+  assert(selectedModels.length >= 1, 'Expected at least one selected backend model.');
+});
+
+When('I ask {string}', async function (message) {
+  await sendPracticalMessage(this, message);
+});
+
 Then('the practical assistant should answer with {string}', async function (expectedText) {
   const page = await this.launch();
   await page.waitForFunction(
@@ -56,4 +72,28 @@ Then('the practical assistant should show a weather prediction', async function 
   );
   const bodyText = await page.evaluate(() => document.body.innerText.toLowerCase());
   assert(!bodyText.includes('demo'), 'Weather response should not use the word demo.');
+});
+
+Then('the assistant should provide a playful uncertainty-aware weather response', async function () {
+  const page = await this.launch();
+  await page.waitForFunction(
+    () => {
+      const text = document.body.innerText.toLowerCase();
+      return text.includes('royal') || text.includes('lord silly') || text.includes('sky council') || text.includes('weather caution');
+    },
+    { timeout: 12000 }
+  );
+  const bodyText = await page.evaluate(() => document.body.innerText.toLowerCase());
+  assert(bodyText.includes('weather'), 'Expected a weather response.');
+});
+
+Then('the response should mention a general trend rather than claiming exact certainty', async function () {
+  const page = await this.launch();
+  await page.waitForFunction(
+    () => document.body.innerText.toLowerCase().includes('trend'),
+    { timeout: 12000 }
+  );
+  const bodyText = await page.evaluate(() => document.body.innerText.toLowerCase());
+  assert(bodyText.includes('trend'), 'Expected the response to mention a trend.');
+  assert(!bodyText.includes('will rain exactly at 7:13 pm'), 'Response should not claim exact minute-level certainty.');
 });
