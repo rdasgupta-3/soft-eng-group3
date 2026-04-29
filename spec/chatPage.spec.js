@@ -54,4 +54,43 @@ describe('chat.html', () => {
         expect(selectedPills[0].textContent).toContain('Local Llama 3.2 1B');
         expect(selectedPills[1].textContent).toContain('Claude 3.5 Haiku');
     });
+
+    it('renders the selected persona name and avatar path in the chat header', async () => {
+        const win = loadPage('chat.html', 'http://localhost/chat?persona=sweetheart');
+        await new Promise(resolve => setTimeout(resolve, 0));
+        const personaName = win.document.getElementById('current-persona-name').textContent;
+        const avatar = win.document.querySelector('#current-persona-avatar img');
+
+        expect(personaName).toBe('Miss Sweetheart');
+        expect(avatar).not.toBeNull();
+        expect(avatar.getAttribute('src')).toBe('/images/image_4.png');
+    });
+
+    it('falls back to initials when a persona avatar image fails to load', async () => {
+        const win = loadPage('chat.html', 'http://localhost/chat?persona=professional');
+        await new Promise(resolve => setTimeout(resolve, 0));
+        const avatar = win.createAvatar('/images/missing.png', 'Mr. Professional', 'persona-avatar');
+        const img = avatar.querySelector('img');
+
+        img.dispatchEvent(new win.Event('error'));
+
+        expect(avatar.textContent).toBe('M');
+        expect(avatar.classList.contains('default-avatar')).toBeTrue();
+    });
+
+    it('uses corrected persona avatar metadata for assistant messages', async () => {
+        const win = loadPage('chat.html', 'http://localhost/chat?persona=silly');
+        await new Promise(resolve => setTimeout(resolve, 0));
+
+        await win.addMessage('ai-bubble', 'A royal answer appears.', {
+            modelName: 'Gemini 2.0 Flash',
+            personaId: 'silly',
+            personaName: 'Lord Silly the Ninth',
+            personaAvatar: 'images/silly.jpg'
+        });
+
+        const avatar = win.document.querySelector('.ai-message-row .persona-avatar img');
+        expect(avatar).not.toBeNull();
+        expect(avatar.getAttribute('src')).toBe('/images/image_5.png');
+    });
 });

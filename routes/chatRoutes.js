@@ -123,9 +123,9 @@ router.post('/conversations/:conversationId/ai-reply', async (req, res) => {
                 personaId: persona.id,
                 personaName: persona.name,
                 personaAvatar: {
-                    professional: 'images/professional.jpg',
-                    sweetheart: 'images/sweetheart.png',
-                    silly: 'images/silly.jpg'
+                    professional: '/images/image_6.png',
+                    sweetheart: '/images/image_4.png',
+                    silly: '/images/image_5.png'
                 }[persona.id],
                 ...(reply.metadata || {})
             });

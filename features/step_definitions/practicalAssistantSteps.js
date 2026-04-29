@@ -42,6 +42,11 @@ When('I ask {string}', async function (message) {
   await sendPracticalMessage(this, message);
 });
 
+When('the assistant responds', async function () {
+  const page = await this.launch();
+  await page.waitForSelector('.model-response-card .tts-read-btn', { timeout: 12000 });
+});
+
 Then('the practical assistant should answer with {string}', async function (expectedText) {
   const page = await this.launch();
   await page.waitForFunction(
@@ -96,4 +101,13 @@ Then('the response should mention a general trend rather than claiming exact cer
   const bodyText = await page.evaluate(() => document.body.innerText.toLowerCase());
   assert(bodyText.includes('trend'), 'Expected the response to mention a trend.');
   assert(!bodyText.includes('will rain exactly at 7:13 pm'), 'Response should not claim exact minute-level certainty.');
+});
+
+Then('I should see a Read Aloud button for the assistant response', async function () {
+  const page = await this.launch();
+  const buttons = await page.$$('.model-response-card .tts-read-btn');
+  assert(buttons.length > 0, 'Expected at least one assistant response to have a Read Aloud button.');
+
+  const label = await page.evaluate(button => button.getAttribute('aria-label'), buttons[0]);
+  assert(label && label.toLowerCase().includes('read'), 'Expected the Read Aloud button to have an accessible label.');
 });

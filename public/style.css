@@ -644,6 +644,11 @@ h1 {
     color: #26384a;
 }
 
+.current-persona-avatar .message-avatar {
+    width: 44px;
+    height: 44px;
+}
+
 .section-title-row {
     display: flex;
     justify-content: space-between;
@@ -755,6 +760,47 @@ h1 {
 
 .model-response-card {
     max-width: 100%;
+}
+
+.tts-controls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.tts-read-btn,
+.tts-stop-btn {
+    border: 1px solid #cbd5e1;
+    border-radius: 4px;
+    padding: 5px 8px;
+    background: #f8fafc;
+    color: #243444;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.tts-read-btn:hover,
+.tts-stop-btn:hover {
+    background: #edf4ff;
+}
+
+.tts-read-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.tts-stop-btn {
+    border-color: #f3c7cc;
+    background: #fff5f6;
+    color: #9b2c2c;
+}
+
+.tts-unavailable {
+    color: #6c757d;
+    font-size: 0.76rem;
 }
 
 .typing-bubble {

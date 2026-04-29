@@ -52,6 +52,7 @@
             </header>
 
             <section class="persona-switcher" aria-label="Current AI personality">
+                <div id="current-persona-avatar" class="current-persona-avatar" aria-hidden="true"></div>
                 <div>
                     <p class="selection-label">Current personality</p>
                     <div id="current-persona-name" class="current-persona-name">Mr. Professional</div>
@@ -78,6 +79,7 @@
         </section>
     </div>
 
+    <script src="tts.js"></script>
     <script>
         const STORAGE_KEY = 'llmChatConversations';
         const ACTIVE_KEY = 'llmActiveConversationId';
@@ -99,9 +101,9 @@
         ];
         const fallbackDefaultIds = ['ollama-llama3.2-1b', 'openai-gpt-4o-mini', 'google-gemini-2.0-flash'];
         const personaCatalog = [
-            { id: 'professional', name: 'Mr. Professional', tone: 'Serious, precise answers with a professional tone.', avatar: 'images/image_6.png' },
-            { id: 'sweetheart', name: 'Miss Sweetheart', tone: 'Warm, encouraging answers with exact practical details.', avatar: 'images/image_4.png' },
-            { id: 'silly', name: 'Lord Silly the Ninth', tone: 'Useful answers with a ridiculous royal tone.', avatar: 'images/image_5.png' }
+            { id: 'professional', name: 'Mr. Professional', tone: 'Serious, precise answers with a professional tone.', avatar: '/images/image_6.png' },
+            { id: 'sweetheart', name: 'Miss Sweetheart', tone: 'Warm, encouraging answers with exact practical details.', avatar: '/images/image_4.png' },
+            { id: 'silly', name: 'Lord Silly the Ninth', tone: 'Useful answers with a ridiculous royal tone.', avatar: '/images/image_5.png' }
         ];
 
         let conversations = [];
@@ -113,6 +115,8 @@
         let typingIndicatorVisible = false;
         let currentUserEmail = 'User';
         let userProfile = { displayName: '', avatar: '' };
+        let ttsSupported = false;
+        let ttsSpeaking = false;
 
         function uniqueIds(ids) {
             return [...new Set((ids || []).filter(id => typeof id === 'string'))];
@@ -200,6 +204,11 @@
                 const img = document.createElement('img');
                 img.src = src;
                 img.alt = name;
+                img.onerror = () => {
+                    avatar.innerHTML = '';
+                    avatar.classList.add('default-avatar');
+                    avatar.textContent = defaultInitial(name);
+                };
                 avatar.appendChild(img);
                 return avatar;
             }
@@ -282,6 +291,39 @@
                 hour: 'numeric',
                 minute: '2-digit'
             });
+        }
+
+        function initTtsControls() {
+            const tts = window.TriadTts;
+            ttsSupported = Boolean(tts && tts.isSupported(window));
+
+            if (tts && typeof tts.onSpeakingChange === 'function') {
+                tts.onSpeakingChange(isSpeaking => {
+                    ttsSpeaking = isSpeaking;
+                    renderMessages();
+                });
+            }
+        }
+
+        function speakAssistantMessage(text, personaId) {
+            const tts = window.TriadTts;
+            if (!tts || !ttsSupported) {
+                return;
+            }
+
+            const result = tts.speakText(text, personaId || selectedPersonaId, window);
+            ttsSupported = Boolean(result && result.supported);
+            ttsSpeaking = ttsSupported;
+            renderMessages();
+        }
+
+        function stopAssistantSpeech() {
+            const tts = window.TriadTts;
+            if (tts && typeof tts.stopSpeaking === 'function') {
+                tts.stopSpeaking(window);
+            }
+            ttsSpeaking = false;
+            renderMessages();
         }
 
         function loadSelectedModels() {
@@ -554,6 +596,11 @@
             const persona = getSelectedPersona();
             document.getElementById('current-persona-name').textContent = persona.name;
             document.getElementById('persona-tone').textContent = persona.tone;
+            const avatar = document.getElementById('current-persona-avatar');
+            if (avatar) {
+                avatar.innerHTML = '';
+                avatar.appendChild(createAvatar(persona.avatar, persona.name, 'persona-avatar'));
+            }
         }
 
         function showTypingIndicator() {
@@ -603,7 +650,7 @@
                 const first = group[0];
                 const persona = personaCatalog.find(entry => entry.id === first.personaId) || getSelectedPersona();
                 const personaName = first.personaName || persona.name;
-                const personaAvatar = first.personaAvatar || persona.avatar;
+                const personaAvatar = (first.personaAvatar && first.personaAvatar.includes('image_')) ? first.personaAvatar : persona.avatar;
                 const row = document.createElement('div');
                 row.className = 'message-row ai-message-row';
 
@@ -634,6 +681,37 @@
                     const content = document.createElement('div');
                     content.textContent = msg.text;
                     bubble.appendChild(content);
+
+                    const controls = document.createElement('div');
+                    controls.className = 'tts-controls';
+
+                    const readButton = document.createElement('button');
+                    readButton.type = 'button';
+                    readButton.className = 'tts-read-btn';
+                    readButton.textContent = 'Read Aloud';
+                    readButton.disabled = !ttsSupported;
+                    readButton.setAttribute('aria-label', `Read ${msg.modelName || personaName} response aloud`);
+                    readButton.onclick = () => speakAssistantMessage(msg.text, msg.personaId || persona.id);
+                    controls.appendChild(readButton);
+
+                    if (ttsSpeaking) {
+                        const stopButton = document.createElement('button');
+                        stopButton.type = 'button';
+                        stopButton.className = 'tts-stop-btn';
+                        stopButton.textContent = 'Stop Reading';
+                        stopButton.setAttribute('aria-label', 'Stop reading aloud');
+                        stopButton.onclick = stopAssistantSpeech;
+                        controls.appendChild(stopButton);
+                    }
+
+                    if (!ttsSupported) {
+                        const unsupported = document.createElement('span');
+                        unsupported.className = 'tts-unavailable';
+                        unsupported.textContent = 'Text-to-speech is not supported in this browser.';
+                        controls.appendChild(unsupported);
+                    }
+
+                    bubble.appendChild(controls);
                     groupEl.appendChild(bubble);
                 });
 
@@ -990,6 +1068,7 @@
             loadUserProfile();
             await loadCurrentUser();
             renderAccountPanel();
+            initTtsControls();
             loadSelectedPersona();
             loadSelectedModels();
 

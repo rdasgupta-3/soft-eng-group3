@@ -19,3 +19,10 @@ Feature: Practical personality assistant
     When I ask "Will it rain exactly at 7:13 PM in Piscataway?"
     Then the assistant should provide a playful uncertainty-aware weather response
     And the response should mention a general trend rather than claiming exact certainty
+
+  Scenario: User can read an assistant response aloud
+    Given I am logged in as "test@test.com" with password "123456"
+    And I open the practical assistant as "sweetheart"
+    When I ask "What is artificial intelligence?"
+    And the assistant responds
+    Then I should see a Read Aloud button for the assistant response
