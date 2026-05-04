@@ -9,11 +9,7 @@ describe('chat.html', () => {
 
         expect(stored.length).toBe(1);
         expect(stored[0].messages.length).toBe(0);
-        expect(stored[0].selectedModelIds).toEqual([
-            'ollama-llama3.2-1b',
-            'openai-gpt-4o-mini',
-            'google-gemini-2.0-flash'
-        ]);
+        expect(stored[0].selectedModelIds).toEqual(['ollama-gemma3-1b']);
         expect(messagesEl.children.length).toBe(0);
     });
 
@@ -45,14 +41,79 @@ describe('chat.html', () => {
     });
 
     it('renders selected model pills without the latest-response panel', async () => {
-        const win = loadPage('chat.html', 'http://localhost/chat?models=ollama-llama3.2-1b,anthropic-claude-3-5-haiku');
+        const win = loadPage('chat.html', 'http://localhost/chat?models=ollama-gemma3-1b,ollama-phi3-mini,ollama-qwen2.5-3b,anthropic-claude-3-5-haiku');
         await new Promise(resolve => setTimeout(resolve, 0));
         const selectedPills = win.document.querySelectorAll('#selected-models .selected-model-pill');
 
         expect(win.document.querySelector('.latest-responses-wrap')).toBeNull();
-        expect(selectedPills.length).toBe(2);
-        expect(selectedPills[0].textContent).toContain('Local Llama 3.2 1B');
-        expect(selectedPills[1].textContent).toContain('Claude 3.5 Haiku');
+        expect(selectedPills.length).toBe(4);
+        expect(selectedPills[0].textContent).toContain('Local Gemma 3 1B');
+        expect(selectedPills[1].textContent).toContain('Local Phi-3 Mini');
+        expect(selectedPills[2].textContent).toContain('Local Qwen 2.5 3B');
+        expect(selectedPills[3].textContent).toContain('Claude 3.5 Haiku');
+    });
+
+    it('preserves selected local models when server conversations contain old public defaults', async () => {
+        const win = loadPage(
+            'chat.html',
+            'http://localhost/chat?models=ollama-gemma3-1b,ollama-phi3-mini',
+            {
+                beforeParse(window) {
+                    window.fetch = url => {
+                        if (url === '/api/me') {
+                            return Promise.resolve({
+                                ok: true,
+                                status: 200,
+                                json: async () => ({ email: 'test@test.com' })
+                            });
+                        }
+                        if (url === '/api/models') {
+                            return Promise.resolve({
+                                ok: true,
+                                status: 200,
+                                json: async () => ({
+                                    models: [
+                                        { id: 'openai-gpt-4o-mini', name: 'GPT-4o Mini', access: 'public', provider: 'openai' },
+                                        { id: 'google-gemini-2.0-flash', name: 'Gemini 2.0 Flash', access: 'public', provider: 'google' }
+                                    ],
+                                    defaultModelIds: ['openai-gpt-4o-mini', 'google-gemini-2.0-flash']
+                                })
+                            });
+                        }
+                        if (url === '/api/conversations') {
+                            return Promise.resolve({
+                                ok: true,
+                                status: 200,
+                                json: async () => ({
+                                    conversations: [{
+                                        id: 'conv-old',
+                                        title: 'Old public conversation',
+                                        pinned: false,
+                                        updatedAt: Date.now(),
+                                        selectedModelIds: ['openai-gpt-4o-mini', 'google-gemini-2.0-flash'],
+                                        messages: []
+                                    }]
+                                })
+                            });
+                        }
+                        return Promise.resolve({
+                            ok: true,
+                            status: 200,
+                            json: async () => ({})
+                        });
+                    };
+                }
+            }
+        );
+        await new Promise(resolve => setTimeout(resolve, 10));
+
+        const stored = JSON.parse(win.localStorage.getItem('llmChatConversations'));
+        const active = stored.find(conversation => conversation.id === win.localStorage.getItem('llmActiveConversationId'));
+
+        expect(active.selectedModelIds).toEqual(['ollama-gemma3-1b', 'ollama-phi3-mini']);
+        expect(win.document.getElementById('selected-models').textContent).toContain('Local Gemma 3 1B');
+        expect(win.document.getElementById('selected-models').textContent).toContain('Local Phi-3 Mini');
+        expect(win.document.getElementById('selected-models').textContent).not.toContain('GPT-4o Mini');
     });
 
     it('renders the selected persona name and avatar path in the chat header', async () => {

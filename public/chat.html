@@ -96,13 +96,16 @@
         );
 
         const fallbackCatalog = [
-            { id: 'ollama-llama3.2-1b', name: 'Local Llama 3.2 1B', access: 'local', provider: 'ollama' },
+            { id: 'ollama-gemma3-1b', name: 'Local Gemma 3 1B (Recommended/Fastest)', access: 'local', provider: 'ollama', runtimeModel: 'gemma3:1b' },
+            { id: 'ollama-phi3-mini', name: 'Local Phi-3 Mini (Reliable Backup)', access: 'local', provider: 'ollama', runtimeModel: 'phi3:mini' },
+            { id: 'ollama-llama3.2-1b', name: 'Local Llama 3.2 1B (Better Quality/Slower)', access: 'local', provider: 'ollama', runtimeModel: 'llama3.2:1b' },
+            { id: 'ollama-qwen2.5-3b', name: 'Local Qwen 2.5 3B', access: 'local', provider: 'ollama', runtimeModel: 'qwen2.5:3b' },
+            { id: 'ollama-llama3.2-latest', name: 'Local Llama 3.2 Latest (Advanced/Slow)', access: 'local', provider: 'ollama', runtimeModel: 'llama3.2:latest' },
             { id: 'openai-gpt-4o-mini', name: 'GPT-4o Mini', access: 'public', provider: 'openai' },
             { id: 'google-gemini-2.0-flash', name: 'Gemini 2.0 Flash', access: 'public', provider: 'google' },
-            { id: 'anthropic-claude-3-5-haiku', name: 'Claude 3.5 Haiku', access: 'public', provider: 'anthropic' },
-            { id: 'ollama-qwen2.5-1.5b', name: 'Local Qwen 2.5 1.5B', access: 'local', provider: 'ollama' }
+            { id: 'anthropic-claude-3-5-haiku', name: 'Claude 3.5 Haiku', access: 'public', provider: 'anthropic' }
         ];
-        const fallbackDefaultIds = ['ollama-llama3.2-1b', 'openai-gpt-4o-mini', 'google-gemini-2.0-flash'];
+        const fallbackDefaultIds = ['ollama-gemma3-1b'];
         const personaCatalog = [
             { id: 'professional', name: 'Mr. Professional', tone: 'Serious, precise answers with a professional tone.', avatar: '/images/image_6.png' },
             { id: 'sweetheart', name: 'Miss Sweetheart', tone: 'Warm, encouraging answers with exact practical details.', avatar: '/images/image_4.png' },
@@ -142,8 +145,18 @@
 
         function normalizeSelectedModelIds(ids) {
             const validIds = uniqueIds(ids).filter(id => modelCatalog.some(model => model.id === id));
-            const limitedIds = validIds.slice(0, 3);
-            return limitedIds.length ? limitedIds : [...fallbackDefaultIds];
+            return validIds.length ? validIds : [...fallbackDefaultIds];
+        }
+
+        function mergeModelCatalog(serverModels = []) {
+            const merged = new Map();
+            fallbackCatalog.forEach(model => merged.set(model.id, model));
+            (Array.isArray(serverModels) ? serverModels : []).forEach(model => {
+                if (model && typeof model.id === 'string') {
+                    merged.set(model.id, { ...(merged.get(model.id) || {}), ...model });
+                }
+            });
+            return [...merged.values()];
         }
 
         function modelNameFor(modelId) {
@@ -400,7 +413,7 @@
             }
 
             const payload = await response.json();
-            modelCatalog = Array.isArray(payload.models) && payload.models.length ? payload.models : [...fallbackCatalog];
+            modelCatalog = mergeModelCatalog(payload.models);
             const defaults = Array.isArray(payload.defaultModelIds) ? payload.defaultModelIds : fallbackDefaultIds;
             selectedModelIds = normalizeSelectedModelIds(selectedModelIds.length ? selectedModelIds : defaults);
             localStorage.setItem(SELECTED_MODELS_KEY, JSON.stringify(selectedModelIds));
@@ -1146,7 +1159,10 @@
 
             if (useServerApi) {
                 try {
+                    const intendedSelectedModelIds = [...selectedModelIds];
                     await syncConversationsFromServer();
+                    selectedModelIds = normalizeSelectedModelIds(intendedSelectedModelIds);
+                    localStorage.setItem(SELECTED_MODELS_KEY, JSON.stringify(selectedModelIds));
                     openFreshDraftSession(selectedModelIds);
                     saveConversations();
                     renderConversationList();

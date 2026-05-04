@@ -72,7 +72,7 @@ const KNOWLEDGE_BASE = [
     {
         id: 'model-policy',
         topics: ['model', 'llm', 'ollama', 'gpt', 'gemini', 'claude'],
-        text: 'The app can compare up to three backend models, including local Ollama models and public GPT, Gemini, and Claude slots.'
+        text: 'The app can compare backend models, including local Ollama models and public GPT, Gemini, and Claude slots.'
     }
 ];
 

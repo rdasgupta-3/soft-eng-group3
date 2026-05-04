@@ -8,6 +8,7 @@ const {
     solveLinearEquation
 } = require('../utils/practicalAssistant');
 const { generateReplies, getConfiguredModelIds } = require('../utils/llmService');
+const { getModelById, listModelSummaries, sanitizeSelectedModelIds } = require('../utils/modelCatalog');
 const { evaluateWeatherConfidence } = require('../utils/confidenceEvaluator');
 const { resolveKnownTimezone } = require('../utils/locationResolver');
 const { extractLocationFromMessage } = require('../utils/queryParser');
@@ -145,7 +146,38 @@ describe('practical assistant tools', () => {
         expect(buildSystemPrompt('silly', 'weather in Boston')).toContain('Retrieved guidance');
         expect(buildSystemPrompt('silly', 'weather in Boston')).toContain('In-context examples');
         expect(buildSystemPrompt('silly', 'weather in Boston')).toContain('Reasoning plan summary');
-        expect(getConfiguredModelIds(['bad-id', 'ollama-qwen2.5-1.5b'])).toEqual(['ollama-qwen2.5-1.5b']);
+        expect(getConfiguredModelIds(['bad-id', 'ollama-qwen2.5-3b'])).toEqual(['ollama-qwen2.5-3b']);
+    });
+
+    it('exposes the requested local Ollama models for backend selection', () => {
+        const localModels = listModelSummaries().filter(model => model.access === 'local');
+
+        expect(localModels.map(model => model.id)).toEqual([
+            'ollama-gemma3-1b',
+            'ollama-phi3-mini',
+            'ollama-llama3.2-1b',
+            'ollama-qwen2.5-3b',
+            'ollama-llama3.2-latest'
+        ]);
+        expect(getModelById('ollama-gemma3-1b').runtimeModel).toBe('gemma3:1b');
+        expect(getModelById('ollama-phi3-mini').runtimeModel).toBe('phi3:mini');
+        expect(getModelById('ollama-llama3.2-1b').runtimeModel).toBe('llama3.2:1b');
+        expect(getModelById('ollama-qwen2.5-3b').runtimeModel).toBe('qwen2.5:3b');
+        expect(getModelById('ollama-gemma3-1b').description).toContain('Recommended fastest');
+        expect(getModelById('ollama-llama3.2-latest').description).toContain('not recommended for demos');
+        expect(sanitizeSelectedModelIds([
+            'ollama-gemma3-1b',
+            'ollama-phi3-mini',
+            'ollama-llama3.2-1b',
+            'ollama-qwen2.5-3b',
+            'ollama-llama3.2-latest'
+        ])).toEqual([
+            'ollama-gemma3-1b',
+            'ollama-phi3-mini',
+            'ollama-llama3.2-1b',
+            'ollama-qwen2.5-3b',
+            'ollama-llama3.2-latest'
+        ]);
     });
 
     it('adds an uncertainty note for medium confidence weather questions', async () => {
