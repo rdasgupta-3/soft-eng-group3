@@ -63,6 +63,15 @@ router.post('/logout', (req, res) => {
     return res.json({ success: true });
 });
 
+router.get('/me', (req, res) => {
+    const session = getSessionFromRequest(req);
+    if (!session) {
+        return res.status(401).json({ error: 'Not logged in.' });
+    }
+
+    return res.json({ email: session.email });
+});
+
 router.post('/forgot-password', (req, res) => {
     const { email } = req.body;
     const normalizedEmail = normalizeEmail(email);

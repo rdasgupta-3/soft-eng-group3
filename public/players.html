@@ -3,47 +3,252 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Choose Your Persona - LLM Project</title>
+    <title>Choose Assistant - LLM Project</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <h1>Select Your Persona</h1>
-    
-<div class="player-grid">
-        <div class="player-card frame-sweetheart" onclick="location.href='/chat?persona=sweetheart'">
-            <img src="images/image_4.png" alt="Miss Sweetheart">
-            <div class="player-name">Miss Sweetheart</div>
-            <p class="player-description">A kind, empathetic companion who is always ready to cheer you up and offer emotional support.</p>
-        </div>
+<body class="model-picker-page">
+    <div class="logo-container">
+        <img src="images/logo.png" alt="Logo">
+    </div>
+    <div class="model-picker-shell">
+        <header class="model-picker-header">
+            <div>
+                <p class="eyebrow">Iteration 3 Practical Assistant</p>
+                <h1>Choose A Personality And Backend LLMs</h1>
+                <p class="model-picker-copy">
+                    Pick the assistant style, then choose backend models. Local Ollama models and public GPT, Gemini, and Claude slots are all available.
+                </p>
+            </div>
+            <button type="button" onclick="logout()" class="logout-btn picker-logout-btn">Log Out</button>
+        </header>
 
-        <div class="player-card frame-professional" onclick="location.href='/chat?persona=professional'">
-            <img src="images/image_6.png" alt="Mr. Professional">
-            <div class="player-name">MR. PROFESSIONAL</div>
-            <p class="player-description">Direct, concise, and focused. He provides logical, business-oriented solutions to your problems.</p>
-        </div>
+        <section class="selection-status-panel">
+            <div>
+                <p class="selection-label">Selected models</p>
+                <div id="selected-model-pill-list" class="selected-model-pill-list"></div>
+            </div>
+            <div class="selection-actions">
+                <span id="selection-hint" class="selection-hint">Choose at least one model.</span>
+                <button id="continue-to-chat" type="button" onclick="continueToChat()">Continue To Chat</button>
+            </div>
+        </section>
 
-        <div class="player-card frame-silly" onclick="location.href='/chat?persona=silly'">
-            <img src="images/image_5.png" alt="Lord Silly The Ninth">
-            <div class="player-name">Lord Silly The Ninth</div>
-            <p class="player-description">A chaotic royal who speaks in riddles, jokes, and absolute nonsense to keep you entertained.</p>
-        </div>
+        <section class="picker-section">
+            <h2>Personalities</h2>
+            <p class="section-description">Click a personality to start chatting immediately.</p>
+            <div class="player-grid">
+                <button class="player-card frame-professional" type="button" data-persona-id="professional" onclick="selectPersonaAndContinue('professional')">
+                    <img class="player-image" src="images/image_6.png" alt="Mr. Professional">
+                    <div class="player-name">Mr. Professional</div>
+                    <p class="player-description">Serious, precise answers for practical questions and open prompts.</p>
+                </button>
+
+                <button class="player-card frame-sweetheart" type="button" data-persona-id="sweetheart" onclick="selectPersonaAndContinue('sweetheart')">
+                    <img class="player-image" src="images/image_4.png" alt="Miss Sweetheart">
+                    <div class="player-name">Miss Sweetheart</div>
+                    <p class="player-description">Warm, encouraging answers that still preserve the requested facts.</p>
+                </button>
+
+                <button class="player-card frame-silly" type="button" data-persona-id="silly" onclick="selectPersonaAndContinue('silly')">
+                    <img class="player-image" src="images/image_5.png" alt="Lord Silly the Ninth">
+                    <div class="player-name">Lord Silly the Ninth</div>
+                    <p class="player-description">Playful, theatrical answers with useful facts underneath the nonsense.</p>
+                </button>
+            </div>
+        </section>
+
+        <section class="picker-section">
+            <h2>Backend Models</h2>
+            <p class="section-description">Use these before continuing, or change them later from chat.</p>
+            <div class="player-grid model-grid">
+                <button class="model-choice-card frame-sweetheart" type="button" data-model-id="ollama-gemma3-1b" onclick="toggleModelSelection('ollama-gemma3-1b')">
+                    <div class="model-avatar" aria-hidden="true">GM</div>
+                    <div class="player-name">Local Gemma 3 1B</div>
+                    <p class="player-description">Recommended fastest local demo model through Ollama, about 0.8 GB.</p>
+                    <span class="model-badge">LOCAL</span>
+                </button>
+
+                <button class="model-choice-card frame-professional" type="button" data-model-id="ollama-phi3-mini" onclick="toggleModelSelection('ollama-phi3-mini')">
+                    <div class="model-avatar" aria-hidden="true">PH</div>
+                    <div class="player-name">Local Phi-3 Mini</div>
+                    <p class="player-description">Reliable local backup model through Ollama, about 2.3 GB.</p>
+                    <span class="model-badge">LOCAL</span>
+                </button>
+
+                <button class="model-choice-card frame-professional" type="button" data-model-id="ollama-llama3.2-1b" onclick="toggleModelSelection('ollama-llama3.2-1b')">
+                    <div class="model-avatar" aria-hidden="true">L1</div>
+                    <div class="player-name">Local Llama 3.2 1B</div>
+                    <p class="player-description">Better quality but slower local demo model through Ollama.</p>
+                    <span class="model-badge">LOCAL</span>
+                </button>
+
+                <button class="model-choice-card frame-silly" type="button" data-model-id="ollama-qwen2.5-3b" onclick="toggleModelSelection('ollama-qwen2.5-3b')">
+                    <div class="model-avatar" aria-hidden="true">QW</div>
+                    <div class="player-name">Local Qwen 2.5 3B</div>
+                    <p class="player-description">Alibaba small local model through Ollama, about 1.9 GB.</p>
+                    <span class="model-badge">LOCAL</span>
+                </button>
+
+                <button class="model-choice-card frame-professional" type="button" data-model-id="ollama-llama3.2-latest" onclick="toggleModelSelection('ollama-llama3.2-latest')">
+                    <div class="model-avatar" aria-hidden="true">OL</div>
+                    <div class="player-name">Local Llama 3.2 Latest</div>
+                    <p class="player-description">Slow advanced local model; not recommended for demos.</p>
+                    <span class="model-badge">LOCAL</span>
+                </button>
+
+                <button class="model-choice-card frame-sweetheart" type="button" data-model-id="openai-gpt-4o-mini" onclick="toggleModelSelection('openai-gpt-4o-mini')">
+                    <div class="model-avatar" aria-hidden="true">GP</div>
+                    <div class="player-name">GPT-4o Mini</div>
+                    <p class="player-description">Public OpenAI model slot.</p>
+                    <span class="model-badge">PUBLIC</span>
+                </button>
+
+                <button class="model-choice-card frame-silly" type="button" data-model-id="google-gemini-2.0-flash" onclick="toggleModelSelection('google-gemini-2.0-flash')">
+                    <div class="model-avatar" aria-hidden="true">GE</div>
+                    <div class="player-name">Gemini 2.0 Flash</div>
+                    <p class="player-description">Public Google model slot.</p>
+                    <span class="model-badge">PUBLIC</span>
+                </button>
+
+                <button class="model-choice-card frame-professional" type="button" data-model-id="anthropic-claude-3-5-haiku" onclick="toggleModelSelection('anthropic-claude-3-5-haiku')">
+                    <div class="model-avatar" aria-hidden="true">CL</div>
+                    <div class="player-name">Claude 3.5 Haiku</div>
+                    <p class="player-description">Public Anthropic model slot.</p>
+                    <span class="model-badge">PUBLIC</span>
+                </button>
+
+            </div>
+        </section>
     </div>
 
     <script>
-        // Note: I added basic URL parameters (e.g., ?persona=silly) 
-        // to the 'onclick' events. This is a foundational step 
-        // for "Database design" (Image 2), as it tells the chat page
-        // which system prompt to load.
+        const SELECTED_MODELS_KEY = 'llmSelectedModelIds';
+        const SELECTED_PERSONA_KEY = 'llmSelectedPersonaId';
+        const DEFAULT_MODEL_IDS = ['ollama-gemma3-1b'];
+        const VALID_PERSONAS = ['professional', 'sweetheart', 'silly'];
+        let selectedModelIds = [];
+        let selectedPersonaId = 'professional';
+
+        function parsePersonaFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const persona = params.get('persona');
+            return VALID_PERSONAS.includes(persona) ? persona : '';
+        }
+
+        function loadSelectedModelIds() {
+            try {
+                const saved = JSON.parse(localStorage.getItem(SELECTED_MODELS_KEY) || '[]');
+                if (Array.isArray(saved) && saved.length) {
+                    selectedModelIds = saved.filter(modelId =>
+                        document.querySelector(`[data-model-id="${modelId}"]`)
+                    );
+                    if (!selectedModelIds.length) {
+                        selectedModelIds = [...DEFAULT_MODEL_IDS];
+                    }
+                    return;
+                }
+            } catch (error) {
+                console.error(error);
+            }
+
+            selectedModelIds = [...DEFAULT_MODEL_IDS];
+        }
+
+        function loadSelectedPersona() {
+            const saved = localStorage.getItem(SELECTED_PERSONA_KEY);
+            selectedPersonaId = parsePersonaFromUrl() || (VALID_PERSONAS.includes(saved) ? saved : 'professional');
+        }
+
+        function saveSelections() {
+            localStorage.setItem(SELECTED_MODELS_KEY, JSON.stringify(selectedModelIds));
+            localStorage.setItem(SELECTED_PERSONA_KEY, selectedPersonaId);
+        }
+
+        function renderSelectedState() {
+            const pillList = document.getElementById('selected-model-pill-list');
+            const hint = document.getElementById('selection-hint');
+            const continueButton = document.getElementById('continue-to-chat');
+
+            pillList.innerHTML = '';
+            document.querySelectorAll('.model-choice-card').forEach(card => {
+                const isSelected = selectedModelIds.includes(card.dataset.modelId);
+                card.classList.toggle('selected-model-card', isSelected);
+                card.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+            });
+            document.querySelectorAll('.player-card').forEach(card => {
+                card.classList.toggle('selected-player-card', card.dataset.personaId === selectedPersonaId);
+            });
+
+            selectedModelIds.forEach(modelId => {
+                const card = document.querySelector(`[data-model-id="${modelId}"]`);
+                if (!card) {
+                    return;
+                }
+
+                const pill = document.createElement('span');
+                pill.className = 'selected-model-pill';
+                pill.textContent = card.querySelector('.player-name').textContent;
+                pillList.appendChild(pill);
+            });
+
+            if (!selectedModelIds.length) {
+                hint.textContent = 'Select at least one model to continue.';
+                continueButton.disabled = true;
+                return;
+            }
+
+            hint.textContent = `${selectedModelIds.length} model${selectedModelIds.length === 1 ? '' : 's'} selected.`;
+            continueButton.disabled = false;
+        }
+
+        function toggleModelSelection(modelId) {
+            if (selectedModelIds.includes(modelId)) {
+                selectedModelIds = selectedModelIds.filter(id => id !== modelId);
+                saveSelections();
+                renderSelectedState();
+                return;
+            }
+
+            selectedModelIds.push(modelId);
+            saveSelections();
+            renderSelectedState();
+        }
+
+        function selectPersonaAndContinue(personaId) {
+            selectedPersonaId = VALID_PERSONAS.includes(personaId) ? personaId : 'professional';
+            saveSelections();
+            continueToChat();
+        }
+
+        function continueToChat() {
+            if (!selectedModelIds.length) {
+                renderSelectedState();
+                return;
+            }
+
+            saveSelections();
+            const search = new URLSearchParams();
+            search.set('persona', selectedPersonaId);
+            search.set('models', selectedModelIds.join(','));
+            window.location.href = `/chat?${search.toString()}`;
+        }
+
+        async function logout() {
+            if (typeof window.fetch === 'function' && window.location.protocol.startsWith('http')) {
+                try {
+                    await fetch('/api/logout', { method: 'POST' });
+                } catch (error) {
+                    console.error(error);
+                }
+            }
+
+            window.location.href = '/';
+        }
+
+        loadSelectedModelIds();
+        loadSelectedPersona();
+        saveSelections();
+        renderSelectedState();
     </script>
-
-    <button onclick="logout()" style="position: absolute; top: 20px; right: 20px; background-color: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;">Log Out</button>
-
-<script>
-    function logout() {
-        // In the future, this will tell the backend to destroy the session cookie
-        alert("You have been logged out.");
-        window.location.href = "/";
-    }
-</script>
 </body>
 </html>

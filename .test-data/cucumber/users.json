@@ -1,0 +1,8 @@
+{
+  "student1776988088988@example.com": {
+    "email": "student1776988088988@example.com",
+    "passwordHash": "3e8be243bce8ac6628644e48e4a8a91e8ff4ed602bcc159a1853886a36c04b4fbf74576a62c9187975cec93a9c02fa80deadbeeb28f4e4405d37280d9edec36f",
+    "passwordSalt": "4adc83a7e2bb88ad8de84e45a2aaa9dc",
+    "createdAt": 1776988088992
+  }
+}

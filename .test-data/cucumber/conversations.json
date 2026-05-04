@@ -1,0 +1,42 @@
+{
+  "student1776988088988@example.com": [
+    {
+      "id": "conv-1776988090936-9154",
+      "title": "Pinned study note",
+      "persona": "sweetheart",
+      "pinned": true,
+      "updatedAt": 1776988096217,
+      "messages": [
+        {
+          "type": "user-bubble",
+          "text": "Pinned study note",
+          "at": 1776988090948
+        },
+        {
+          "type": "model-group",
+          "responses": [
+            {
+              "providerId": "openai",
+              "providerLabel": "GPT",
+              "mode": "ollama-live",
+              "text": "Mr. Professional guided GPT to answer \"Pinned study note\" with a structured plan: identify the goal, break it into manageable steps, and verify the result after each change."
+            },
+            {
+              "providerId": "gemini",
+              "providerLabel": "Gemini",
+              "mode": "ollama-live",
+              "text": "Mr. Professional guided Gemini to compare options for \"Pinned study note\" by weighing clarity, speed, and confidence before choosing the strongest approach."
+            },
+            {
+              "providerId": "claude",
+              "providerLabel": "Claude",
+              "mode": "ollama-live",
+              "text": "Mr. Professional guided Claude to respond to \"Pinned study note\" with reassurance, a short explanation, and one concrete next action the user can take immediately."
+            }
+          ],
+          "at": 1776988090972
+        }
+      ]
+    }
+  ]
+}
